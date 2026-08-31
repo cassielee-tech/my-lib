@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520">
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64748b"/></marker>
+    <style>.t{font:700 25px sans-serif;fill:#172033}.s{font:18px sans-serif;fill:#475569}.b{fill:#fff;stroke:#94a3b8;stroke-width:2}.tok{fill:#e0f2fe;stroke:#0284c7;stroke-width:2}.out{fill:#dcfce7;stroke:#16a34a;stroke-width:2}</style>
+  </defs>
+  <rect width="1100" height="520" rx="24" fill="#f8fafc"/>
+  <text x="550" y="42" text-anchor="middle" class="t">没有位置时：交换输入，只会交换对应输出</text>
+  <text x="70" y="96" class="s">输入 A</text>
+  <g class="tok"><rect x="160" y="65" width="120" height="54" rx="12"/><rect x="310" y="65" width="120" height="54" rx="12"/><rect x="460" y="65" width="120" height="54" rx="12"/></g>
+  <g class="t" font-size="20"><text x="220" y="100" text-anchor="middle">我</text><text x="370" y="100" text-anchor="middle">爱</text><text x="520" y="100" text-anchor="middle">于金凤</text></g>
+  <rect x="665" y="64" width="250" height="56" rx="14" class="b"/><text x="790" y="99" text-anchor="middle" class="s">无位置 Self-Attention</text>
+  <path d="M590 92 H650" stroke="#64748b" stroke-width="2" marker-end="url(#a)"/>
+  <g class="out"><rect x="950" y="52" width="90" height="38" rx="9"/><rect x="950" y="96" width="90" height="38" rx="9"/></g><text x="995" y="78" text-anchor="middle" class="s">O₁</text><text x="995" y="122" text-anchor="middle" class="s">O₂,O₃</text>
+
+  <path d="M70 185 H1030" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="8 8"/>
+  <text x="70" y="238" class="s">输入 B</text>
+  <g class="tok"><rect x="160" y="207" width="120" height="54" rx="12"/><rect x="310" y="207" width="120" height="54" rx="12"/><rect x="460" y="207" width="120" height="54" rx="12"/></g>
+  <g class="t" font-size="20"><text x="220" y="242" text-anchor="middle">于金凤</text><text x="370" y="242" text-anchor="middle">爱</text><text x="520" y="242" text-anchor="middle">我</text></g>
+  <rect x="665" y="206" width="250" height="56" rx="14" class="b"/><text x="790" y="241" text-anchor="middle" class="s">同一套 Attention</text>
+  <path d="M590 234 H650" stroke="#64748b" stroke-width="2" marker-end="url(#a)"/>
+  <g class="out"><rect x="950" y="194" width="90" height="38" rx="9"/><rect x="950" y="238" width="90" height="38" rx="9"/></g><text x="995" y="220" text-anchor="middle" class="s">O₃</text><text x="995" y="264" text-anchor="middle" class="s">O₂,O₁</text>
+
+  <rect x="90" y="324" width="920" height="140" rx="18" fill="#fff7ed" stroke="#f97316" stroke-width="2"/>
+  <text x="550" y="365" text-anchor="middle" class="t" font-size="22">Attention 能匹配内容，但没有“第几个”的坐标</text>
+  <text x="550" y="405" text-anchor="middle" class="s">交换 Token 后，计算关系只跟着一起交换；模型无法单靠它判断语序变化</text>
+  <text x="550" y="438" text-anchor="middle" class="s">位置编码的任务：让相同内容位于不同位置时，参与计算的表示有所不同</text>
+</svg>

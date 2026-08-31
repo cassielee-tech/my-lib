@@ -1,0 +1,228 @@
+{
+  "main": {
+    "id": "1d06535e1446299f",
+    "type": "split",
+    "children": [
+      {
+        "id": "7379a0af7b42e988",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0d29c37ea330b1c0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/index.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "index"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "2ea13881827cfd0b",
+    "type": "split",
+    "children": [
+      {
+        "id": "c8edd13ec729108d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5d7e716d4faa11bd",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "a6e7f39a750135f0",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "d3356b9d3b9be583",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "cdaa032a92043aed",
+    "type": "split",
+    "children": [
+      {
+        "id": "444eb9076c88e0c0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "81567e859396de63",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "docs/markdown-examples.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "markdown-examples 的反向链接列表"
+            }
+          },
+          {
+            "id": "dc41bf7058c59913",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "docs/markdown-examples.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "markdown-examples 的出链列表"
+            }
+          },
+          {
+            "id": "352b69b26629695f",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "12afda790b588038",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "f6b57f0fb6654fcb",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "docs/markdown-examples.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "markdown-examples 的大纲"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:新建数据库": false
+    }
+  },
+  "active": "0d29c37ea330b1c0",
+  "lastOpenFiles": [
+    "docs/markdown-examples.md",
+    "docs/roadmap.md",
+    "docs/llm-foundations/06-rope-long-context.md",
+    "README.md",
+    "docs/public/images/llm/rope-multi-frequency.svg",
+    "docs/public/images/llm/rope-attention-flow.svg",
+    "docs/public/images/llm/rope-relative-rotation.svg",
+    "docs/public/images/llm/attention-without-position.svg",
+    "docs/llm-foundations/05-decoder-block.md",
+    "docs/public/images/llm/block-cost-flow.svg",
+    "docs/public/images/llm/swiglu-flow.svg",
+    "docs/public/images/llm/rmsnorm-process.svg",
+    "docs/public/images/llm/decoder-block-flow.svg",
+    "docs/llm-foundations/04-self-attention.md",
+    "docs/public/images/llm/multi-head-attention.svg",
+    "docs/public/images/llm/causal-attention-matrix.svg",
+    "docs/llm-foundations/03-tokenization-embedding.md",
+    "docs/ai-agent/index.md",
+    "docs/ai-agent",
+    "docs/essays/index.md",
+    "docs/llm-foundations/01-landscape.md",
+    "docs/llm-foundations/02-tensor-autograd.md",
+    "docs/api-examples.md",
+    "docs/index.md",
+    "docs/ai-infra/index.md",
+    "docs/blog/index.md",
+    "docs/blog/project/chatbi-autosave.md",
+    "docs/blog/music/ai-music-prompt.md",
+    "docs/blog/interview/transformer-interview.md",
+    "docs/blog/interview/rag-interview.md",
+    "docs/blog/interview/chatbi-interview.md",
+    "docs/blog/interview/ai-agent-interview.md",
+    "docs/blog/ai-learning/ai-agent-tech-stack.md",
+    "docs/blog/ai-learning/ai-backend-roadmap.md",
+    "docs/blog/ai-learning/ai-engineering-resources.md",
+    "docs/blog/ai-learning/chatbi-source-notes.md",
+    "docs/blog/ai-learning/rag-intro.md"
+  ]
+}

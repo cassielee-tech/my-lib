@@ -1,0 +1,21 @@
+{
+  "name": "my-lib",
+  "version": "1.0.0",
+  "description": "A VitePress documentation site",
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "dependencies": {
+    "my-lib": "^2.1.0",
+    "vue": "^3.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.0.0",
+    "markdown-it-mathjax3": "^4.3.2",
+    "vite": "^4.0.0",
+    "vitepress": "^1.0.0"
+  }
+}
