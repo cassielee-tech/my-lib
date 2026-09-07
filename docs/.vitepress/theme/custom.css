@@ -1,0 +1,167 @@
+.vp-doc .custom-block {
+  border-radius: 14px;
+}
+
+.vp-doc p,
+.vp-doc li,
+.vp-doc td {
+  font-size: 16px;
+  line-height: 1.85;
+}
+
+/* 用颜色表达信息层级，但避免把整页染成高亮。 */
+.vp-doc strong {
+  color: var(--vp-c-brand-1);
+  font-weight: 750;
+}
+
+.vp-doc .custom-block.info {
+  border-left: 4px solid var(--vp-c-brand-1);
+}
+
+.vp-doc .custom-block.tip {
+  border-left: 4px solid var(--vp-c-green-1);
+}
+
+.vp-doc .custom-block.warning {
+  border-left: 4px solid var(--vp-c-yellow-1);
+}
+
+.vp-doc .custom-block.danger {
+  border-left: 4px solid var(--vp-c-danger-1);
+}
+
+.vp-doc .custom-block-title {
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.vp-doc blockquote {
+  border-left-color: var(--vp-c-brand-1);
+  background: var(--vp-c-bg-soft);
+}
+
+.vp-doc table th {
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg-soft);
+}
+
+.vp-doc h2 {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+.vp-doc h2:has(.learning-unit) {
+  margin-top: 56px;
+  padding: 16px 18px;
+  border-top: 0;
+  border-left: 4px solid var(--vp-c-brand-1);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--vp-c-brand-soft) 70%, transparent);
+}
+
+.vp-doc .learning-unit {
+  color: var(--vp-c-brand-1);
+}
+
+.vp-doc h3 {
+  margin-top: 32px;
+}
+
+.vp-doc li + li {
+  margin-top: 7px;
+}
+
+.vp-doc input[type='checkbox'] {
+  width: 17px;
+  height: 17px;
+  margin-right: 7px;
+  accent-color: var(--vp-c-brand-1);
+}
+
+.vp-doc details {
+  border-radius: 12px;
+}
+
+.focus-timer {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--vp-c-bg) 94%, transparent);
+  box-shadow: var(--vp-shadow-3);
+  backdrop-filter: blur(10px);
+}
+
+.focus-timer__display {
+  display: flex;
+  min-width: 74px;
+  flex-direction: column;
+}
+
+.focus-timer__label {
+  color: var(--vp-c-text-2);
+  font-size: 11px;
+}
+
+.focus-timer time {
+  color: var(--vp-c-text-1);
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.focus-timer__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.focus-timer button {
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 1px solid var(--vp-c-brand-1);
+  border-radius: 8px;
+  color: var(--vp-c-bg);
+  background: var(--vp-c-brand-1);
+  cursor: pointer;
+}
+
+.focus-timer button.secondary {
+  border-color: var(--vp-c-divider);
+  color: var(--vp-c-text-2);
+  background: var(--vp-c-bg-soft);
+}
+
+.focus-timer button:hover {
+  opacity: 0.85;
+}
+
+@media (max-width: 768px) {
+  .focus-timer {
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .focus-timer__label,
+  .focus-timer button.secondary {
+    display: none;
+  }
+
+  .focus-timer time {
+    font-size: 19px;
+  }
+
+  .vp-doc p,
+  .vp-doc li,
+  .vp-doc td {
+    line-height: 1.75;
+  }
+}

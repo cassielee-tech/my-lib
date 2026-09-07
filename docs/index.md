@@ -2,7 +2,8 @@
 layout: home
 
 hero:
-  name: "Cassie的知识库"
+  name: "Cassie’s Stack"
+  tagline: "Between Tokens · 永不停止成长"
   actions:
     - theme: brand
       text: 查看学习路线
@@ -32,6 +33,11 @@ features:
     details: 编程语言、数据库、分布式系统与后端工程实践。
     link: /backend/
     linkText: 查看目录
+  - icon: 🛠️
+    title: 工具与效率
+    details: 开发工具、系统快捷键与日常效率工作流。
+    link: /tools-productivity/
+    linkText: 查看目录
   - icon: ✍️
     title: 个人杂谈
     details: 学习复盘、生活观察，以及一些不设边界的思考。
@@ -40,6 +46,10 @@ features:
 ---
 
 这里是我的个人知识博客。我会把学习过程中的理解、实践和思考逐步整理在这里。
+
+::: tip 专注阅读
+课程按约 **15 分钟一个学习单元**组织。每次只解决一个问题，完成单元后再进入下一篇或本章总结。
+:::
 
 ## 总体学习路线
 

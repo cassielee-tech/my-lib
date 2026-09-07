@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+  <title id="title">MHA、GQA 与 MQA 的 KV Head 共享方式</title>
+  <desc id="desc">八个查询头在 MHA 中使用八组 KV，在 GQA 中分组共享两组 KV，在 MQA 中共享一组 KV。</desc>
+  <defs><style>
+    .t{font:700 25px system-ui,sans-serif;fill:#182230}.s{font:16px system-ui,sans-serif;fill:#52606d}.q{fill:#e8f1ff;stroke:#3677d2;stroke-width:2}.kv{fill:#fff1db;stroke:#db7c20;stroke-width:2}.line{stroke:#8795a5;stroke-width:2}.badge{font:700 15px system-ui,sans-serif;fill:#1d4f91}.label{font:700 16px system-ui,sans-serif;fill:#7e4211}
+  </style></defs>
+  <rect width="1200" height="560" rx="24" fill="#f8fafc"/>
+  <text x="600" y="42" text-anchor="middle" class="t">Q Head 数不变，减少的是必须保存和读取的 K/V 份数</text>
+  <text x="200" y="90" text-anchor="middle" class="t">MHA</text><text x="600" y="90" text-anchor="middle" class="t">GQA</text><text x="1000" y="90" text-anchor="middle" class="t">MQA</text>
+  <g id="heads">
+    <g transform="translate(55 120)"><rect class="q" width="54" height="34" rx="8"/><text class="badge" x="27" y="23" text-anchor="middle">Q0</text></g>
+    <g transform="translate(95 165)"><rect class="q" width="54" height="34" rx="8"/><text class="badge" x="27" y="23" text-anchor="middle">Q1</text></g>
+    <g transform="translate(55 210)"><rect class="q" width="54" height="34" rx="8"/><text class="badge" x="27" y="23" text-anchor="middle">Q2</text></g>
+    <g transform="translate(95 255)"><rect class="q" width="54" height="34" rx="8"/><text class="badge" x="27" y="23" text-anchor="middle">Q3</text></g>
+    <g transform="translate(55 300)"><rect class="q" width="54" height="34" rx="8"/><text class="badge" x="27" y="23" text-anchor="middle">Q4</text></g>
+    <g transform="translate(95 345)"><rect class="q" width="54" height="34" rx="8"/><text class="badge" x="27" y="23" text-anchor="middle">Q5</text></g>
+    <g transform="translate(55 390)"><rect class="q" width="54" height="34" rx="8"/><text class="badge" x="27" y="23" text-anchor="middle">Q6</text></g>
+    <g transform="translate(95 435)"><rect class="q" width="54" height="34" rx="8"/><text class="badge" x="27" y="23" text-anchor="middle">Q7</text></g>
+  </g>
+  <use href="#heads" transform="translate(400 0)"/><use href="#heads" transform="translate(800 0)"/>
+  <g>
+    <path class="line" d="M109 137L260 137M149 182L260 182M109 227L260 227M149 272L260 272M109 317L260 317M149 362L260 362M109 407L260 407M149 452L260 452"/>
+    <g class="label"><text x="278" y="143">KV0</text><text x="278" y="188">KV1</text><text x="278" y="233">KV2</text><text x="278" y="278">KV3</text><text x="278" y="323">KV4</text><text x="278" y="368">KV5</text><text x="278" y="413">KV6</text><text x="278" y="458">KV7</text></g>
+  </g>
+  <g>
+    <path class="line" d="M509 137L670 205M549 182L670 205M509 227L670 205M549 272L670 205M509 317L670 385M549 362L670 385M509 407L670 385M549 452L670 385"/>
+    <rect class="kv" x="670" y="181" width="75" height="48" rx="10"/><text class="label" x="708" y="211" text-anchor="middle">KV0</text>
+    <rect class="kv" x="670" y="361" width="75" height="48" rx="10"/><text class="label" x="708" y="391" text-anchor="middle">KV1</text>
+  </g>
+  <g>
+    <path class="line" d="M909 137L1070 295M949 182L1070 295M909 227L1070 295M949 272L1070 295M909 317L1070 295M949 362L1070 295M909 407L1070 295M949 452L1070 295"/>
+    <rect class="kv" x="1070" y="271" width="75" height="48" rx="10"/><text class="label" x="1108" y="301" text-anchor="middle">KV0</text>
+  </g>
+  <text x="200" y="520" text-anchor="middle" class="s">8 组缓存 · 表达充分 · 搬运最多</text><text x="600" y="520" text-anchor="middle" class="s">2 组缓存 · 每 4 个 Q 共享</text><text x="1000" y="520" text-anchor="middle" class="s">1 组缓存 · 最省带宽与显存</text>
+</svg>
