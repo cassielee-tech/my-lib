@@ -13,7 +13,21 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/index.md",
+                "file": "docs/ai-infra/index.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "index"
+            }
+          },
+          {
+            "id": "89e0a4bfc0b6f70b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/cann/index.md",
                 "mode": "source",
                 "source": false
               },
@@ -21,7 +35,8 @@
               "title": "index"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -55,7 +70,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "从零",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -80,7 +95,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 261.11328125
   },
   "right": {
     "id": "cdaa032a92043aed",
@@ -96,8 +111,8 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "docs/markdown-examples.md",
-                "collapseAll": false,
+                "file": "docs/cann/index.md",
+                "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
                 "showSearch": false,
@@ -106,7 +121,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "markdown-examples 的反向链接列表"
+              "title": "反向链接"
             }
           },
           {
@@ -158,21 +173,21 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "docs/markdown-examples.md",
+                "file": "docs/cann/index.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "markdown-examples 的大纲"
+              "title": "大纲"
             }
           }
-        ]
+        ],
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -182,47 +197,57 @@
       "daily-notes:打开/创建今天的日记": false,
       "templates:插入模板": false,
       "command-palette:打开命令面板": false,
-      "bases:新建数据库": false
+      "bases:新建数据库": false,
+      "obsidian-excalidraw-plugin:新建绘图文件": false
     }
   },
-  "active": "0d29c37ea330b1c0",
+  "active": "89e0a4bfc0b6f70b",
   "lastOpenFiles": [
+    "docs/public/images/cann/hccl/official/allgather-hierarchical.png",
+    "docs/public/images/cann/hccl/official/reduce-scatter-hierarchical.png",
+    "docs/public/images/cann/hccl/official/pairwise.png",
+    "docs/public/images/cann/hccl/official/mesh.png",
+    "docs/public/images/cann/hccl/official/nhr-5rank-flow.png",
+    "docs/public/images/cann/hccl/official/nhr-4rank-flow.png",
+    "docs/public/images/cann/hccl/official/rhd.png",
+    "docs/public/images/cann/hccl/official/allreduce-op.png",
+    "docs/public/images/cann/hccl/official/operation-flow.png",
+    "docs/public/images/cann/hccl/official/hccl-architecture.png",
+    "docs/public/images/cann/hccl/official/typical-network.png",
+    "docs/cann/hccl-source/summary.md",
+    "docs/cann/hccl-source/07-allreduce-call-chain.md",
+    "docs/cann/hccl-source/06-coll-algorithms.md",
+    "docs/cann/hccl-source/05-comm-engines.md",
+    "docs/cann/hccl-source/04-primitives-and-sync.md",
+    "docs/cann/hccl-source/03-comm-domain-rank-graph.md",
+    "docs/cann/hccl-source/02-architecture-layering.md",
+    "docs/cann/hccl-source/01-hccl-repo-map.md",
+    "docs/cann/hccl-source",
+    "docs/cann/hccl-source.md",
+    "docs/cann/cann常用命令.md",
+    "docs/cann/hccl-from-zero.md",
+    "docs/cann/cann-learning-hub.md",
+    "docs/cann/01-ascend-cann.md",
+    "docs/cann/hccl-from-zero/07-allreduce-source-walk.md",
+    "docs/cann/hccl-from-zero/06-cpp-and-build.md",
+    "docs/cann/hccl-from-zero/05-architecture.md",
+    "docs/cann/hccl-from-zero/04-communication-algorithms.md",
+    "docs/cann/hccl-from-zero/03-collective-ops.md",
+    "docs/cann/hccl-from-zero/02-core-concepts.md",
+    "docs/cann/hccl-from-zero/01-what-is-hccl.md",
     "docs/markdown-examples.md",
     "docs/roadmap.md",
-    "docs/llm-foundations/06-rope-long-context.md",
-    "README.md",
-    "docs/public/images/llm/rope-multi-frequency.svg",
-    "docs/public/images/llm/rope-attention-flow.svg",
-    "docs/public/images/llm/rope-relative-rotation.svg",
-    "docs/public/images/llm/attention-without-position.svg",
-    "docs/llm-foundations/05-decoder-block.md",
-    "docs/public/images/llm/block-cost-flow.svg",
-    "docs/public/images/llm/swiglu-flow.svg",
-    "docs/public/images/llm/rmsnorm-process.svg",
-    "docs/public/images/llm/decoder-block-flow.svg",
-    "docs/llm-foundations/04-self-attention.md",
-    "docs/public/images/llm/multi-head-attention.svg",
-    "docs/public/images/llm/causal-attention-matrix.svg",
-    "docs/llm-foundations/03-tokenization-embedding.md",
-    "docs/ai-agent/index.md",
-    "docs/ai-agent",
-    "docs/essays/index.md",
-    "docs/llm-foundations/01-landscape.md",
-    "docs/llm-foundations/02-tensor-autograd.md",
-    "docs/api-examples.md",
     "docs/index.md",
-    "docs/ai-infra/index.md",
-    "docs/blog/index.md",
-    "docs/blog/project/chatbi-autosave.md",
-    "docs/blog/music/ai-music-prompt.md",
-    "docs/blog/interview/transformer-interview.md",
-    "docs/blog/interview/rag-interview.md",
-    "docs/blog/interview/chatbi-interview.md",
-    "docs/blog/interview/ai-agent-interview.md",
-    "docs/blog/ai-learning/ai-agent-tech-stack.md",
-    "docs/blog/ai-learning/ai-backend-roadmap.md",
-    "docs/blog/ai-learning/ai-engineering-resources.md",
-    "docs/blog/ai-learning/chatbi-source-notes.md",
-    "docs/blog/ai-learning/rag-intro.md"
+    "docs/cann/01-ascend-cann/01-npu-davinci-ai-core.md",
+    "docs/cann/hccl-from-zero/summary.md",
+    "docs/public/images/cann/hccl/official",
+    "docs/public/draw",
+    "docs/cann/hccl-from-zero",
+    "docs/public/images/cann/hccl",
+    "docs/cann/01-ascend-cann",
+    "docs/public/images/cann",
+    "docs/cann",
+    "docs/ai-infra/00-cann-learning-hub",
+    "docs/ai-infra/01-landscape-performance"
   ]
 }

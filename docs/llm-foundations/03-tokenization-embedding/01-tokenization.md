@@ -1,6 +1,6 @@
 # 单元 03-1｜Tokenization：文本变成整数序列
 
-> 所属章节：[第 3 章｜文本怎样成为模型输入](../03-tokenization-embedding.md) · 预计用时：约 **15 分钟**
+> 所属章节：[第 3 章｜文本怎样成为模型输入](../03-tokenization-embedding.md)
 
 ::: info 本单元目标
 围绕 **Tokenization：文本变成整数序列** 建立一条可以复述的因果链。读完后，尝试不看正文用一句话解释它。

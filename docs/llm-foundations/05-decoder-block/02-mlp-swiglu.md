@@ -1,6 +1,6 @@
 # 单元 05-2｜MLP 与 SwiGLU 数据流
 
-> 所属章节：[第 5 章｜完整 Decoder Block](../05-decoder-block.md) · 预计用时：约 **15 分钟**
+> 所属章节：[第 5 章｜完整 Decoder Block](../05-decoder-block.md)
 
 ::: info 本单元目标
 围绕 **MLP 与 SwiGLU 数据流** 建立一条可以复述的因果链。读完后，尝试不看正文用一句话解释它。

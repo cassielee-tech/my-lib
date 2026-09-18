@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   lang: 'zh-CN',
   title: 'Cassie’s Stack',
-  description: '记录大模型、AI Infra、AI Agent、后端、效率工具与个人思考',
+  description: '记录大模型、AI Infra、AI Agent、CANN、后端、效率工具与个人思考',
   base: '/my-lib/',
   cleanUrls: true,
   markdown: {
@@ -17,6 +17,7 @@ export default defineConfig({
       { text: '大模型基础', link: '/llm-foundations/' },
       { text: 'AI Infra', link: '/ai-infra/' },
       { text: 'AI Agent', link: '/ai-agent/' },
+      { text: 'CANN', link: '/cann/' },
       { text: '后端知识', link: '/backend/' },
       { text: '工具与效率', link: '/tools-productivity/' },
       { text: '个人杂谈', link: '/essays/' }
@@ -176,7 +177,37 @@ export default defineConfig({
           items: [
             { text: '目录', link: '/ai-agent/' },
             { text: '2026 热门 AI Agent 产品地图', link: '/ai-agent/01-popular-agents' },
-            { text: 'AI Agent 工程化知识树', link: '/ai-agent/agent-engineering-knowledge-tree' }
+            { text: 'AI Agent 工程化知识树', link: '/ai-agent/agent-engineering-knowledge-tree' },
+            { text: 'AI Coding：从代码补全到智能体协作', link: '/ai-agent/ai-coding-codearts' }
+          ]
+        }
+      ],
+      '/cann/': [
+        {
+          text: 'CANN',
+          items: [
+            { text: '目录与学习路线', link: '/cann/' },
+            {
+              text: '第 1 章｜认识昇腾与 CANN', link: '/cann/01-ascend-cann', collapsed: false,
+              items: [
+                { text: 'C01-1｜NPU 与 AI Core', link: '/cann/01-ascend-cann/01-npu-davinci-ai-core' }
+              ]
+            },
+            {
+              text: '专题｜HCCL 源码学习', link: '/cann/hccl-source', collapsed: true,
+              items: [
+                { text: 'H01-1｜HCCL 全景与仓库地图', link: '/cann/hccl-source/01-hccl-repo-map' },
+                { text: 'H01-2｜HCCL 与 HCOMM 分层架构', link: '/cann/hccl-source/02-architecture-layering' },
+                { text: 'H01-3｜通信域、Rank 与 RankGraph', link: '/cann/hccl-source/03-comm-domain-rank-graph' },
+                { text: 'H01-4｜通信原语与同步机制', link: '/cann/hccl-source/04-primitives-and-sync' },
+                { text: 'H01-5｜通信引擎与任务执行', link: '/cann/hccl-source/05-comm-engines' },
+                { text: 'H01-6｜集合通信算法与代价模型', link: '/cann/hccl-source/06-coll-algorithms' },
+                { text: 'H01-7｜AllReduce 调用链走读', link: '/cann/hccl-source/07-allreduce-call-chain' },
+                { text: '专题总结｜源码阅读地图', link: '/cann/hccl-source/summary' }
+              ]
+            },
+            { text: '速查｜CANN 常用命令', link: '/cann/cann常用命令' },
+            { text: '笔记｜CANN Learning Hub', link: '/cann/cann-learning-hub' }
           ]
         }
       ],
@@ -185,6 +216,8 @@ export default defineConfig({
           text: '工具与效率',
           items: [
             { text: '目录', link: '/tools-productivity/' },
+            { text: 'VS Code + SSH + Jupyter', link: '/tools-productivity/vscode-remote-ssh-jupyter' },
+            { text: 'opencode 使用教程', link: '/tools-productivity/opencode-tutorial' },
             { text: 'Ghostty 快捷键速查', link: '/tools-productivity/ghostty-shortcuts' },
             { text: 'macOS 快捷键速查', link: '/tools-productivity/macos-shortcuts' }
           ]
@@ -195,7 +228,7 @@ export default defineConfig({
           text: '个人杂谈',
           items: [
             { text: '目录', link: '/essays/' },
-            { text: 'AI Coding：从代码补全到智能体协作', link: '/essays/ai-coding-codearts' }
+            { text: '《金刚经》研读笔记', link: '/essays/《金刚经》研读笔记' }
           ]
         }
       ]

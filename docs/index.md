@@ -28,6 +28,11 @@ features:
     details: Agent 架构、工具调用、记忆、规划与工程实践。
     link: /ai-agent/
     linkText: 查看目录
+  - icon: 🔷
+    title: CANN
+    details: 昇腾软硬件栈、Ascend C 算子开发、性能调优与 HCCL 前置知识。
+    link: /cann/
+    linkText: 查看目录
   - icon: 🧱
     title: 后端知识
     details: 编程语言、数据库、分布式系统与后端工程实践。
@@ -51,10 +56,16 @@ features:
 课程按约 **15 分钟一个学习单元**组织。每次只解决一个问题，完成单元后再进入下一篇或本章总结。
 :::
 
+## 博客知识地图
+
+![Cassie’s Stack 博客知识思维导图：以大模型基础、AI Infra 和 CANN 为学习主线，并连接 AI Agent、后端知识、工具效率与个人思考](/images/blog-knowledge-map.svg)
+
+图中上方是当前的**核心学习主线**：先理解大模型，再进入通用 AI Infra，最后落到昇腾 CANN 与 HCCL。下方几条分支分别补充应用能力、工程基础、开发效率和长期思考。
+
 ## 总体学习路线
 
-学习路线跨越大模型基础、AI Infra、分布式训练、集合通信与 HCCL，不归属于某一个具体知识分类。
+学习路线跨越大模型基础、AI Infra、CANN、分布式训练、集合通信与 HCCL，不归属于某一个具体知识分类。
 
-> 模型结构 → 计算图 → 训练与推理 → AI Infra → 并行策略 → 集合通信 → 通信库 → HCCL 源码
+> 模型结构 → 计算图 → 训练与推理 → AI Infra → CANN → 并行策略 → 集合通信 → HCCL 源码
 
 [查看完整的“大模型与 AI Infra 学习路线” →](/roadmap)

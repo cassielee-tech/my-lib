@@ -1,6 +1,6 @@
 # 单元 10-4｜MoE 的并行组合与性能瓶颈
 
-> 所属章节：[第 10 章｜MoE 与 Expert Parallel](../10-moe-expert-parallel.md) · 预计用时：约 **15 分钟**
+> 所属章节：[第 10 章｜MoE 与 Expert Parallel](../10-moe-expert-parallel.md)
 
 ::: info 本单元目标
 围绕 **MoE 的并行组合与性能瓶颈** 建立一条可以复述的因果链。读完后，尝试不看正文用一句话解释它。

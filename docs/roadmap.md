@@ -19,7 +19,7 @@
 
 这条路线面向有传统后端开发经验、正在从事昇腾集合通信算子开发的工程师。目标不是泛泛了解大模型应用，而是建立一条能够指导工程实践和源码阅读的主线：
 
-> 模型结构 → 计算图 → 训练与推理 → 并行策略 → 集合通信 → 通信库 → HCCL 源码
+> 模型结构 → 计算图 → 训练与推理 → AI Infra → CANN → 并行策略 → 集合通信 → HCCL 源码
 
 完成后应当能够：
 
@@ -200,6 +200,7 @@
 
 ### 推荐资料
 
+- [CANN Learning Hub](https://gitcode.com/cann/cann-learning-hub)：先完成公共基础，再重点进入算子开发和大模型推理路线；
 - [HCCL 官方 API 文档](https://www.hiascend.com/document/detail/en/CANNCommunityEdition/900/API/hcclug/hcclcpp_07_0001.html)；
 - [Ascend C 中的 HCCL 接口说明](https://www.hiascend.com/document/detail/en/canncommercial/850/API/ascendcopapi/atlasascendc_api_07_0869.html)；
 - 工作环境所对应 CANN 版本的《集合通信用户指南》和实际源码。

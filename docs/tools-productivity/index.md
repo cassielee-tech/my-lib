@@ -6,6 +6,11 @@
 
 这里整理开发工具、操作系统与日常工作流中值得反复查阅的内容。
 
+## 开发工作流
+
+- [VS Code + Remote SSH + Jupyter：远程做大模型实验](./vscode-remote-ssh-jupyter.md)：远程环境、Kernel、GPU/NPU、SSH 隧道与故障排查
+- [opencode 使用教程](./opencode-tutorial.md)：会话管理、Plan/Build 工作流、AGENTS.md 项目规则与自定义命令
+
 ## 快捷键速查
 
 - [Ghostty 快捷键速查](./ghostty-shortcuts.md)：窗口、标签页、分屏、字体、配置与 Shell 行编辑

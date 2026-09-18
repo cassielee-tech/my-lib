@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="860" viewBox="0 0 1400 860" role="img" aria-labelledby="title desc">
+  <title id="title">Cassie’s Stack 博客知识思维导图</title>
+  <desc id="desc">博客以大模型基础、AI Infra、CANN 和 HCCL 为核心学习主线，同时连接 AI Agent、后端知识、工具与效率及个人杂谈。</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#334155" flood-opacity=".12"/>
+    </filter>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0 0L9 4.5L0 9Z" fill="#64748b"/>
+    </marker>
+    <style>
+      .title{font:700 29px system-ui,-apple-system,"PingFang SC",sans-serif;fill:#172033}
+      .subtitle{font:15px system-ui,-apple-system,"PingFang SC",sans-serif;fill:#64748b}
+      .node-title{font:700 21px system-ui,-apple-system,"PingFang SC",sans-serif;fill:#1e293b}
+      .node-text{font:15px system-ui,-apple-system,"PingFang SC",sans-serif;fill:#475569}
+      .center-title{font:700 30px system-ui,-apple-system,"PingFang SC",sans-serif;fill:#fff}
+      .center-text{font:16px system-ui,-apple-system,"PingFang SC",sans-serif;fill:#e0e7ff}
+      .tag{font:700 14px system-ui,-apple-system,"PingFang SC",sans-serif}
+      .branch{fill:none;stroke-width:4;stroke-linecap:round;opacity:.72}
+      .main-arrow{fill:none;stroke:#64748b;stroke-width:2.5;stroke-dasharray:7 6;marker-end:url(#arrow)}
+    </style>
+  </defs>
+
+  <rect width="1400" height="860" rx="28" fill="#f8fafc"/>
+  <text x="700" y="47" text-anchor="middle" class="title">Cassie’s Stack · 知识地图</text>
+  <text x="700" y="74" text-anchor="middle" class="subtitle">理解模型 → 看懂系统 → 深入昇腾 → 回到工程实践</text>
+
+  <!-- 主学习链 -->
+  <rect x="553" y="91" width="294" height="30" rx="15" fill="#e2e8f0"/>
+  <text x="700" y="112" text-anchor="middle" class="tag" fill="#475569">核心学习主线</text>
+  <path d="M425 205H515" class="main-arrow"/>
+  <path d="M885 205H975" class="main-arrow"/>
+
+  <!-- 中心到各知识分支的连线，放在节点后方 -->
+  <path d="M700 420C520 385 350 330 250 270" class="branch" stroke="#6366f1"/>
+  <path d="M700 420C700 350 700 300 700 290" class="branch" stroke="#0284c7"/>
+  <path d="M700 420C875 380 1040 330 1150 270" class="branch" stroke="#0891b2"/>
+  <path d="M805 452C950 450 1045 442 1065 425" class="branch" stroke="#9333ea"/>
+  <path d="M792 505C930 590 1020 650 1060 677" class="branch" stroke="#f59e0b"/>
+  <path d="M700 515C700 570 700 625 700 657" class="branch" stroke="#16a34a"/>
+  <path d="M608 505C470 590 380 650 340 677" class="branch" stroke="#ec4899"/>
+
+  <!-- 大模型基础 -->
+  <g filter="url(#shadow)">
+    <rect x="70" y="130" width="355" height="150" rx="20" fill="#eef2ff" stroke="#6366f1" stroke-width="2"/>
+    <circle cx="108" cy="169" r="20" fill="#6366f1"/>
+    <text x="108" y="176" text-anchor="middle" font-size="20">🧠</text>
+    <text x="142" y="176" class="node-title">大模型基础</text>
+    <text x="103" y="215" class="node-text">张量与反向传播 · Transformer</text>
+    <text x="103" y="241" class="node-text">训练与推理 · 并行策略 · MoE</text>
+    <text x="103" y="263" class="tag" fill="#4f46e5">回答：模型究竟在算什么？</text>
+  </g>
+
+  <!-- AI Infra -->
+  <g filter="url(#shadow)">
+    <rect x="515" y="130" width="370" height="160" rx="20" fill="#e8f5ff" stroke="#0284c7" stroke-width="2"/>
+    <circle cx="555" cy="169" r="20" fill="#0284c7"/>
+    <text x="555" y="176" text-anchor="middle" font-size="19">⚙️</text>
+    <text x="590" y="176" class="node-title">AI Infra</text>
+    <text x="550" y="215" class="node-text">加速器 · 存储 · Kernel · 编译器</text>
+    <text x="550" y="241" class="node-text">训练与推理系统 · 分布式 · Collective</text>
+    <text x="550" y="268" class="tag" fill="#0369a1">回答：怎样放得下、跑得快、扩得开？</text>
+  </g>
+
+  <!-- CANN -->
+  <g filter="url(#shadow)">
+    <rect x="975" y="130" width="355" height="150" rx="20" fill="#e8fbfb" stroke="#0891b2" stroke-width="2"/>
+    <circle cx="1013" cy="169" r="20" fill="#0891b2"/>
+    <text x="1013" y="176" text-anchor="middle" font-size="18">🔷</text>
+    <text x="1047" y="176" class="node-title">CANN</text>
+    <text x="1008" y="215" class="node-text">NPU · Runtime · Ascend C · Tiling</text>
+    <text x="1008" y="241" class="node-text">算子调优 · torch_npu · HCCL 源码</text>
+    <text x="1008" y="263" class="tag" fill="#0e7490">回答：原理怎样落到昇腾平台？</text>
+  </g>
+
+  <!-- 中心 -->
+  <g filter="url(#shadow)">
+    <rect x="505" y="350" width="390" height="176" rx="32" fill="#312e81"/>
+    <circle cx="700" cy="391" r="10" fill="#a5b4fc"/>
+    <text x="700" y="439" text-anchor="middle" class="center-title">Cassie’s Stack</text>
+    <text x="700" y="471" text-anchor="middle" class="center-text">Between Tokens</text>
+    <text x="700" y="501" text-anchor="middle" class="center-text">知识 · 实践 · 复盘 · 持续生长</text>
+  </g>
+
+  <!-- AI Agent -->
+  <g filter="url(#shadow)">
+    <rect x="1005" y="345" width="325" height="145" rx="20" fill="#f5edff" stroke="#9333ea" stroke-width="2"/>
+    <circle cx="1043" cy="384" r="20" fill="#9333ea"/>
+    <text x="1043" y="391" text-anchor="middle" font-size="19">🤖</text>
+    <text x="1078" y="391" class="node-title">AI Agent</text>
+    <text x="1038" y="430" class="node-text">规划 · 工具调用 · 记忆 · 工作流</text>
+    <text x="1038" y="458" class="tag" fill="#7e22ce">把模型能力变成可执行系统</text>
+  </g>
+
+  <!-- 个人杂谈 -->
+  <g filter="url(#shadow)">
+    <rect x="70" y="650" width="360" height="145" rx="20" fill="#fff0f7" stroke="#ec4899" stroke-width="2"/>
+    <circle cx="108" cy="689" r="20" fill="#ec4899"/>
+    <text x="108" y="696" text-anchor="middle" font-size="19">✍️</text>
+    <text x="142" y="696" class="node-title">个人杂谈</text>
+    <text x="103" y="735" class="node-text">行业观察 · 学习复盘 · 个人思考</text>
+    <text x="103" y="763" class="tag" fill="#be185d">记录认知怎样随实践变化</text>
+  </g>
+
+  <!-- 工具与效率 -->
+  <g filter="url(#shadow)">
+    <rect x="520" y="650" width="360" height="145" rx="20" fill="#edfdf2" stroke="#16a34a" stroke-width="2"/>
+    <circle cx="558" cy="689" r="20" fill="#16a34a"/>
+    <text x="558" y="696" text-anchor="middle" font-size="19">🛠️</text>
+    <text x="593" y="696" class="node-title">工具与效率</text>
+    <text x="553" y="735" class="node-text">开发环境 · SSH · Jupyter · 快捷键</text>
+    <text x="553" y="763" class="tag" fill="#15803d">减少阻力，让学习快速启动</text>
+  </g>
+
+  <!-- 后端知识 -->
+  <g filter="url(#shadow)">
+    <rect x="970" y="650" width="360" height="145" rx="20" fill="#fff7e6" stroke="#f59e0b" stroke-width="2"/>
+    <circle cx="1008" cy="689" r="20" fill="#f59e0b"/>
+    <text x="1008" y="696" text-anchor="middle" font-size="19">🧱</text>
+    <text x="1043" y="696" class="node-title">后端知识</text>
+    <text x="1003" y="735" class="node-text">语言 · 数据库 · 网络 · 分布式系统</text>
+    <text x="1003" y="763" class="tag" fill="#b45309">提供稳定的工程底座</text>
+  </g>
+
+  <text x="700" y="832" text-anchor="middle" class="subtitle">主线深入底层，分支持续反哺工程能力与个人认知</text>
+</svg>
