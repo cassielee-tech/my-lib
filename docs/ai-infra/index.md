@@ -4,6 +4,10 @@
 不要一次消化 22 课。当前只需要看“学习主线”，然后进入侧边栏中第一篇未完成的课程；每课完成“3 个核心结论＋1 张图＋3 道自测”即可继续。
 :::
 
+::: tip 时间紧或跟不动完整版？
+每章都配了「⚡ 速通」页：一个生活类比讲完整章 + 即点即答小测，约 5 分钟一页。可从 [第 1 章速通版](./01-landscape-performance/quick.md) 开始；速通页位于侧边栏每章第一项。
+:::
+
 AI Infra 研究的是：怎样让大模型在真实硬件和集群上**放得下、算得快、扩得开、跑得稳**。
 
 这部分承接“大模型基础”12 课，从单个算子怎样执行开始，逐步进入训练与推理系统、分布式并行和集合通信，为后续学习 CANN 打下通用基础。
@@ -29,10 +33,10 @@ AI Infra 研究的是：怎样让大模型在真实硬件和集群上**放得下
 | 课次 | 主题 | 学完能够回答的问题 |
 | ---: | --- | --- |
 | 01 | [AI Infra 全景与性能分析方法](./01-landscape-performance.md) | 一个大模型请求怎样穿过框架、编译器、Runtime、算子和硬件？ |
-| 02 | GPU/NPU 执行模型与计算单元 | CPU、GPU、NPU 为什么采用不同执行方式，昇腾 Cube/Vector 单元分别做什么？ |
-| 03 | 存储层次与数据搬运 | HBM、Cache、片上 Buffer 和寄存器有什么区别，数据为什么经常比计算更贵？ |
-| 04 | Kernel、Tiling 与流水线 | 一个大算子怎样被切成 Tile，搬运和计算怎样形成流水？ |
-| 05 | FLOPs、带宽、算术强度与 Roofline | 怎样判断一个算子是 Compute-bound 还是 Memory-bound？ |
+| 02 | [GPU/NPU 执行模型与计算单元](./02-execution-model.md) | CPU、GPU、NPU 为什么采用不同执行方式，昇腾 Cube/Vector 单元分别做什么？ |
+| 03 | [存储层次与数据搬运](./03-memory-hierarchy.md) | HBM、Cache、片上 Buffer 和寄存器有什么区别，数据为什么经常比计算更贵？ |
+| 04 | [Kernel、Tiling 与流水线](./04-kernel-tiling-pipeline.md) | 一个大算子怎样被切成 Tile，搬运和计算怎样形成流水？ |
+| 05 | [FLOPs、带宽、算术强度与 Roofline](./05-flops-bandwidth-roofline.md) | 怎样判断一个算子是 Compute-bound 还是 Memory-bound？ |
 
 阶段产出：能够为矩阵乘法或逐元素算子计算 FLOPs、访存量和算术强度，并用 Roofline 判断理论瓶颈。
 
@@ -43,6 +47,34 @@ AI Infra 研究的是：怎样让大模型在真实硬件和集群上**放得下
 - **I01-3**：[计算、访存与通信瓶颈](./01-landscape-performance/03-performance-bottlenecks.md)
 - **I01-4**：[数量级、算术强度与峰值](./01-landscape-performance/04-arithmetic-intensity.md)
 - **I01-5**：[性能分析流程与常见误区](./01-landscape-performance/05-analysis-workflow.md)
+
+第 2 章已经拆成以下 15 分钟单元：
+
+- **I02-1**：[三种执行哲学：CPU、GPU 与 NPU](./02-execution-model/01-execution-philosophy.md)
+- **I02-2**：[GPU 内部：SM、Warp 与 SIMT](./02-execution-model/02-gpu-sm-warp-simt.md)
+- **I02-3**：[NPU 内部：达芬奇架构与计算单元](./02-execution-model/03-npu-davinci-core.md)
+- **I02-4**：[从执行模型到利用率](./02-execution-model/04-utilization-tail-effects.md)
+
+第 3 章已经拆成以下 15 分钟单元：
+
+- **I03-1**：[存储金字塔：容量、延迟与带宽](./03-memory-hierarchy/01-memory-pyramid.md)
+- **I03-2**：[认识每一层：HBM、Cache、Buffer 与寄存器](./03-memory-hierarchy/02-hbm-cache-buffer-register.md)
+- **I03-3**：[数据搬运的代价：为什么数据比计算贵](./03-memory-hierarchy/03-data-movement-cost.md)
+- **I03-4**：[局部性、复用与 Layout](./03-memory-hierarchy/04-locality-reuse.md)
+
+第 4 章已经拆成以下 15 分钟单元：
+
+- **I04-1**：[Kernel 的解剖：入口、索引与启动开销](./04-kernel-tiling-pipeline/01-kernel-anatomy.md)
+- **I04-2**：[Tiling：把大算子切成块](./04-kernel-tiling-pipeline/02-tiling-strategy.md)
+- **I04-3**：[流水线与 Double Buffer](./04-kernel-tiling-pipeline/03-pipeline-double-buffer.md)
+- **I04-4**：[最小算子走读与调优检查单](./04-kernel-tiling-pipeline/04-minimal-kernel-walkthrough.md)
+
+第 5 章已经拆成以下 15 分钟单元：
+
+- **I05-1**：[算子的三本账：FLOPs、Bytes 与 AI](./05-flops-bandwidth-roofline/01-operator-accounting.md)
+- **I05-2**：[Roofline 模型：一条线看清瓶颈](./05-flops-bandwidth-roofline/02-roofline-model.md)
+- **I05-3**：[用 Roofline 分析真实算子](./05-flops-bandwidth-roofline/03-roofline-case-studies.md)
+- **I05-4**：[从判断到行动：优化路线图](./05-flops-bandwidth-roofline/04-from-diagnosis-to-action.md)
 
 ## 第二阶段：框架、编译与 Runtime
 

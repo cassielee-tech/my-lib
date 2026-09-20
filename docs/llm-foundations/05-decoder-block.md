@@ -10,6 +10,8 @@
 
 **学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**，分别理解结构、FFN、资源和并行。
 
+**跟不动？** 先读 [⚡ 速通版（约 5 分钟）](./05-decoder-block/quick.md)：一条标准生产车间类比讲完整章，再回来按单元深入。
+
 **先看这几张核心图：** Decoder Block 总图、RMSNorm Process、SwiGLU Flow 三张图。
 
 - [ ] 我能默画一个 Decoder Block

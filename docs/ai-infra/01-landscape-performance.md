@@ -12,6 +12,8 @@
 
 **学习节奏：** 本章拆为 **5 个学习单元，每个约 15 分钟**。先判断数据与任务在哪里，再进入性能公式。
 
+**跟不动？** 先读 [⚡ 速通版（约 5 分钟）](./01-landscape-performance/quick.md)：一个餐厅类比讲完整章，再回来按单元深入。
+
 **先看这几张核心图：** Model to Device、Timeline Overlap、Performance Funnel。
 
 - [ ] 我能画出模型到设备的软件栈

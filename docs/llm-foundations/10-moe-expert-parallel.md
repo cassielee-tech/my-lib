@@ -12,6 +12,8 @@
 
 **学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**，围绕 Token 被谁处理、怎样移动展开。
 
+**跟不动？** 先读 [⚡ 速通版（约 5 分钟）](./10-moe-expert-parallel/quick.md)：一家分诊台医院类比讲完整章，再回来按单元深入。
+
 **先看这几张核心图：** Dense vs MoE、Router Top-k、Expert Parallel Alltoall 三张图。
 
 - [ ] 我能区分总参数与激活参数

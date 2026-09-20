@@ -19,9 +19,9 @@
 ## 本章单元
 
 - **C01-1（约 15 分钟）**：[NPU、达芬奇架构与 AI Core](./01-ascend-cann/01-npu-davinci-ai-core.md)
-- **C01-2（约 15 分钟）**：CANN 软件栈与模型执行路径（待整理）
-- **C01-3（约 15 分钟）**：版本、驱动、固件与开发环境（待整理）
-- **本章总结**：画出一段模型代码到 NPU 的完整路径（完成三个单元后整理）
+- **C01-2（约 15 分钟）**：[CANN 软件栈与模型执行路径](./01-ascend-cann/02-cann-stack-execution-path.md)
+- **C01-3（约 15 分钟）**：[版本、驱动、固件与开发环境](./01-ascend-cann/03-version-driver-firmware-env.md)
+- **本章总结**：[画出一段模型代码到 NPU 的完整路径](./01-ascend-cann/summary.md)
 
 ## 这一章在整条路线中的位置
 

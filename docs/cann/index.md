@@ -37,9 +37,9 @@ CANN（Compute Architecture for Neural Networks）是昇腾 AI 处理器的软�
 
 - **章节导学**：[认识昇腾与 CANN](./01-ascend-cann.md)
 - **C01-1**：[NPU、达芬奇架构与 AI Core](./01-ascend-cann/01-npu-davinci-ai-core.md)
-- **C01-2**：CANN 软件栈与模型执行路径
-- **C01-3**：版本、驱动、固件与开发环境
-- **本章总结**：画出一段模型代码到 NPU 的完整路径
+- **C01-2**：[CANN 软件栈与模型执行路径](./01-ascend-cann/02-cann-stack-execution-path.md)
+- **C01-3**：[版本、驱动、固件与开发环境](./01-ascend-cann/03-version-driver-firmware-env.md)
+- **本章总结**：[画出一段模型代码到 NPU 的完整路径](./01-ascend-cann/summary.md)
 
 ### 第 2 章：Runtime 与任务执行
 

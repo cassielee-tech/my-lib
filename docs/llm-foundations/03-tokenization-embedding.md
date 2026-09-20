@@ -10,6 +10,8 @@
 
 **学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**，依次跟踪文本、ID、向量和 Logits。
 
+**跟不动？** 先读 [⚡ 速通版（约 5 分钟）](./03-tokenization-embedding/quick.md)：一场文字接龙考试类比讲完整章，再回来按单元深入。
+
 **先看这几张核心图：** 开头的数据流、Tokenization Pipeline、Embedding Lookup 和 Causal LM Shift 四张图。
 
 - [ ] 我能解释 Token、Token ID、Embedding 的区别

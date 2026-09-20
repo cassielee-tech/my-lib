@@ -12,6 +12,8 @@
 
 **学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**，从单次生成推进到推理服务。
 
+**跟不动？** 先读 [⚡ 速通版（约 5 分钟）](./08-inference-kv-cache/quick.md)：一场开卷接龙考试类比讲完整章，再回来按单元深入。
+
 **先看这几张核心图：** Autoregressive Loop、Prefill vs Decode、KV Cache Recompute 三张图。
 
 - [ ] 我能画出逐 Token 生成循环

@@ -12,6 +12,8 @@
 
 **学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**，先分清训练阶段，再比较实现代价。
 
+**跟不动？** 先读 [⚡ 速通版（约 5 分钟）](./09-post-training-alignment/quick.md)：一个"培养作者"类比讲完整章，再回来按单元深入。
+
 **先看这几张核心图：** Model Training Stages、LoRA Low-Rank Update、RLHF vs DPO 三张图。
 
 - [ ] 我能区分预训练、SFT 和偏好对齐

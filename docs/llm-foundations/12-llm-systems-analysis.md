@@ -12,6 +12,8 @@
 
 **学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**，每次只完成一种资源估算。
 
+**跟不动？** 先读 [⚡ 速通版（约 5 分钟）](./12-llm-systems-analysis/quick.md)：一份"开店预算"类比讲完整章，再回来按单元深入。
+
 **先看这几张核心图：** Parameter Ledger、Training vs Inference Memory、Model Sharding Communication 三张图。
 
 - [ ] 我能从模型配置估算参数和 BF16 权重

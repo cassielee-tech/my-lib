@@ -12,6 +12,8 @@
 
 **学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**，沿一次参数更新的时间顺序推进。
 
+**跟不动？** 先读 [⚡ 速通版（约 5 分钟）](./07-training-loop/quick.md)：一个学生的学习闭环类比讲完整章，再回来按单元深入。
+
 **先看这几张核心图：** Training Step Lifecycle、Gradient Accumulation 和 AdamW State Update 三张图。
 
 - [ ] 我能按顺序说出一次参数更新的步骤

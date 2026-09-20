@@ -10,6 +10,8 @@
 
 **学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**。先建立 Q/K/V 直觉，再进入公式和性能。
 
+**跟不动？** 先读 [⚡ 速通版（约 5 分钟）](./04-self-attention/quick.md)：一场会议室"听谁说话"类比讲完整章，再回来按单元深入。
+
 **先看这几张核心图：** QKV Retrieval、Causal Attention Matrix、Multi-Head Attention 三张图；手算部分留到第二次。
 
 - [ ] 我能用自己的话解释 Q、K、V

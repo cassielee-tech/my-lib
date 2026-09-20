@@ -12,6 +12,8 @@
 
 **学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**。量化公式可留到第二遍阅读。
 
+**跟不动？** 先读 [⚡ 速通版（约 5 分钟）](./11-efficient-llm-design/quick.md)：一个"给出版社省钱"类比讲完整章，再回来按单元深入。
+
 **先看这几张核心图：** MHA/GQA/MQA Sharing、Group Quantization、Long Context Techniques 三张图。
 
 - [ ] 我能算出 GQA 相对 MHA 的 KV 缩减比例
