@@ -3,35 +3,50 @@ layout: home
 
 hero:
   name: "Cassie’s Stack"
-  tagline: "Between Tokens · 永不停止成长"
+  tagline: "AI Infra·昇腾·集合通信领域的系统学习文档"
   actions:
     - theme: brand
-      text: 查看学习路线
+      text: 查看课程总览
       link: /roadmap
     - theme: alt
       text: 开始第一课
-      link: /llm-foundations/01-landscape
+      link: /model/01-landscape
 
 features:
   - icon: 🧠
-    title: 大模型基础
-    details: Transformer、训练、推理、RAG 与 Agent 等基础知识。
-    link: /llm-foundations/
-    linkText: 查看目录
-  - icon: ⚙️
-    title: AI Infra
-    details: 算力、训练框架、推理优化与大模型工程基础设施。
-    link: /ai-infra/
-    linkText: 查看目录
+    title: 模型全景
+    details: 模型在算什么？通信从哪来？—— Transformer 骨架、张量流动与并行的必然性（第 1-6 章）。
+    link: /model/
+    linkText: 进入专栏
+  - icon: 🏋️
+    title: 训练与推理系统
+    details: 训练怎样运转？显存花在哪？—— 训练循环、显存账本与梯度通信；推理与后训练为选修（第 1-6 章）。
+    link: /systems/
+    linkText: 进入专栏
+  - icon: 🔧
+    title: 单卡执行系统
+    details: 算子怎样在单卡上跑得快？—— 执行模型、存储层次、Roofline、Stream/Event 与图编译（第 1-8 章）。
+    link: /device/
+    linkText: 进入专栏
+  - icon: 🧩
+    title: 并行策略
+    details: 并行为什么产生通信？—— DP/TP/PP/CP/EP 与 ZeRO/FSDP 的张量切分与通信量推导（第 1-9 章）。
+    link: /parallel/
+    linkText: 进入专栏
+  - icon: 📡
+    title: 集合通信（岗位核心）
+    details: 语义、算法、代价模型与工程 —— 六大原语、Ring/Tree 推导、拓扑分层与重叠（第 1-5 章）。
+    link: /collective/
+    linkText: 进入专栏
+  - icon: 🔷
+    title: 昇腾与 HCCL
+    details: 平台机制、调用链与源码落地 —— CANN 软件栈、Runtime、HCCL 源码专题（第 1-6 章 + 专题）。
+    link: /ascend/
+    linkText: 进入专栏
   - icon: 🤖
     title: AI Agent
-    details: Agent 架构、工具调用、记忆、规划与工程实践。
+    details: 主线之外的工程应用视角：Agent 产品地图、工程化知识树与 AI Coding 实践。
     link: /ai-agent/
-    linkText: 查看目录
-  - icon: 🔷
-    title: CANN
-    details: 昇腾软硬件栈、Ascend C 算子开发、性能调优与 HCCL 前置知识。
-    link: /cann/
     linkText: 查看目录
   - icon: 🧱
     title: 后端知识
@@ -50,22 +65,7 @@ features:
     linkText: 查看目录
 ---
 
-这里是我的个人知识博客。我会把学习过程中的理解、实践和思考逐步整理在这里。
 
 ::: tip 专注阅读
-课程按约 **15 分钟一个学习单元**组织。每次只解决一个问题，完成单元后再进入下一篇或本章总结。
+课程按约 **15 分钟一个学习单元**组织。每次只解决一个问题，完成单元后再进入下一篇或本章总结；时间紧或跟不动时，先读每章的「⚡ 速通」页。
 :::
-
-## 博客知识地图
-
-![Cassie’s Stack 博客知识思维导图：以大模型基础、AI Infra 和 CANN 为学习主线，并连接 AI Agent、后端知识、工具效率与个人思考](/images/blog-knowledge-map.svg)
-
-图中上方是当前的**核心学习主线**：先理解大模型，再进入通用 AI Infra，最后落到昇腾 CANN 与 HCCL。下方几条分支分别补充应用能力、工程基础、开发效率和长期思考。
-
-## 总体学习路线
-
-学习路线跨越大模型基础、AI Infra、CANN、分布式训练、集合通信与 HCCL，不归属于某一个具体知识分类。
-
-> 模型结构 → 计算图 → 训练与推理 → AI Infra → CANN → 并行策略 → 集合通信 → HCCL 源码
-
-[查看完整的“大模型与 AI Infra 学习路线” →](/roadmap)
