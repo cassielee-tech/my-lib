@@ -170,7 +170,28 @@ export default defineConfig({
                 { text: '本章总结', link: '/systems/04-post-training-alignment/summary' }
               ]
             },
-            { text: '第 5-6 章｜推理系统两讲（选修·待写）', link: '/systems/' },
+            {
+              text: '第 5 章｜推理引擎与 KV Cache（选修）', link: '/systems/05-inference-engine', collapsed: true,
+              items: [
+                { text: '⚡ 速通版（5 分钟）', link: '/systems/05-inference-engine/quick' },
+                { text: '05-1｜从训练到服务', link: '/systems/05-inference-engine/01-from-training-to-serving' },
+                { text: '05-2｜Continuous Batching', link: '/systems/05-inference-engine/02-continuous-batching' },
+                { text: '05-3｜Paged Attention', link: '/systems/05-inference-engine/03-paged-attention' },
+                { text: '05-4｜Prefix Cache 与多卡', link: '/systems/05-inference-engine/04-prefix-cache-multicard' },
+                { text: '本章总结', link: '/systems/05-inference-engine/summary' }
+              ]
+            },
+            {
+              text: '第 6 章｜PD 调度与推理指标（选修）', link: '/systems/06-pd-scheduling', collapsed: true,
+              items: [
+                { text: '⚡ 速通版（5 分钟）', link: '/systems/06-pd-scheduling/quick' },
+                { text: '06-1｜三指标与两种负载', link: '/systems/06-pd-scheduling/01-metrics-and-workloads' },
+                { text: '06-2｜干扰与 Chunked Prefill', link: '/systems/06-pd-scheduling/02-interference-chunked-prefill' },
+                { text: '06-3｜PD 分离', link: '/systems/06-pd-scheduling/03-pd-disaggregation' },
+                { text: '06-4｜推理通信版图', link: '/systems/06-pd-scheduling/04-inference-comm-wrapup' },
+                { text: '本章总结', link: '/systems/06-pd-scheduling/summary' }
+              ]
+            },
             { text: '下一专栏 → 单卡执行系统', link: '/device/' }
           ]
         }
