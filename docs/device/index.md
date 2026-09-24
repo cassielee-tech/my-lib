@@ -10,21 +10,21 @@
 
 | 章 | 主题 | 学完能够回答的问题 | 状态 |
 | ---: | --- | --- | --- |
-| 1 | [全景与性能分析](./01-landscape-performance.md) | 一个请求怎样穿过框架、编译器、Runtime、算子和硬件？ | ✅ |
-| 2 | [GPU/NPU 执行模型与计算单元](./02-execution-model.md) | CPU、GPU、NPU 为什么采用不同执行方式？昇腾 Cube/Vector 做什么？ | ✅ |
-| 3 | [存储层次与数据搬运](./03-memory-hierarchy.md) | HBM、Cache、片上 Buffer 有什么区别？数据为什么比计算贵？ | ✅ |
-| 4 | [Kernel、Tiling 与流水线](./04-kernel-tiling-pipeline.md) | 大算子怎样切成 Tile？搬运和计算怎样形成流水？ | ✅ |
-| 5 | [FLOPs、带宽与 Roofline](./05-flops-bandwidth-roofline.md) | 怎样判断算子是 Compute-bound 还是 Memory-bound？ | ✅ |
+| 1 | [全景与性能分析](01-landscape-performance.md) | 一个请求怎样穿过框架、编译器、Runtime、算子和硬件？ | ✅ |
+| 2 | [GPU/NPU 执行模型与计算单元](02-execution-model.md) | CPU、GPU、NPU 为什么采用不同执行方式？昇腾 Cube/Vector 做什么？ | ✅ |
+| 3 | [存储层次与数据搬运](03-memory-hierarchy.md) | HBM、Cache、片上 Buffer 有什么区别？数据为什么比计算贵？ | ✅ |
+| 4 | [Kernel、Tiling 与流水线](04-kernel-tiling-pipeline.md) | 大算子怎样切成 Tile？搬运和计算怎样形成流水？ | ✅ |
+| 5 | [FLOPs、带宽与 Roofline](05-flops-bandwidth-roofline.md) | 怎样判断算子是 Compute-bound 还是 Memory-bound？ | ✅ |
 
 下半程：**执行系统**（第 6-8 章）
 
 | 章 | 主题 | 学完能够回答的问题 | 状态 |
 | ---: | --- | --- | --- |
-| 6 | [Eager、计算图与图编译](./06-eager-graph-compilation.md) | 一行 Python 怎样变成可执行计算图？图模式为什么快？ | ✅ |
-| 7 | [Stream、Event 与异步执行](./07-stream-event-async.md) | 计算和通信怎样并发？什么时候必须同步？ | ✅ |
-| 8 | [数据类型、布局与算子融合](./08-dtype-layout-fusion.md) | BF16/FP8、Layout 和 Fusion 怎样影响精度与性能？ | ✅ |
+| 6 | [Eager、计算图与图编译](06-eager-graph-compilation.md) | 一行 Python 怎样变成可执行计算图？图模式为什么快？ | ✅ |
+| 7 | [Stream、Event 与异步执行](07-stream-event-async.md) | 计算和通信怎样并发？什么时候必须同步？ | ✅ |
+| 8 | [数据类型、布局与算子融合](08-dtype-layout-fusion.md) | BF16/FP8、Layout 和 Fusion 怎样影响精度与性能？ | ✅ |
 
-**专题**：[2026 主流 AI 加速卡全景](./accelerator-cards-2026.md)——NVIDIA、昇腾、AMD 与 Intel 的算力/显存/互联规格对照（选修，《集合通信》拓扑章的前置材料）。
+**专题**：[2026 主流 AI 加速卡全景](accelerator-cards-2026.md)——NVIDIA、昇腾、AMD 与 Intel 的算力/显存/互联规格对照（选修，《集合通信》拓扑章的前置材料）。
 
 ## 阅读提示
 

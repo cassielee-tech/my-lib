@@ -8,17 +8,17 @@
 
 | 章 | 主题 | 学完能够回答的问题 | 状态 |
 | ---: | --- | --- | --- |
-| 1 | [Collective 语义与代价模型](./01-collective-semantics-cost.md) | 六大原语的输入输出是什么？α-β-γ 账本怎么算？ | ✅ |
-| 2 | [Ring AllReduce 完整推导](./02-ring-allreduce.md) | Ring 为什么等于 RS 加 AG？每轮发送哪一块数据？ | ✅ |
-| 3 | [Tree、Recursive Doubling 与算法选择](./03-tree-algorithms-selection.md) | 小消息和大消息为什么选不同算法？分界线在哪？ | ✅ |
-| 4 | [AllGather、ReduceScatter 与 AlltoAll](./04-gather-scatter-alltoall.md) | 数据布局怎样变化？MoE AlltoAll 为什么容易失衡？ | ✅ |
-| 5 | [拓扑、分层通信与通信计算重叠](./05-topology-hierarchical-overlap.md) | 机内和机间链路怎样组合？Chunk、Channel、重叠各解决什么？ | ✅ |
+| 1 | [Collective 语义与代价模型](01-collective-semantics-cost.md) | 六大原语的输入输出是什么？α-β-γ 账本怎么算？ | ✅ |
+| 2 | [Ring AllReduce 完整推导](02-ring-allreduce.md) | Ring 为什么等于 RS 加 AG？每轮发送哪一块数据？ | ✅ |
+| 3 | [Tree、Recursive Doubling 与算法选择](03-tree-algorithms-selection.md) | 小消息和大消息为什么选不同算法？分界线在哪？ | ✅ |
+| 4 | [AllGather、ReduceScatter 与 AlltoAll](04-gather-scatter-alltoall.md) | 数据布局怎样变化？MoE AlltoAll 为什么容易失衡？ | ✅ |
+| 5 | [拓扑、分层通信与通信计算重叠](05-topology-hierarchical-overlap.md) | 机内和机间链路怎样组合？Chunk、Channel、重叠各解决什么？ | ✅ |
 
 ## 阅读提示
 
 - 学习顺序即章号顺序：语义账本（1）→ 算法（2/3）→ 原语场景（4）→ 拓扑与兑现（5）；
 - **第 2 章务必手推**：4 rank 的 RS+AG 两阶段模拟是本专栏的验收硬指标；
-- 每读一章，对照 [HCCL 源码专题 H01-6](../ascend/hccl-source/06-coll-algorithms.md) 的实现视角看一遍——理论/实现双轨并进。
+- 每读一章，对照 [HCCL 源码 5](../ascend/hccl-source/05-coll-algorithms.md) 的实现视角看一遍——理论/实现双轨并进。
 
 ## 验收清单
 

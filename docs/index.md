@@ -40,7 +40,7 @@ features:
     linkText: 进入专栏
   - icon: 🔷
     title: 昇腾与 HCCL
-    details: 平台机制、调用链与源码落地 —— CANN 软件栈、Runtime、HCCL 源码专题（第 1-6 章 + 专题）。
+    details: 平台机制、调用链与源码落地 —— 四类：昇腾 / Ascend C / HCCL / HCOMM，含 HCCL 与 HCOMM 两门源码课程。
     link: /ascend/
     linkText: 进入专栏
   - icon: 🤖

@@ -8,12 +8,12 @@
 
 | 章 | 主题 | 学完能够回答的问题 | 状态 |
 | ---: | --- | --- | --- |
-| 1 | [训练循环](./01-training-loop.md) | 一次训练 Step 发生什么？梯度累积、AdamW、混合精度各自做什么？ | ✅ 主线 |
-| 2 | [训练显存与计算优化](./02-training-memory-compute.md) | 训练显存的四个大件各占多少？Checkpointing/累积/Offload 分别省什么？ | ✅ 主线 |
-| 3 | [推理与 KV Cache](./03-inference-kv-cache.md)【选修】 | Prefill 与 Decode 有何不同？KV Cache 占多少显存？ | ✅ |
-| 4 | [后训练与对齐](./04-post-training-alignment.md)【选修】 | SFT/LoRA/RLHF/DPO 分别解决什么？ | ✅ |
-| 5 | [推理引擎与 KV Cache 管理](./05-inference-engine.md)【选修】 | Continuous Batching、Paged Attention 和 Prefix Cache 怎样提高并发？ | ✅ |
-| 6 | [Prefill/Decode 调度与推理指标](./06-pd-scheduling.md)【选修】 | TTFT、TPOT、吞吐为什么互相制约？PD 分离解决什么？ | ✅ |
+| 1 | [训练循环](01-training-loop.md) | 一次训练 Step 发生什么？梯度累积、AdamW、混合精度各自做什么？ | ✅ 主线 |
+| 2 | [训练显存与计算优化](02-training-memory-compute.md) | 训练显存的四个大件各占多少？Checkpointing/累积/Offload 分别省什么？ | ✅ 主线 |
+| 3 | [推理与 KV Cache](03-inference-kv-cache.md)【选修】 | Prefill 与 Decode 有何不同？KV Cache 占多少显存？ | ✅ |
+| 4 | [后训练与对齐](04-post-training-alignment.md)【选修】 | SFT/LoRA/RLHF/DPO 分别解决什么？ | ✅ |
+| 5 | [推理引擎与 KV Cache 管理](05-inference-engine.md)【选修】 | Continuous Batching、Paged Attention 和 Prefix Cache 怎样提高并发？ | ✅ |
+| 6 | [Prefill/Decode 调度与推理指标](06-pd-scheduling.md)【选修】 | TTFT、TPOT、吞吐为什么互相制约？PD 分离解决什么？ | ✅ |
 
 ## 阅读提示
 

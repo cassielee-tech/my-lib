@@ -165,3 +165,32 @@
     line-height: 1.75;
   }
 }
+
+/* ===== 文档页内容区加宽（≥960px，首页 VPHome / 移动端不受影响） ===== */
+@media (min-width: 960px) {
+  .VPDoc .container {
+    max-width: 1600px !important;
+  }
+
+  .VPDoc .content,
+  .VPDoc .content-container {
+    max-width: none !important;
+  }
+}
+
+/* ===== 侧边栏翻倍：272 → 544px，1920px 起生效 =====
+   三级嵌套（分类 > 章 > 单元）的长标题在 544px 下可单行显示；
+   --vp-layout-max-width 同步抬升，保证正文列不缩水且不与侧栏重叠。 */
+@media (min-width: 1920px) {
+  :root {
+    --vp-sidebar-width: 544px;
+    --vp-layout-max-width: 1920px;
+  }
+}
+
+/* 2144px+（2K/4K 外接屏）：正文涨满容器上限（~1280px） */
+@media (min-width: 2144px) {
+  :root {
+    --vp-layout-max-width: 2144px;
+  }
+}

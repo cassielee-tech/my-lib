@@ -12,12 +12,12 @@
 
 | 专栏 | 主题 | 章节 | 状态 | 直达第一课 |
 | --- | --- | --- | --- | --- |
-| [模型全景](./model/index.md) | 模型在算什么？通信从哪来？ | 第 1-6 章 | ✅ 已备 | [第 1 章｜从模型到集合通信](./model/01-landscape.md) |
-| [训练与推理系统](./systems/index.md) | 训练怎样运转？显存花在哪？ | 第 1-6 章 | ✅ 已备 | [第 1 章｜训练循环](./systems/01-training-loop.md) |
-| [单卡执行系统](./device/index.md) | 算子怎样在单卡上跑得快？ | 第 1-8 章 + 专题 | ✅ 已备 | [第 1 章｜全景与性能分析](./device/01-landscape-performance.md) |
-| [并行策略](./parallel/index.md) | 并行为什么产生通信？ | 第 1-9 章 | ✅ 已备 | [第 4 章｜分布式基础](./parallel/04-distributed-basics.md) |
-| [集合通信](./collective/index.md) | 语义、算法、代价模型与工程（岗位核心） | 第 1-5 章 | ✅ 已备 | [第 1 章｜Collective 语义与代价模型](./collective/01-collective-semantics-cost.md) |
-| [昇腾与 HCCL](./ascend/index.md) | 平台机制、调用链与源码落地 | 第 1-6 章 + 源码专题 | 🚧 1-3 已备，4-6 二梯队 | [第 1 章｜认识昇腾与 CANN](./ascend/01-ascend-cann.md) |
+| [模型全景](model/index.md) | 模型在算什么？通信从哪来？ | 第 1-6 章 | ✅ 已备 | [第 1 章｜从模型到集合通信](model/01-landscape.md) |
+| [训练与推理系统](systems/index.md) | 训练怎样运转？显存花在哪？ | 第 1-6 章 | ✅ 已备 | [第 1 章｜训练循环](systems/01-training-loop.md) |
+| [单卡执行系统](device/index.md) | 算子怎样在单卡上跑得快？ | 第 1-8 章 + 专题 | ✅ 已备 | [第 1 章｜全景与性能分析](device/01-landscape-performance.md) |
+| [并行策略](parallel/index.md) | 并行为什么产生通信？ | 第 1-9 章 | ✅ 已备 | [第 4 章｜分布式基础](parallel/04-distributed-basics.md) |
+| [集合通信](collective/index.md) | 语义、算法、代价模型与工程（岗位核心） | 第 1-5 章 | ✅ 已备 | [第 1 章｜Collective 语义与代价模型](collective/01-collective-semantics-cost.md) |
+| [昇腾与 HCCL](ascend/index.md) | 平台机制、调用链与源码落地 | 四类：昇腾 / Ascend C / HCCL / HCOMM | 🚧 昇腾+HCCL+HCOMM 已备，Ascend C 二梯队 | [第 0 章｜认识昇腾与 CANN](ascend/00-ascend-cann.md) |
 
 ## 学习路线
 
@@ -45,17 +45,17 @@
 
 按岗位价值排序的阅读路线：
 
-- **主线**：模型全景 1-5 → 训练与推理系统 1-2 → 单卡执行系统 1-8 → 并行策略 1-9 → 集合通信 1-5 → 昇腾与 HCCL 1-3 → [HCCL 源码专题](./ascend/hccl-source.md)；
+- **主线**：模型全景 1-5 → 训练与推理系统 1-2 → 单卡执行系统 1-8 → 并行策略 1-9 → 集合通信 1-5 → 昇腾与 HCCL（昇腾 0-1、HCCL 0）→ [HCCL 源码学习](ascend/hccl-source.md)；
 - **选修**：模型全景第 6 章（RoPE/长上下文）、训练与推理系统第 3-6 章（推理与后训练）、并行策略第 2 章（效率设计）；
-- **二梯队**：昇腾与 HCCL 第 4-6 章（Ascend C 算子开发）——进入 HCCL 引擎 template（AICPU/AIV/CCU）开发时再深入。
+- **二梯队**：昇腾与 HCCL 专栏的 Ascend C 分类（第 0-2 章，算子开发）——进入 HCCL 引擎 template（AICPU/AIV/CCU）开发时再深入。
 
 ## 写作进度与下一步
 
-- **P0**：✅ 主线材料全部备齐（六专栏主线章节 + HCCL 源码专题）——下一步是读与练，不是写；
+- **P0**：✅ 主线材料全部备齐（六专栏主线章节 + HCCL/HCOMM 源码课程）——下一步是读与练，不是写；
 - **P1**：✅ 已完成（《训练与推理系统》第 5-6 章推理两讲已备）；
-- **P2**：《昇腾与 HCCL》第 4-6 章（Ascend C 算子开发，二梯队）——进入引擎 template 开发时再写。
+- **P2**：《昇腾与 HCCL》Ascend C 分类（第 0-2 章，算子开发，二梯队）——进入引擎 template 开发时再写。
 
-至此，**六专栏全部章节 + HCCL 源码专题均已备齐**（含选修），课程进入纯"读与练"阶段。
+至此，**六专栏全部章节 + HCCL/HCOMM 源码课程均已备齐**（含选修），课程进入纯"读与练"阶段。
 
 ## 笔记习惯
 

@@ -18,7 +18,7 @@
 
 ## 产品与生态
 
-- [2026 热门 AI Agent 产品地图：从通用执行到 Coding Agent](./01-popular-agents.md)
-- [AI Agent 工程化知识树：从模型接入到生产治理](./agent-engineering-knowledge-tree.md)
+- [2026 热门 AI Agent 产品地图：从通用执行到 Coding Agent](01-popular-agents.md)
+- [AI Agent 工程化知识树：从模型接入到生产治理](agent-engineering-knowledge-tree.md)
 
 > 后续会从“会用 Agent”逐步深入到“理解 Agent”和“开发 Agent”。

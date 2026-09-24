@@ -10,20 +10,20 @@
 
 | 章 | 主题 | 学完能够回答的问题 | 状态 |
 | ---: | --- | --- | --- |
-| 1 | [MoE 与 Expert Parallel](./01-moe-expert-parallel.md) | Router/Top-k 怎样工作？Token 的 AlltoAll 分发为什么失衡？ | ✅ |
-| 2 | [效率设计](./02-efficient-llm-design.md)【选修】 | MQA/GQA、量化、长上下文各自省什么？ | ✅ |
-| 3 | [系统分析](./03-llm-systems-analysis.md) | 读配置估参数量/显存/FLOPs，模型切分与性能模型怎样建立？ | ✅ |
+| 1 | [MoE 与 Expert Parallel](01-moe-expert-parallel.md) | Router/Top-k 怎样工作？Token 的 AlltoAll 分发为什么失衡？ | ✅ |
+| 2 | [效率设计](02-efficient-llm-design.md)【选修】 | MQA/GQA、量化、长上下文各自省什么？ | ✅ |
+| 3 | [系统分析](03-llm-systems-analysis.md) | 读配置估参数量/显存/FLOPs，模型切分与性能模型怎样建立？ | ✅ |
 
 系统视角深化（第 4-9 章）：
 
 | 章 | 主题 | 学完能够回答的问题 | 状态 |
 | ---: | --- | --- | --- |
-| 4 | [分布式基础：Rank、通信域与拓扑](./04-distributed-basics.md) | Process、Device、Rank、World Size、Process Group 分别是什么？ | ✅ |
-| 5 | [数据并行与 DDP](./05-ddp.md) | 梯度为什么需要 AllReduce？Bucket 和通信计算重叠怎样工作？ | ✅ |
-| 6 | [Tensor Parallel](./06-tensor-parallel.md) | Column/Row Parallel 怎样切矩阵？为什么产生 AllGather、AllReduce 或 ReduceScatter？ | ✅ |
-| 7 | [Pipeline Parallel](./07-pipeline-parallel.md) | Stage、Micro-batch、1F1B 和 Bubble 分别是什么？ | ✅ |
-| 8 | [Sequence/Context Parallel](./08-context-parallel.md) | 长序列怎样切到多卡？Attention 为什么需要交换 K/V？ | ✅ |
-| 9 | [ZeRO、FSDP 与混合并行](./09-zero-fsdp.md) | 参数、梯度、优化器状态怎样分片？DP/TP/PP/CP/EP 怎样组合？ | ✅ |
+| 4 | [分布式基础：Rank、通信域与拓扑](04-distributed-basics.md) | Process、Device、Rank、World Size、Process Group 分别是什么？ | ✅ |
+| 5 | [数据并行与 DDP](05-ddp.md) | 梯度为什么需要 AllReduce？Bucket 和通信计算重叠怎样工作？ | ✅ |
+| 6 | [Tensor Parallel](06-tensor-parallel.md) | Column/Row Parallel 怎样切矩阵？为什么产生 AllGather、AllReduce 或 ReduceScatter？ | ✅ |
+| 7 | [Pipeline Parallel](07-pipeline-parallel.md) | Stage、Micro-batch、1F1B 和 Bubble 分别是什么？ | ✅ |
+| 8 | [Sequence/Context Parallel](08-context-parallel.md) | 长序列怎样切到多卡？Attention 为什么需要交换 K/V？ | ✅ |
+| 9 | [ZeRO、FSDP 与混合并行](09-zero-fsdp.md) | 参数、梯度、优化器状态怎样分片？DP/TP/PP/CP/EP 怎样组合？ | ✅ |
 
 ## 阅读提示
 
