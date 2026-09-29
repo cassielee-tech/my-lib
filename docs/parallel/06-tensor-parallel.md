@@ -280,7 +280,7 @@ Megatron 的 TP+SP 正是"恒等式落地"的经典（[《集合通信》01-2 �
 
 1. **组划分**：`tp_group` = 机内 8 卡（第 4 章 node-major），跨机不设 TP；
 2. **显存账**：三大件 ÷tp；权重加载时各 rank 只载自己的分片；
-3. **通信原语**：出口 AllReduce（或 TP+SP 的 RS+AG）落在 tp_group 上——HCCL 按拓扑自动选机内高速通路（[HCCL 源码 5](../ascend/hccl-source/05-coll-algorithms.md)）；
+3. **通信原语**：出口 AllReduce（或 TP+SP 的 RS+AG）落在 tp_group 上——HCCL 按拓扑自动选机内高速通路（[HCCL 源码 5](../ascend/hccl-hcomm/05-coll-algorithms.md)）；
 4. **重叠期望管理**：TP 通信在关键路径上——优化方向是**压通信量**（TP+SP、量化激活）而不是找重叠；
 5. **组合原则**：单机内 TP，跨机交给 DP/PP——`tp=8` 之外的世界由后两章接管。
 
@@ -368,7 +368,7 @@ MLP：$W_1 \in \mathbb{R}^{4096 \times 16384}$、$W_2 \in \mathbb{R}^{16384 \tim
 - [《模型全景》05-4：Block 张量并行](../model/05-decoder-block.md#_05-4-张量并行怎样切分-block)
 - [《集合通信》04-1/04-2：AllGather 与 ReduceScatter](../collective/04-gather-scatter-alltoall.md#_04-1-allgather-从分片到完整)
 - [《集合通信》05-4：藏不住的关键路径通信](../collective/05-topology-hierarchical-overlap.md#_05-4-通信计算重叠-从公式到实践)
-- [HCCL 源码 5：算法与拓扑感知](../ascend/hccl-source/05-coll-algorithms.md)
+- [HCCL 源码 5：算法与拓扑感知](../ascend/hccl-hcomm/05-coll-algorithms.md)
 
 下一章 **Pipeline Parallel** 换一把刀：不再切层内部，而是把层**分段接力**——Stage、Micro-batch、1F1B 与 Bubble，通信最少、调度最讲究的一种并行。
 

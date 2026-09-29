@@ -34,7 +34,7 @@
           ↓
 第 1 章（昇腾）：这些原理在昇腾上的 API 与执行模型 ← 你在这里
           ↓
-HCCL 第 0 章：torch_npu → HCCL 的调用链（主线）
+第 2 章：torch_npu → HCCL 的调用链（主线）
           ↓
 HCCL 源码：通信任务与计算任务在 Stream 上的交汇
 ```
@@ -356,7 +356,7 @@ aclrtDestroyStream(stream);   // 销毁（之前必须保证任务都已完成�
 - **默认 Stream**：不传 Stream（或 NULL）时任务进默认流——单流程序够用，但**没有重叠可言**；性能场景显式建流。
 
 ::: warning HCCL 与 Stream
-HCCL 集合通信调用同样接收一个 Stream 参数：通信任务排在该 Stream 上，与计算任务的依赖关系由 Stream/Event 表达。`torch_npu` 里通常为通信单独建 Stream，再与计算 Stream 用 Event 编排（HCCL 第 0 章展开）。
+HCCL 集合通信调用同样接收一个 Stream 参数：通信任务排在该 Stream 上，与计算任务的依赖关系由 Stream/Event 表达。`torch_npu` 里通常为通信单独建 Stream，再与计算 Stream 用 Event 编排（第 2 章展开）。
 :::
 
 ### 3. Event：打点与等待
@@ -429,7 +429,7 @@ copyStream：    [等event1]              [拷 batch2 数据 H2D][record event2]
 
 - [《单卡执行系统》第 7 章：Stream、Event 与异步执行](../device/07-stream-event-async.md)
 - [《集合通信》第 5 章：通信计算重叠](../collective/05-topology-hierarchical-overlap.md#_05-4-通信计算重叠-从公式到实践)
-- [HCCL 源码 3：通信原语与同步机制](hccl-source/03-primitives-and-sync.md)
+- [HCCL 源码 3：通信原语与同步机制](hccl-hcomm/03-data-plane.md)
 - [昇腾社区：CANN Runtime](https://www.hiascend.com/cann/runtime)
 
 ---
@@ -536,8 +536,8 @@ D2H 拷回结果后直接读——但忘了 `aclrtSynchronizeStream`，读到的
 
 ### 4. 从这里去向哪里
 
-- **向上**：`torch_npu` 把这套样板包进了框架——`y = a + b`（npu tensor）背后就是"准备段 + 执行段"的循环（HCCL 第 0 章展开）；
-- **向旁**：HCCL 的 AllReduce 一样是"准备 + 入队通信 Stream"的结构（[HCCL 源码 6 调用链走读](hccl-source/06-allreduce-call-chain.md)）；
+- **向上**：`torch_npu` 把这套样板包进了框架——`y = a + b`（npu tensor）背后就是"准备段 + 执行段"的循环（[第 2 章](02-pytorch-to-hccl.md)展开）；
+- **向旁**：HCCL 的 AllReduce 一样是"准备 + 入队通信 Stream"的结构（[HCCL 源码 6 调用链走读](hccl-hcomm/06-allreduce-call-chain.md)）；
 - **向工具**：Profiling（msprof）呈现的正是 Device 时间线上每个任务的起止——学会本章的双时间线，Profiling 火焰图/时间轴就是它的放大版（[常用命令速查：msprof](cann常用命令.md)）。
 
 ### 5. 自测题
@@ -572,7 +572,7 @@ D2H 拷回结果后直接读——但忘了 `aclrtSynchronizeStream`，读到的
 
 - [昇腾社区：CANN Runtime](https://www.hiascend.com/cann/runtime)
 - [《单卡执行系统》第 6 章：Eager 与图编译](../device/06-eager-graph-compilation.md)
-- [HCCL 源码 6：AllReduce 调用链走读](hccl-source/06-allreduce-call-chain.md)
+- [HCCL 源码 6：AllReduce 调用链走读](hccl-hcomm/06-allreduce-call-chain.md)
 - [CANN 常用命令速查：msprof 性能采集](cann常用命令.md)
 
 ---
@@ -655,7 +655,7 @@ Device 时间线（干活，stream 队列 FIFO）
 
 ### 下一章预告
 
-按学习顺序进入 **Ascend C 篇：算子开发基础**（二梯队）；按 HCCL 主线，可直接跳到 **HCCL 第 0 章：从 PyTorch 走向 HCCL**——把本章的 Runtime 世界观接到 `torch.distributed` → torch_npu → HCCL 的调用链上。
+按学习顺序进入 **Ascend C 篇：算子开发基础**（二梯队）；按 HCCL 主线，可直接跳到 **第 2 章：从 PyTorch 走向 HCCL**——把本章的 Runtime 世界观接到 `torch.distributed` → torch_npu → HCCL 的调用链上。
 
 无论走哪条，本章的双时间线都是后面所有内容的底图。
 
@@ -664,5 +664,5 @@ Device 时间线（干活，stream 队列 FIFO）
 - [昇腾社区：CANN Runtime](https://www.hiascend.com/cann/runtime)
 - [CANN Learning Hub：quick_start 公共基础](https://gitcode.com/cann/cann-learning-hub/tree/master/quick_start/cann_basics)
 - [《单卡执行系统》第 7 章：Stream、Event 与异步执行](../device/07-stream-event-async.md)
-- [HCCL 源码 3：通信原语与同步机制](hccl-source/03-primitives-and-sync.md)
+- [HCCL 源码 3：通信原语与同步机制](hccl-hcomm/03-data-plane.md)
 - [CANN 常用命令速查](cann常用命令.md)

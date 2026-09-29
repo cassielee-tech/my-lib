@@ -29,7 +29,7 @@
 
 ## 这一课在整条路线中的位置
 
-上一章立了语义与账本，本章推导第一个完整算法。Ring 是 HCCL/NCCL 等通信库大消息路径的支柱，也是 [HCCL 源码 5](../ascend/hccl-source/05-coll-algorithms.md) 中 Ring/RHD/NHR 一族的原点——手推过 Ring，那一章的算法对比就能秒懂。
+上一章立了语义与账本，本章推导第一个完整算法。Ring 是 HCCL/NCCL 等通信库大消息路径的支柱，也是 [HCCL 源码 5](../ascend/hccl-hcomm/05-coll-algorithms.md) 中 Ring/RHD/NHR 一族的原点——手推过 Ring，那一章的算法对比就能秒懂。
 
 ## ⚡ 速通（约 5 分钟）
 
@@ -310,7 +310,7 @@ N=1024: ≈ 2.00S
 这引出一个通用工程直觉：**算法决定账本形状，chunk 粒度决定账本兑现率**——第 5 章的 Chunk/Channel 是它在拓扑层的一次放大。
 
 ::: tip 与 HCCL 的衔接
-HCCL 的 Ring 族（Ring、RHD、NHR、NB 等，见 [HCCL 源码 5](../ascend/hccl-source/05-coll-algorithms.md)）都是本章这个骨架的变体：改变"块怎么分、发给谁、跳几步"，来适配不同 rank 数与拓扑。**手推过本章，再看那一章就是查表**。
+HCCL 的 Ring 族（Ring、RHD、NHR、NB 等，见 [HCCL 源码 5](../ascend/hccl-hcomm/05-coll-algorithms.md)）都是本章这个骨架的变体：改变"块怎么分、发给谁、跳几步"，来适配不同 rank 数与拓扑。**手推过本章，再看那一章就是查表**。
 :::
 
 ## 本章总结
@@ -388,7 +388,7 @@ S=512 MB、BW=25 GB/s、α=25 µs。分别计算 N=8 与 N=64 时 Ring AllReduce
 ### 参考资料
 
 - [Baidu Ring AllReduce（Bringing HPC Techniques to Deep Learning）](https://andrewgyork.org/high_performance_neural_networks/no_node_left_behind.html)
-- [HCCL 源码 5：Ring/RHD/NHR 算法族](../ascend/hccl-source/05-coll-algorithms.md)
+- [HCCL 源码 5：Ring/RHD/NHR 算法族](../ascend/hccl-hcomm/05-coll-algorithms.md)
 - [NCCL 官方文档](https://docs.nvidia.com/deeplearning/nccl/user-guide/index.html)
 - [《模型全景》第 1 章：DDP 为什么需要 AllReduce](../model/01-landscape.md#_01-2-并行策略为什么产生通信)
 

@@ -10,7 +10,7 @@
 3. **三板斧兑现账本**：**Chunk** 拆小铺流水、**Channel** 多路并行、**重叠**藏进计算——理论带宽和实测带宽之间的差距，靠它们补。
 :::
 
-**学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**。本章是《集合通信》收官课，读完建议回到 [课程总览](../roadmap.md) 做一次验收。
+**学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**。本章是《集合通信》收官课，读完建议回到 [课程总览](../index.md) 做一次验收。
 
 **跟不动？** 先读 [⚡ 速通版（约 5 分钟）](#⚡-速通-约-5-分钟)：一个"物流网络"的类比讲完整章，再回来按单元深入。
 
@@ -129,7 +129,7 @@
 | **机间**（跨机） | PCIe 网卡 / RoCE / InfiniBand | 几十 GB/s 级（每卡） | 交换网络（多跳、共享） |
 
 - 机内/机间**差近一个量级**，而且机内是"专线"、机间是"共用公路"；
-- 关于 AI Server 内部的完整叙事见 [大模型基础：AI Server](../model/01-landscape.md#_01-2-并行策略为什么产生通信) 与 [算力厂商加速卡专题](../device/accelerator-cards-2026.md)；HCCL 如何探测这两层拓扑，见 [HCCL 源码 4：通信引擎与任务执行](../ascend/hccl-source/04-comm-engines.md)。
+- 关于 AI Server 内部的完整叙事见 [大模型基础：AI Server](../model/01-landscape.md#_01-2-并行策略为什么产生通信) 与 [算力厂商加速卡专题](../device/accelerator-cards-2026.md)；HCCL 如何探测这两层拓扑，见 [HCCL 源码 4：通信引擎与任务执行](../ascend/hccl-hcomm/04-comm-engines.md)。
 
 #### 1.1 第 2 章的伏笔：逻辑环 ≠ 物理连线
 
@@ -146,7 +146,7 @@
 
 ### 2. 拓扑感知：通信库的第一课
 
-真实通信库（HCCL/NCCL）启动时都要做**拓扑探测**：识别哪些 rank 同机、经什么链路互联、有几张网卡——然后才决定算法与排布。这就是 [HCCL 源码 4](../ascend/hccl-source/04-comm-engines.md) 里"Server 内/Server 间"两套场景的由来。
+真实通信库（HCCL/NCCL）启动时都要做**拓扑探测**：识别哪些 rank 同机、经什么链路互联、有几张网卡——然后才决定算法与排布。这就是 [HCCL 源码 4](../ascend/hccl-hcomm/04-comm-engines.md) 里"Server 内/Server 间"两套场景的由来。
 
 **一个反直觉的结论**：拓扑感知排布的 flat ring，机间流量已经接近显式分层方案（下一单元）——因为贵的链路只搬"每节点一份"。所以：
 
@@ -196,7 +196,7 @@
 
 - 机间 8 人小 AllReduce：rank 少 → **Tree/RD**（轮次少）或 **Ring**（S 大时）；
 - 机内 Reduce/Broadcast：全互联高带宽 → **Tree**（层级天然匹配）或专用引擎卸载；
-- HCCL 的分级通信正是这个结构：机内/机间场景分别走不同算法与链路（见 [HCCL 源码 4](../ascend/hccl-source/04-comm-engines.md)、[HCCL 源码 5](../ascend/hccl-source/05-coll-algorithms.md)）。
+- HCCL 的分级通信正是这个结构：机内/机间场景分别走不同算法与链路（见 [HCCL 源码 4](../ascend/hccl-hcomm/04-comm-engines.md)、[HCCL 源码 5](../ascend/hccl-hcomm/05-coll-algorithms.md)）。
 
 ```text
 《集合通信》算法栈至此合龙：
@@ -233,7 +233,7 @@
 
 - 物理来源：多网卡（每卡 4/8 张 RDG/RoCE 网卡）、HCCS/NVLink 的多条 lane、网卡多队列；
 - 编排：每个 channel 独立跑一份算法（如各自一个小环），数据在 channel 间再切分——**吞吐 ≈ 单路 × channel 数**，直到物理带宽打满；
-- **代价**：每个 channel 要独立的收发缓冲与同步状态——**内存占用和调度开销随 channel 数上涨**，所以不是越多越好（HCCL 的 buffer 管理与 channel 规划见 [HCCL 源码 5](../ascend/hccl-source/05-coll-algorithms.md)）。
+- **代价**：每个 channel 要独立的收发缓冲与同步状态——**内存占用和调度开销随 channel 数上涨**，所以不是越多越好（HCCL 的 buffer 管理与 channel 规划见 [HCCL 源码 5](../ascend/hccl-hcomm/05-coll-algorithms.md)）。
 
 #### 6.1 两个旋钮的分工
 
@@ -258,7 +258,7 @@
 
 《单卡执行系统》第 7 章讲过 Stream/Event 异步执行，通信版同理（详见 [《单卡执行系统》第 7 章重叠单元](../device/07-stream-event-async.md#_07-4-重叠的艺术-让设备闲不下来)）：
 
-1. **资源独立**：通信走网卡/通信引擎，计算走 AI Core——互不抢座位（昇腾上 HCCL 可用独立引擎，见 [HCCL 源码 4](../ascend/hccl-source/04-comm-engines.md)）；
+1. **资源独立**：通信走网卡/通信引擎，计算走 AI Core——互不抢座位（昇腾上 HCCL 可用独立引擎，见 [HCCL 源码 4](../ascend/hccl-hcomm/04-comm-engines.md)）；
 2. **依赖允许**：被通信的数据已就绪（如梯度已算完），且当前计算不依赖还没到的数据；
 3. **显式编排**：要把"哪段计算配哪段通信"排进不同流，并设好同步点——不会自动发生。
 
@@ -360,7 +360,7 @@ Chunk/Channel（05-3）：拆小铺流水（单路利用率）· 多路并行（
 
 ### 11. 《集合通信》收官验收
 
-恭喜——[课程总览](../roadmap.md)《集合通信》（岗位核心）到此完成。对照验收清单：
+恭喜——[课程总览](../index.md)《集合通信》（岗位核心）到此完成。对照验收清单：
 
 - [ ] 能手工模拟 4~8 rank 的 Ring RS+AG 两阶段（[第 2 章](02-ring-allreduce.md#_02-2-第一阶段-reducescatter-轮转)）
 - [ ] 能用 α-β-γ 推导算法选型分界点，并说明 N 如何移动它（[第 3 章](03-tree-algorithms-selection.md#_03-3-选型地图-大小消息的分界线)）
@@ -368,12 +368,12 @@ Chunk/Channel（05-3）：拆小铺流水（单路利用率）· 多路并行（
 - [ ] 能解释分层为什么快、chunk/channel 各自的甜点与代价（本章）
 - [ ] 能判断一段通信"该优化算法、拓扑还是重叠"（回到 [第 1 章选型](01-collective-semantics-cost.md#_01-4-从语义到选型)）
 
-下一专栏进入 **《昇腾与 HCCL》**——建议从 [HCCL 源码学习](../ascend/hccl-source.md)开始，把本章世界观逐条对到源码；《昇腾与 HCCL》第 2 章（Runtime 与任务执行）写就后再补平台侧落地。
+下一专栏进入 **《昇腾与 HCCL》**——建议从 [HCCL 与 HCOMM 源码学习](../ascend/hccl-hcomm.md)开始，把本章世界观逐条对到源码；《昇腾与 HCCL》第 2 章（Runtime 与任务执行）写就后再补平台侧落地。
 
 ### 参考资料
 
-- [HCCL 源码 4：通信引擎与任务执行](../ascend/hccl-source/04-comm-engines.md)
-- [HCCL 源码 5：算法族与分级通信](../ascend/hccl-source/05-coll-algorithms.md)
+- [HCCL 源码 4：通信引擎与任务执行](../ascend/hccl-hcomm/04-comm-engines.md)
+- [HCCL 源码 5：算法族与分级通信](../ascend/hccl-hcomm/05-coll-algorithms.md)
 - [《单卡执行系统》第 7 章：Stream/Event 与重叠](../device/07-stream-event-async.md#_07-4-重叠的艺术-让设备闲不下来)
 - [《训练与推理系统》第 1 章：训练中的通信](../systems/01-training-loop.md#_01-4-训练显存与梯度通信)
 - [算力厂商加速卡专题（互联规格）](../device/accelerator-cards-2026.md)

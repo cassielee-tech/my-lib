@@ -1,6 +1,6 @@
 # 单元 5｜集合通信算法与 selector 选择器
 
-> 所属课程：[HCCL 源码学习](../hccl-source.md) · 第 5 单元（共 10 单元）
+> 所属课程：[HCCL 与 HCOMM 源码学习](../hccl-hcomm.md) · 第 5 单元（共 12 单元）
 > 精读对象：`src/ops/op_common/selector/`（registry + base + execute）与 `src/ops/all_reduce/selector/all_reduce_auto_selector.cc`（728 行）
 
 ::: info 本单元目标
@@ -166,7 +166,7 @@ for (auto iter : selectors) {                    // 按 priority 升序
 return HCCL_E_NOT_SUPPORT;                       // 全部 NOT_MATCH 才是错误
 ```
 
-- MC2 特例（L25~39）：`opParam.isMc2` 时**硬编码取 priority=18 的选择器**（即 AllReduce 系的 CCU 选择器）——MC2 自定义算子复用 AllReduce 的选算法逻辑（单元 9 展开）。
+- MC2 特例（L25~39）：`opParam.isMc2` 时**硬编码取 priority=18 的选择器**（即 AllReduce 系的 CCU 选择器）——MC2 自定义算子复用 AllReduce 的选算法逻辑（单元 10 展开）。
 - 由此读码技巧：**想知道某 opType 有哪些选择器，grep `REGISTER_SELECTOR_BY_OPTYPE(HcclCMDType::XXX`**。
 
 ### 10. 引擎瀑布：`AutoSelectorBase::Select`（auto_selector_base.cc:17~68）★ 核心机制
@@ -361,4 +361,4 @@ Selector() (op_common.cc:84)
 
 下一单元进入 **[6｜AllReduce 调用链走读](06-allreduce-call-chain.md)**。
 
-[返回课程导学 →](../hccl-source.md)
+[返回课程导学 →](../hccl-hcomm.md)

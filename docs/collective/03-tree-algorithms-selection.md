@@ -29,7 +29,7 @@
 
 ## 这一课在整条路线中的位置
 
-上一章 Ring 解决了大消息；本章补齐小消息的解法，并给出三族算法的统一选型框架。这也是阅读 [HCCL 源码 5](../ascend/hccl-source/05-coll-algorithms.md) 算法族对比的必备前置。
+上一章 Ring 解决了大消息；本章补齐小消息的解法，并给出三族算法的统一选型框架。这也是阅读 [HCCL 源码 5](../ascend/hccl-hcomm/05-coll-algorithms.md) 算法族对比的必备前置。
 
 ## ⚡ 速通（约 5 分钟）
 
@@ -205,7 +205,7 @@ RD 全员对称，但要求 2 的幂。另一族 log 轮次算法对**任意 N**
 
 ::: tip 工程里的 Tree：不只是"另一条路"
 1. **层级映射**：把树的"根"放在汇聚点（如节点代表网卡），上下行恰好贴合机内/机间两级拓扑——第 5 章分层算法的主角之一；
-2. **引擎卸载**：HCCL 的 Tree 族常与专用执行引擎（CPU_TS/AICPU 等，见 [HCCL 源码 4](../ascend/hccl-source/04-comm-engines.md)）绑定——小消息场景让计算核心专心算，通信交给协处理器。
+2. **引擎卸载**：HCCL 的 Tree 族常与专用执行引擎（CPU_TS/AICPU 等，见 [HCCL 源码 4](../ascend/hccl-hcomm/04-comm-engines.md)）绑定——小消息场景让计算核心专心算，通信交给协处理器。
 :::
 
 ## 03-3｜选型地图：大小消息的分界线
@@ -360,8 +360,8 @@ Tree（03-2）：上行归约 + 下行广播，2·log₂N 轮
 
 ### 参考资料
 
-- [HCCL 源码 5：算法族与选择](../ascend/hccl-source/05-coll-algorithms.md)
-- [HCCL 源码 4：通信引擎与任务执行](../ascend/hccl-source/04-comm-engines.md)
+- [HCCL 源码 5：算法族与选择](../ascend/hccl-hcomm/05-coll-algorithms.md)
+- [HCCL 源码 4：通信引擎与任务执行](../ascend/hccl-hcomm/04-comm-engines.md)
 - [NCCL 官方文档](https://docs.nvidia.com/deeplearning/nccl/user-guide/index.html)
 - [第 1 章：α-β-γ 代价模型](01-collective-semantics-cost.md#_01-3-代价模型-α、β、γ-与三本账)
 - [第 2 章：Ring 账本](02-ring-allreduce.md#_02-4-ring-的账本与变体)

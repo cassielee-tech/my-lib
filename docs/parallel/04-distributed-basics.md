@@ -39,7 +39,7 @@
 《集合通信》：这些"组"上跑的原语与算法
 ```
 
-《集合通信》第 1 章给过 Rank 与通信域的**语义视角**（谁在说话、对谁说）；本章补上**系统视角**——这些编号和分组在进程、设备与物理网络上怎么落地。HCCL 的通信域与 RankGraph（[HCCL 源码 2](../ascend/hccl-source/02-comm-domain-rank-graph.md)）正是本章概念的源码化身。
+《集合通信》第 1 章给过 Rank 与通信域的**语义视角**（谁在说话、对谁说）；本章补上**系统视角**——这些编号和分组在进程、设备与物理网络上怎么落地。HCCL 的通信域与 RankGraph（[HCCL 源码 2](../ascend/hccl-hcomm/02-control-plane.md)）正是本章概念的源码化身。
 
 ---
 
@@ -192,7 +192,7 @@ rank 7  local_rank 7              rank 15  local_rank 7
 | gloo | CPU | 调试/小规模 CPU 通信的备胎 |
 
 ::: tip 语义与实现的分工
-《集合通信》01-1 讲过"通信域"的**语义**（谁在说话、对谁说）；本章的 PG 是它在框架层的**实现**；再往下一层，HCCL 里的通信域与 RankGraph（[HCCL 源码 2](../ascend/hccl-source/02-comm-domain-rank-graph.md)）是它在通信库里的**数据结构**——同一个概念的三层化身。
+《集合通信》01-1 讲过"通信域"的**语义**（谁在说话、对谁说）；本章的 PG 是它在框架层的**实现**；再往下一层，HCCL 里的通信域与 RankGraph（[HCCL 源码 2](../ascend/hccl-hcomm/02-control-plane.md)）是它在通信库里的**数据结构**——同一个概念的三层化身。
 :::
 
 ### 4. 为什么需要子组：混合并行的身份系统
@@ -252,7 +252,7 @@ dist.init_process_group(backend="hccl")  # ③ 进组：领工号、连后端
 1. **可见性重映射**：`ASCEND_RT_VISIBLE_DEVICES=4,5` 时，进程里的"卡 0"是物理 4 号卡（回扣 [《昇腾与 HCCL》1-0](../ascend/01-runtime-task-execution.md#_1-0-host、device-与异构计算)）——排查"数据怎么跑到别的卡上了"先查这个；
 2. **一卡多进程是反模式**：两个进程绑同一张卡 = 显存翻倍 + 调度互踩，通常立刻 OOM 或性能崩塌。
 
-顺带把链路接完整：**进程（Host 单位）→ local_rank 绑卡（Device 单位）→ PG 分组（通信单位）→ 拓扑对齐（物理约束）**。HCCL 启动时做的拓扑探测与分级通信（[HCCL 源码 4](../ascend/hccl-source/04-comm-engines.md)），本质就是自动替你做本章这套对齐。
+顺带把链路接完整：**进程（Host 单位）→ local_rank 绑卡（Device 单位）→ PG 分组（通信单位）→ 拓扑对齐（物理约束）**。HCCL 启动时做的拓扑探测与分级通信（[HCCL 源码 4](../ascend/hccl-hcomm/04-comm-engines.md)），本质就是自动替你做本章这套对齐。
 
 ## 04-4｜工程实操：跑起来与排障
 
@@ -391,7 +391,7 @@ torchrun --nproc_per_node=8 demo.py
 - [PyTorch Distributed 文档](https://docs.pytorch.org/tutorials/beginner/dist_overview.html)
 - [《集合通信》01-1：Rank 与通信域（语义视角）](../collective/01-collective-semantics-cost.md#_01-1-通信的坐标系-rank、通信域与消息)
 - [《集合通信》05-1：拓扑地图](../collective/05-topology-hierarchical-overlap.md#_05-1-拓扑-通信的物理地图)
-- [HCCL 源码 2：通信域与 RankGraph](../ascend/hccl-source/02-comm-domain-rank-graph.md)
+- [HCCL 源码 2：通信域与 RankGraph](../ascend/hccl-hcomm/02-control-plane.md)
 - [CANN 常用命令速查：分布式环境与排障](../ascend/cann常用命令.md)
 
 下一章开始逐一展开六种并行策略，第一站是最经典的**数据并行与 DDP**——梯度为什么需要 AllReduce、Bucket 和通信计算重叠怎样工作，正是本章"world group 上的集体行动"。

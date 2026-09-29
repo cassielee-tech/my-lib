@@ -304,7 +304,7 @@ ZeRO-2/3（+ Offload）× DP —— 一行 wrap，云上弹性伸缩
 下一站的选择：
 
 - 补理论 → [《集合通信》](../collective/index.md)：把需求清单里的每个原语推到底；
-- 落平台 → [《昇腾与 HCCL》](../ascend/index.md)：torch_npu → HCCL 的调用链与源码（[HCCL 源码 6](../ascend/hccl-source/06-allreduce-call-chain.md) 正是 DDP 那一行 `all_reduce` 的下半生）。
+- 落平台 → [《昇腾与 HCCL》](../ascend/index.md)：torch_npu → HCCL 的调用链与源码（[HCCL 源码 6](../ascend/hccl-hcomm/06-allreduce-call-chain.md) 正是 DDP 那一行 `all_reduce` 的下半生）。
 
 ## 本章总结
 
@@ -389,7 +389,7 @@ FSDP（09-2）：Z3 的工程化身 —— 逐层"用时拼、用完还"
 - [《训练与推理系统》02 章：显存账本与 Offload](../systems/02-training-memory-compute.md#_02-1-训练显存账本-四个大件)
 - [《集合通信》04-2：ReduceScatter 的省钱逻辑](../collective/04-gather-scatter-alltoall.md#_04-2-reducescatter-规约后分着拿)
 - [《集合通信》05-4：重叠的条件与边界](../collective/05-topology-hierarchical-overlap.md#_05-4-通信计算重叠-从公式到实践)
-- [HCCL 源码 6：AllReduce 调用链](../ascend/hccl-source/06-allreduce-call-chain.md)
+- [HCCL 源码 6：AllReduce 调用链](../ascend/hccl-hcomm/06-allreduce-call-chain.md)
 
 ---
 

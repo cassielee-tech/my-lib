@@ -1,9 +1,10 @@
-# 单元 1｜软件架构：分层与对外 API
+# 单元 1｜软件架构：分层、五层 API 与两仓边界
 
-> 所属课程：[HCCL 源码学习](../hccl-source.md) · 第 1 单元（共 10 单元）
+> 所属课程：[HCCL 与 HCOMM 源码学习](../hccl-hcomm.md) · 第 1 单元（共 12 单元）
+> 精读对象：`include/hccl.h`（262 行）——L1 算子 API 的全部声明
 
 ::: info 本单元目标
-读完后，你能够画出 HCCL & HCOMM 的**三层软件结构**与**五层对外 API**，解释三个设计决策（控制面/数据面分离、dlsym 解耦、legacy 冻结）；并逐段精读 `include/hccl.h`（262 行），看清 L1 算子 API 的 C ABI 设计。
+读完后，你能够画出 HCCL & HCOMM 的**三层软件结构**与**五层对外 API（外加 CCU 引擎族）**，解释四个设计决策（分层隔离、控制面/数据面分离、dlsym 解耦、legacy 冻结）；并逐段精读 `include/hccl.h`，看清 L1 算子 API 的 C ABI 设计。
 :::
 
 ## 先记住 5 个结论
@@ -40,90 +41,82 @@
 | **HCOMM 集合通信域管理（HCCM）** | 通信域 + 拓扑管理（rank_graph）+ 资源管理 | `hcomm` 仓 `coll_communicator_mgr` |
 | **HCOMM 基础通信（base_comm）** | 基础通信资源 + 通信原语执行 | `hcomm` 仓 `base_comm` |
 
-对应到 HCOMM 仓库的目标目录（读码时对照）：
-
-```text
-hcomm/src
-├── base_comm/                  # 基础通信层
-│   ├── common/                 #   公共基础功能
-│   ├── primitives/             #   通信原语（数据面）
-│   └── resource/               #   通信资源（Endpoint/Channel/CommMem）
-├── coll_communicator_mgr/      # 集合通信域管理
-│   ├── api_c_adpt/             #   C 接口适配
-│   ├── communicator/           #   通信域
-│   ├── rank_graph/             #   拓扑管理（控制面核心）
-│   ├── config_mgr/  resource_mgr/  dfx/  common/
-└── legacy/                     # 历史版本兼容（A2&A3、A5 旧流程），不持续演进
-```
+hcomm 仓两大模块的内部目录（`communicator/`、`rank_graph/`、`primitives/`、`resources/hccp/` 等）已在单元 0 的仓库地图里展开，此处不再重复。
 
 ::: tip 判断代码归属的口诀
 **"选算法"在 HCCL，"建连接"在 HCOMM。** 看到一个 `.cc` 文件，先问它在回答哪个问题：是"这次 AllReduce 用 Ring 还是 NHR"（HCCL），还是"这两个 rank 之间能建什么链"（HCOMM）。
 :::
 
-### 3. 五层对外 API
+### 3. 六族对外 API：五层 + CCU 引擎族
 
 分层不是内部洁癖，而是直接决定了对外暴露的接口层次：
 
 ![HCCL & HCOMM 对外接口分层：L1 算子 / L2 通信域与拓扑资源 / L3 原语与资源（图源：HCCL 官方文档）](/images/cann/hccl/official/hccl-hcomm-api.svg)
 
-| 层次 | 接口（头文件） | 面向 | 职责 |
-| --- | --- | --- | --- |
-| **L1** | HCCL 算子（`hccl.h`） | AI 框架适配层 | AllReduce 等标准集合通信算子入口 |
-| **L2-comm** | HCOMM 通信域（`hccl_comm.h`） | 框架适配层 | 通信域创建/销毁/子域切分 |
-| **L2-res** | HCOMM 拓扑与资源（`hccl_res.h` / `hccl_rank_graph.h`） | 算子开发者 | 拓扑查询，Thread/Channel 等资源获取 |
-| **L3-prim** | HCOMM 通信原语（`hcomm_primitives.h`） | 算子/通信库开发者 | Write/Read/Reduce + Notify |
-| **L3-res** | HCOMM 基础资源（`hcomm_res.h`） | 通信库开发者 | 通信设备/通道/内存资源的管理 |
+| 层次 | 接口（头文件族） | 仓 | 面向 | 职责 |
+| --- | --- | --- | --- | --- |
+| **L1** | HCCL 算子（`hccl.h`） | hccl | AI 框架适配层 | AllReduce 等标准集合通信算子入口 |
+| **L2-comm** | HCOMM 通信域（`hccl/hccl_comm.h`） | hcomm | 框架适配层 | 通信域创建/销毁/子域切分 |
+| **L2-res** | HCOMM 拓扑与资源（`hccl/hccl_res.h`、`hccl/hccl_rank_graph.h`、`hccl/hccl_channel.h`） | hcomm | 算子开发者 | 拓扑查询，Thread/Channel 等资源获取 |
+| **L3-prim** | HCOMM 通信原语（`hcomm_primitives.h`） | hcomm | 算子/通信库开发者 | Write/Read/Reduce + Notify |
+| **L3-res** | HCOMM 基础资源（`hcomm_res.h`、`hcomm_channel.h`） | hcomm | 通信库开发者 | 通信设备/通道/内存资源的管理 |
+| **引擎专用** | CCU C++ 接口（`ccu/*.hpp`：`ccu_primitives.hpp`、`ccu_buffer.hpp`、`ccu_variable.hpp`、`ccu_loop.hpp`…） | hcomm | CCU 算子开发者 | 片上缓存、寄存器等 CCU 资源的 C++ 抽象（单元 4） |
+
+**接口前缀就是层级身份证**：`hccl.h` 是 L1；`hccl/*.h` 前缀是 L2（注意与 hccl 仓的 `hccl.h` 区分——L2 头文件全部位于 hcomm 仓）；`hcomm_*.h` 前缀是 L3；`ccu/*.hpp` 是 CCU 引擎的专属世界，与 C 风格完全不同的 C++ 资源抽象。读码起点建议：**先读头文件、再进源码**——`hccl_comm.h` 里能数出建域接口的全家族，`hcomm_primitives.h` 里躺着数据面的全部"动词"。
 
 两个官方强调的组合，直接对应两类开发者：
 
-- **L2-res（rank_graph）+ L3-prim = 自定义通信算子开发接口**：你可以查拓扑、拿通道，然后用自己的编排调用搬运与同步原语——这就是 `examples/04_custom_ops_p2p`、`05_custom_ops_allgather` 的玩法（单元 9 实战）；
+- **L2-res（rank_graph）+ L3-prim = 自定义通信算子开发接口**：你可以查拓扑、拿通道，然后用自己的编排调用搬运与同步原语——这就是 `examples/04_custom_ops_p2p`、`05_custom_ops_allgather` 的玩法（单元 9～11 展开）；
 - **L3-res + L3-prim = 通信库开发接口**：面向要自己写一个"HCCL"的场景。
 
 ::: warning 位置澄清
 L2/L3 的头文件与通信域接口位于 [hcomm 仓库](https://gitcode.com/cann/hcomm)，不要在 hccl 仓里找 `hccl_comm.h`。HCCL 仓的 `include/hccl.h` 只有 L1 算子 API。
 :::
 
-### 4. 三条架构约束
+### 4. 四条架构硬约束
 
-`architecture-brief.md` 末尾给出四条约束，其中三条最值得在读码前记住：
+官方 `architecture-brief.md` 给出的架构约束，改动 `src/` 前逐条自查：
 
-**4.1 分层依赖方向**：上层依赖下层，**禁止反向依赖**：
+| 约束 | 内容 | 读码/改动时的用途 |
+| --- | --- | --- |
+| **依赖单向** | 上层依赖下层，禁止反向 | 在下层看到上层符号 → 要么理解错了，要么去 `legacy/` 找线索 |
+| **控制面/数据面分离** | 资源管理与数据搬运的接口独立演进 | 数据面可以按极致性能优化（单元 3 只剩几个"动词"） |
+| **dlsym 跨仓解耦** | HCCL 不得 `#include` HCOMM 私有头，跨仓调用一律走 `src/common/hcomm_dlsym/` 符号表 | 两仓独立编译、独立发版（单元 8 精读） |
+| **四段式 + legacy 冻结** | 新算子必须落 `src/ops/<op>/` 标准四段式；`legacy/` 不承接新特性 | 目录结构即架构（单元 0 地图） |
+
+**4.1 分层依赖方向**（约束一的代码形态）：
 
 ```text
 base_comm ✗→ coll_communicator_mgr   （基础层不能回头找管理层）
 coll_communicator_mgr / base_comm ✗→ coll_comm_ops（管理层/基础层不能依赖算子层）
 ```
 
-读码时的用途：在 `base_comm` 里看到引用上层符号，要么是理解错了，要么是历史遗留（去 `legacy/` 找线索）。
-
-**4.2 控制面 / 数据面分离**：
+**4.2 控制面 / 数据面分离**（约束二的两个平面）：
 
 | 平面 | 内容 | 特点 |
 | --- | --- | --- |
 | **控制面** | 资源管理、拓扑查询 | 建域/建链时执行，频率低 |
 | **数据面** | Write / Read / Reduce / Notify | 通信热路径，频率极高 |
 
-分离的价值：数据面接口可以按极致性能优化（单元 3 会看到它只剩几个"动词"），而不用拖着资源管理的复杂度。
+分离的价值：数据面接口可以按极致性能优化，而不用拖着资源管理的复杂度。
 
-**4.3 dlsym 动态加载解耦**：HCCL 算子层**编译期不链接 HCOMM**，运行时通过 `dlsym` 动态加载其接口（对应 `src/common/hcomm_dlsym`，单元 8 精读）。好处：两仓独立编译、独立版本演进，发布节奏互不阻塞；HCOMM 不在时 HCCL 仍可完成编译检查。
-
-第四条约束（legacy 不持续演进）在单元 0 已说明，读码时把 `legacy/` 当"博物馆"即可。
+**4.3 dlsym 动态加载解耦**（约束三的机制）：HCCL 算子层**编译期不链接 HCOMM**，运行时通过 `dlsym` 动态加载其接口（对应 `src/common/hcomm_dlsym`，单元 8 精读）。好处：两仓独立编译、独立版本演进，发布节奏互不阻塞；HCOMM 不在时 HCCL 仍可完成编译检查。
 
 ### 5. 用这张分层图重看仓库地图
 
-把单元 0 的地图按本单元视角重新标注：
+把单元 0 的双仓地图按本单元视角重新标注：
 
 ```text
 你调用的 API            HcclAllReduce(...)                 ← L1
-                        │
+                         │
 HCCL 算子层             all_reduce_op.cc → selector        ← "用哪个算法/引擎"
 （hccl 仓 src/ops）     template → executor                 ← "把算法执行出来"
-                        │  dlsym 动态加载
+                         │  dlsym 动态加载
 HCOMM 域管理层          communicator / rank_graph           ← 建域、查拓扑（控制面）
 （hcomm 仓）            │
 HCOMM 基础通信层        primitives: Write/Read/Notify       ← 数据面
-                        resource: Endpoint/Channel/Mem      ← 资源
-                        │
+                         resource: Endpoint/Channel/Mem      ← 资源
+                         │
 硬件                    RoCE 网卡 / SDMA / UB / CCU …
 ```
 
@@ -204,8 +197,8 @@ extern HcclResult HcclAllReduce(
 ## 6. 自测题
 
 1. 三层软件结构分别叫什么，各自职责一句话？
-2. L2-res + L3-prim 组合面向谁？L3-res + L3-prim 又面向谁？
-3. 为什么 `base_comm` 不允许依赖 `coll_communicator_mgr`？
+2. 六族对外 API 各自的头文件前缀是什么？L2-res + L3-prim 组合面向谁？
+3. 四条架构硬约束分别是什么？违反依赖单向的代码可能出现在哪个目录？
 4. HCCL 与 HCOMM 是怎样做到独立编译、独立发版的？
 5. 为什么 `HcclAllReduce` 的 `count` 用元素个数而不是字节数？
 6. 如果框架同时发起两个 AllReduce 到同一个 stream，执行顺序如何保证？
@@ -213,8 +206,8 @@ extern HcclResult HcclAllReduce(
 ::: details 自测答案
 
 1. HCCL 集合通信算子层（算子入口→算法选择→执行）；HCOMM 集合通信域管理层（通信域、拓扑、资源管理）；HCOMM 基础通信层（基础资源与通信原语执行）。
-2. L2-res + L3-prim 是自定义通信算子开发接口（查拓扑拿资源 + 用原语编排数据搬运）；L3-res + L3-prim 是通信库开发接口（面向自研集合通信库）。
-3. 保持依赖方向单向。基础层反向依赖管理层会让上层演进被下层锁死，分层失去意义；这类依赖只允许出现在 legacy 兼容代码中。
+2. `hccl.h`（L1，hccl 仓）、`hccl/*.h`（L2）、`hcomm_*.h`（L3）、`ccu/*.hpp`（CCU 引擎专用），后三族均在 hcomm 仓。L2-res + L3-prim 是自定义通信算子开发接口（查拓扑拿资源 + 用原语编排数据搬运）；L3-res + L3-prim 是通信库开发接口（面向自研集合通信库）。
+3. 依赖单向、控制面/数据面分离、dlsym 跨仓解耦、四段式 + legacy 冻结。违反依赖方向的代码只允许出现在 legacy 兼容目录中。
 4. HCCL 通过 dlsym 在运行时动态加载 HCOMM 接口（src/common/hcomm_dlsym），编译期不链接，因此两仓可独立编译与版本演进。
 5. dataType 决定单元素宽度，算子语义以元素为单位；换算成字节数是执行层的职责（单元 6 的 `FillAllReduceOpParam` 里 `count × DATATYPE_SIZE_TABLE[dataType]`）。
 6. stream 语义 = 顺序执行队列，同 stream 上的任务按提交顺序执行——这是异步语义的正确性基础。
@@ -224,10 +217,10 @@ extern HcclResult HcclAllReduce(
 ## 本单元小结
 
 - **三层**：算子层（hccl 仓）→ 域管理层 → 基础通信层（hcomm 仓）；
-- **五层 API**：L1 算子 / L2 通信域 / L2 拓扑资源 / L3 原语 / L3 基础资源，组合出"自定义算子"与"通信库"两条开发路线；
-- **约束**：依赖单向、控制面/数据面分离、dlsym 解耦、legacy 冻结；
+- **六族 API**：L1 算子 / L2 通信域 / L2 拓扑资源 / L3 原语 / L3 基础资源 + CCU 引擎族，组合出"自定义算子"与"通信库"两条开发路线——前缀即层级身份证；
+- **约束**：依赖单向、控制面/数据面分离、dlsym 解耦、四段式 + legacy 冻结；
 - **L1 精读**：`hccl.h` 是纯 C ABI 的 14 个原语，统一签名模式预示实现侧有统一的校验与分发层；
-- **读码地图**：从此看任何文件，先定位它在哪一层、属于哪个平面。
+- **读码地图**：从此看任何文件，先定位它在哪一层、属于哪个平面、头文件前缀是哪一族。
 
 ## 参考资料
 
@@ -237,6 +230,6 @@ extern HcclResult HcclAllReduce(
 
 ---
 
-下一单元进入 **[2｜通信域、Rank 与 RankGraph](02-comm-domain-rank-graph.md)**。
+下一单元进入 **[2｜控制面：通信域的一生](02-control-plane.md)**。
 
-[返回课程导学 →](../hccl-source.md)
+[返回课程导学 →](../hccl-hcomm.md)

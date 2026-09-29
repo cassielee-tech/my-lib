@@ -1,6 +1,6 @@
 # 单元 6｜AllReduce 调用链走读
 
-> 所属课程：[HCCL 源码学习](../hccl-source.md) · 第 6 单元（共 10 单元）
+> 所属课程：[HCCL 与 HCOMM 源码学习](../hccl-hcomm.md) · 第 6 单元（共 12 单元）
 > 精读对象：`src/ops/all_reduce/all_reduce_op.cc`（281 行）+ `all_reduce_op.h`
 
 ::: info 本单元目标
@@ -51,7 +51,7 @@ HcclCommDestroy(comm);
 三个读码要点：
 
 - **异步语义**：`HcclAllReduce` 把任务挂到 Stream 就返回，完成靠 `aclrtSynchronizeStream`——这就是"通信与计算可重叠"的机制根源；
-- **建域方式有三种**：rank table 文件（`HcclCommInitClusterInfo`）、root 信息（`HcclCommInitRootInfo`）、单机批量（`HcclCommInitAll`），另可用 `HcclCreateSubCommConfig` 切子域；
+- **建域方式有三种**：rank table 文件（`HcclCommInitClusterInfo`）、root 信息（`HcclCommInitRootInfo`）、单机批量（`HcclCommInitAll`），另可用 `HcclCreateSubCommConfig` 切子域（三种姿势的样例与选型见单元 11 的建域三式）；
 - **每个 rank 只能有一个输入**（AllReduce 语义约束），reduce op 支持 sum/prod/max/min。
 
 ### 2. 官方约束（集成时的高频坑）
@@ -347,4 +347,4 @@ if (forceLog || GetExternalInputHcclEnableEntryLog()) {   // 环境变量开关
 
 下一单元进入 **[7｜executor 与 template：执行机制](07-executor-template.md)**。
 
-[返回课程导学 →](../hccl-source.md)
+[返回课程导学 →](../hccl-hcomm.md)

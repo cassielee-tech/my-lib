@@ -1,16 +1,16 @@
-# 第 0 章（HCCL）｜从 PyTorch 走向 HCCL
+# 第 2 章｜从 PyTorch 走向 HCCL
 
 > 本章目标：打通 `torch.distributed` → torch_npu → HCCL 的完整调用链——说清 torch_npu 作为"桥"注册了什么、ProcessGroup 抽象怎样把框架的通信请求交给 HCCL、Stream/Notify 怎样桥接两个世界；最终能独立追踪一次 `dist.all_reduce` 从 Python 到通信库入口的每一步。
 
 ## 本章导学
 
 ::: tip 本章只记住 3 件事
-1. **torch_npu 是一座三件套的桥**：注册 `npu` 设备（`.npu()`）、把 aten 算子映射到 aclnn 两段式（计算路径）、提供 `torch.npu.Stream/Event` 与 Runtime 的对应（异步路径）——第 0 章（昇腾）分层图里那一层的放大。
+1. **torch_npu 是一座三件套的桥**：注册 `npu` 设备（`.npu()`）、把 aten 算子映射到 aclnn 两段式（计算路径）、提供 `torch.npu.Stream/Event` 与 Runtime 的对应（异步路径）——[第 0 章](00-ascend-cann.md)分层图里那一层的放大。
 2. **ProcessGroup 是通信的门面**：`init_process_group(backend="hccl")` 创建 `ProcessGroupHCCL`，其内部建立 HCCL 通信域（HcclComm）；`dist.all_reduce` 沿 Python → c10d → ProcessGroupHCCL 下降到 HCCL 入口。
 3. **Stream 是两个世界的缝合线**：框架把当前流（或专用通信流）传给 HCCL，集合通信任务挂上流异步执行——"下发 ≠ 执行"与重叠编排都建立在这条线上。
 :::
 
-**学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**。本章是全课程主线的收官——把 [《并行策略》](../parallel/index.md)的需求侧与 [HCCL 源码学习](hccl-source.md)的供给侧缝成一条完整链路。
+**学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**。本章是全课程主线的收官——把 [《并行策略》](../parallel/index.md)的需求侧与 [HCCL 与 HCOMM 源码学习](hccl-hcomm.md)的供给侧缝成一条完整链路。
 
 - [ ] 我能画出 `y = a + b`（npu tensor）从 Python 到 aclnn 的路径
 - [ ] 我能说出 `init_process_group` 到 `HcclComm` 建立之间发生了什么
@@ -35,7 +35,7 @@
 HCCL 源码 6：AllReduce 在通信库内部的下潜（供给侧）
 ```
 
-模型视角的同一条链在 [《模型全景》01-3：从 PyTorch 调用到 HCCL](../model/01-landscape.md#_01-3-从-pytorch-调用到-hccl)——本章是它的工程完全体；读完后，[HCCL 源码 6 调用链走读](hccl-source/06-allreduce-call-chain.md) 的入口就亮了。
+模型视角的同一条链在 [《模型全景》01-3：从 PyTorch 调用到 HCCL](../model/01-landscape.md#_01-3-从-pytorch-调用到-hccl)——本章是它的工程完全体；读完后，[HCCL 源码 6 调用链走读](hccl-hcomm/06-allreduce-call-chain.md) 的入口就亮了。
 
 ---
 
@@ -148,7 +148,7 @@ AI Core 执行
 ### 先记住 3 个结论
 
 1. **四层结构**：Python API（`dist.*`）→ c10d 前端 → **ProcessGroup 抽象** → 后端实现（`ProcessGroupHCCL`）——抽象层让同一份训练代码跑在 NCCL/HCCL/Gloo 上。
-2. **init 三步**：rendezvous（人齐）→ 创建 ProcessGroupHCCL → 内部 `HcclCommInitCluster` 建立通信域（[HCCL 源码 2](hccl-source/02-comm-domain-rank-graph.md) 的框架侧入口）。
+2. **init 三步**：rendezvous（人齐）→ 创建 ProcessGroupHCCL → 内部 `HcclCommInitCluster` 建立通信域（[HCCL 源码 2](hccl-hcomm/02-control-plane.md) 的框架侧入口）。
 3. **下降路径**：`dist.all_reduce` → `ProcessGroupHCCL::allreduce`（取流、检查）→ HCCL 集合通信接口——框架只决定"何时、对谁、在哪个流"，"怎么跑"全权交给 HCCL。
 
 ### 1. 为什么需要一层门面
@@ -177,7 +177,7 @@ dist.init_process_group(backend="hccl", init_method="env://")
 
 1. **Rendezvous**：按 `MASTER_ADDR/PORT`（env://）签到，确定 rank/world_size——[《并行策略》04-1](../parallel/04-distributed-basics.md#_04-1-从进程到-rank-人口登记) 的"人口登记"；
 2. **构造 ProcessGroupHCCL**：注册表解析 backend 字符串，创建后端实例；
-3. **建立通信域**：ProcessGroupHCCL 内部调用 HCCL 的初始化接口（`HcclCommInitCluster` 一族），为这个 PG 建立 **HcclCommunicator**——rank、world_size、成员关系在此固化（源码视角见 [HCCL 源码 2：通信域与 RankGraph](hccl-source/02-comm-domain-rank-graph.md)）。
+3. **建立通信域**：ProcessGroupHCCL 内部调用 HCCL 的初始化接口（`HcclCommInitCluster` 一族），为这个 PG 建立 **HcclCommunicator**——rank、world_size、成员关系在此固化（源码视角见 [HCCL 源码 2：通信域与 RankGraph](hccl-hcomm/02-control-plane.md)）。
 
 `dist.new_group(ranks=[...])` 重复第 2、3 步——**一个子 PG 对应一个 HCCL 通信域**，`group=` 参数最终路由到对应的 communicator。
 
@@ -226,7 +226,7 @@ HcclAllReduce(dst, src, count, dtype, op, comm, stream)   # HCCL 入口
 
 - [PyTorch Distributed 文档](https://docs.pytorch.org/tutorials/beginner/dist_overview.html)
 - [《并行策略》04-2：通信域（语义视角）](../parallel/04-distributed-basics.md#_04-2-通信域-谁和谁是一伙的)
-- [HCCL 源码 2：通信域与 RankGraph](hccl-source/02-comm-domain-rank-graph.md)
+- [HCCL 源码 2：通信域与 RankGraph](hccl-hcomm/02-control-plane.md)
 
 ---
 
@@ -241,7 +241,7 @@ HcclAllReduce(dst, src, count, dtype, op, comm, stream)   # HCCL 入口
 ### 先记住 3 个结论
 
 1. **流是缝合线**：`torch.npu.Stream` 底层就是 `aclrtStream`（[第 1 章 1-2](01-runtime-task-execution.md#_1-2-stream、event、task-与异步执行)）——ProcessGroupHCCL 把流对象原样传给 HCCL，通信任务挂上这条队列异步执行。
-2. **两层同步，各管各的**：框架的 `Event`（record/wait）编排**计算流之间**的依赖；HCCL 内部的 **Notify**（[HCCL 源码 3](hccl-source/03-primitives-and-sync.md)）负责**设备间通信的握手**——名字不同、层次不同。
+2. **两层同步，各管各的**：框架的 `Event`（record/wait）编排**计算流之间**的依赖；HCCL 内部的 **Notify**（[HCCL 源码 3](hccl-hcomm/03-data-plane.md)）负责**设备间通信的握手**——名字不同、层次不同。
 3. **重叠闭环三方各出一块**：框架分流（计算流/通信流）、通信库挂流（不占计算单元）、硬件并行（链路与 AI Core 独立）——缺一环都重不起来。
 
 ### 1. 流的传递：一条线穿三层
@@ -279,7 +279,7 @@ DDP 的选择是后者：反向 hook 触发时把桶的 AllReduce 发到通信�
                                    └ HCCL 内部：各 rank 的 Notify 握手 → 数据交换
 ```
 
-外圈（Event）是框架看得见的编排；内圈（Notify）是 HCCL 在设备侧让 N 个 rank 步调一致的机制（[HCCL 源码 3](hccl-source/03-primitives-and-sync.md)）——**外圈管"什么时候能开始"，内圈管"大家到齐没有"**。
+外圈（Event）是框架看得见的编排；内圈（Notify）是 HCCL 在设备侧让 N 个 rank 步调一致的机制（[HCCL 源码 3](hccl-hcomm/03-data-plane.md)）——**外圈管"什么时候能开始"，内圈管"大家到齐没有"**。
 
 ### 3. 自测题
 
@@ -311,7 +311,7 @@ DDP 的选择是后者：反向 hook 触发时把桶的 AllReduce 发到通信�
 
 - [第 1 章 1-2：Stream、Event 与异步执行](01-runtime-task-execution.md#_1-2-stream、event、task-与异步执行)
 - [《单卡执行系统》07-4：重叠的艺术](../device/07-stream-event-async.md#_07-4-重叠的艺术-让设备闲不下来)
-- [HCCL 源码 3：通信原语与同步机制](hccl-source/03-primitives-and-sync.md)
+- [HCCL 源码 3：通信原语与同步机制](hccl-hcomm/03-data-plane.md)
 
 ---
 
@@ -327,7 +327,7 @@ DDP 的选择是后者：反向 hook 触发时把桶的 AllReduce 发到通信�
 
 1. **旅程六站**：DDP hook 触发 → `dist.all_reduce` → ProcessGroupHCCL（检查+取流）→ `HcclAllReduce` 入口 → HCCL 内部（选算法→编排→传输）→ 任务挂流异步返回。
 2. **每层只做自己的事**：框架管时机与对象、门面管检查与取流、HCCL 管执行——追踪调用链的过程就是反复问"这一步是谁的职责"。
-3. **本章止步于入口**：入口之后的 selector/executor/template/Transport 下潜，全部属于 [HCCL 源码学习](hccl-source.md)（单元 5/6）。
+3. **本章止步于入口**：入口之后的 selector/executor/template/Transport 下潜，全部属于 [HCCL 与 HCOMM 源码学习](hccl-hcomm.md)（单元 5/6）。
 
 ### 1. 总装：六站时序
 
@@ -362,10 +362,10 @@ DDP 的选择是后者：反向 hook 触发时把桶的 AllReduce 发到通信�
 | --- | --- |
 | torch_npu 适配层、ProcessGroupHCCL | torch_npu 仓库（[框架适配](https://www.hiascend.com/cn/developer/software/ai-frameworks/pytorch)） |
 | HCCL 公开 API（HcclAllReduce 等） | [HCCL API 文档](https://www.hiascend.com/document/detail/en/CANNCommunityEdition/900/API/hcclug/hcclcpp_07_0001.html) |
-| 入口之后的下潜 | **[HCCL 源码 6：AllReduce 调用链走读](hccl-source/06-allreduce-call-chain.md)** |
-| 算法选择的依据 | [HCCL 源码 5：集合通信算法与代价模型](hccl-source/05-coll-algorithms.md) |
-| 通信域与 RankGraph | [HCCL 源码 2](hccl-source/02-comm-domain-rank-graph.md) |
-| 引擎与执行 | [HCCL 源码 4](hccl-source/04-comm-engines.md) |
+| 入口之后的下潜 | **[HCCL 源码 6：AllReduce 调用链走读](hccl-hcomm/06-allreduce-call-chain.md)** |
+| 算法选择的依据 | [HCCL 源码 5：集合通信算法与代价模型](hccl-hcomm/05-coll-algorithms.md) |
+| 通信域与 RankGraph | [HCCL 源码 2](hccl-hcomm/02-control-plane.md) |
+| 引擎与执行 | [HCCL 源码 4](hccl-hcomm/04-comm-engines.md) |
 
 ### 3. 自测题
 
@@ -396,7 +396,7 @@ DDP 的选择是后者：反向 hook 触发时把桶的 AllReduce 发到通信�
 ### 参考资料
 
 - [HCCL 官方 API 文档](https://www.hiascend.com/document/detail/en/CANNCommunityEdition/900/API/hcclug/hcclcpp_07_0001.html)
-- [HCCL 源码 6：AllReduce 调用链走读](hccl-source/06-allreduce-call-chain.md)
+- [HCCL 源码 6：AllReduce 调用链走读](hccl-hcomm/06-allreduce-call-chain.md)
 - [《并行策略》05-3：Bucket 分桶](../parallel/05-ddp.md#_05-3-bucket-分桶的艺术)
 
 ---
@@ -457,7 +457,7 @@ DDP 的选择是后者：反向 hook 触发时把桶的 AllReduce 发到通信�
 
 下一步的三个方向：
 
-1. **下潜源码**：[HCCL 源码学习](hccl-source.md)——从单元 0 仓库地图开始，单元 6 承接本章的第四站；进阶配套 [HCOMM 源码学习](hcomm-source.md)——底座深潜与自定义通信算子开发；
+1. **下潜源码**：[HCCL 与 HCOMM 源码学习](hccl-hcomm.md)——从单元 0 双仓地图开始，单元 6 承接本章的第四站，单元 9～11 进阶到自定义通信算子开发；
 2. **补齐平台**：[第 4-6 章](index.md)（Ascend C 算子开发，二梯队）——进入引擎 template 开发时回读；
 3. **回望理论**：带着调用链的具体问题回读 [《集合通信》](../collective/index.md)（例如"selector 在哪一步用到了 α-β-γ"）。
 

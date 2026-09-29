@@ -346,7 +346,7 @@ Python 代码 → torch_npu → 算子映射 → GE 优化 → 毕昇编译 → 
 2. HCCL 组织数据交换，Reduce 类操作最终要靠设备侧的计算与搬运单元完成规约（呼应上一单元的 AI Core 数据流）；
 3. 通信任务与计算任务通过 Runtime 的 **Stream / Event / Notify** 协同——第 1 章将展开这些概念。
 
-至此，第 0 章（HCCL）"从 PyTorch 走向 HCCL"的每个环节都在本单元露过面了。
+至此，[第 2 章](02-pytorch-to-hccl.md)"从 PyTorch 走向 HCCL"的每个环节都在本单元露过面了。
 
 ### 7. 自测题
 

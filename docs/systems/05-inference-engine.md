@@ -37,7 +37,7 @@
 第 6 章：调度与指标——TTFT/TPOT 的制约与 PD 分离
 ```
 
-对 HCCL 岗位而言，推理是通信需求的**另一半场景**：多卡推理的逐层集合通信、PD 分离的大块 KV 传输，与训练通信互补（[《集合通信》](../collective/index.md)与 [HCCL 源码 4](../ascend/hccl-source/04-comm-engines.md) 的推理侧战场）。
+对 HCCL 岗位而言，推理是通信需求的**另一半场景**：多卡推理的逐层集合通信、PD 分离的大块 KV 传输，与训练通信互补（[《集合通信》](../collective/index.md)与 [HCCL 源码 4](../ascend/hccl-hcomm/04-comm-engines.md) 的推理侧战场）。
 
 ---
 
@@ -275,7 +275,7 @@ req A（2K）: 128 个物理块，紧凑排布 → 浪费 < 块大小的尾数�
 | **EP 推理（MoE）** | 每层 dispatch/combine 的 AlltoAll | [《集合通信》04-4](../collective/04-gather-scatter-alltoall.md#_04-4-moe-的-alltoall-为什么难) |
 | **PD 分离的 KV 传输** | Prefill→Decode 实例间大块 P2P | [第 6 章](06-pd-scheduling.md)（下一章主角） |
 
-值得先记的一个差异：**训练的通信"大而低频"（梯度 AllReduce），推理的 Decode 通信"小而高频、延迟敏感"**——每生成一个 token 就要过一遍每层通信，任何一次通信的微秒级抖动都直接累积进每个字的延迟（[第 3 章 03-4](03-inference-kv-cache.md#_03-4-推理指标、服务与通信) 的伏笔）。这正是推理成为通信库另一半主战场的原因——算法选择、拓扑贴合的要求与训练侧同源（[HCCL 源码 5](../ascend/hccl-source/05-coll-algorithms.md)）。
+值得先记的一个差异：**训练的通信"大而低频"（梯度 AllReduce），推理的 Decode 通信"小而高频、延迟敏感"**——每生成一个 token 就要过一遍每层通信，任何一次通信的微秒级抖动都直接累积进每个字的延迟（[第 3 章 03-4](03-inference-kv-cache.md#_03-4-推理指标、服务与通信) 的伏笔）。这正是推理成为通信库另一半主战场的原因——算法选择、拓扑贴合的要求与训练侧同源（[HCCL 源码 5](../ascend/hccl-hcomm/05-coll-algorithms.md)）。
 
 ::: tip 本章收束
 推理引擎三件套到此集齐：**调度器**（连续批：批活起来）+ **显存管理器**（分页 + 前缀复用：装得下、算得少）+ **执行器**（多卡通信：挂回主线）。下一章把镜头对准"指标"——TTFT、TPOT 与吞吐的三角制约，以及它的终局解法 PD 分离。

@@ -1,6 +1,6 @@
 # 单元 7｜executor 与 template：执行机制
 
-> 所属课程：[HCCL 源码学习](../hccl-source.md) · 第 7 单元（共 10 单元）
+> 所属课程：[HCCL 与 HCOMM 源码学习](../hccl-hcomm.md) · 第 7 单元（共 12 单元）
 > 精读对象：`src/ops/op_common/executor/`（registry + base + HcclExecOp 总控）、`src/ops/all_reduce/executor/`（13 个执行器）、`src/ops/op_common/template/`（基类 + 数据结构 + wrapper）与 `src/ops/all_reduce/template/{aicpu,aiv,ccu}/`
 
 ::: info 本单元目标
@@ -335,7 +335,7 @@ InsTempReduceScatterMesh1DIntra::KernelRun
  └─ (64bit/PROD) HcommBatchMode + ThreadJoin       特殊类型软件排序
 ```
 
-至此主线闭环：**API（单元 1）→ op 入口（单元 6）→ selector 选名（单元 5）→ executor 组装（本单元）→ template 落到 Hcomm 原语（本单元）**。剩下两个单元往支撑系统与扩展走：资源地基与 dlsym 解耦（单元 8）、MC2 扩展框架（单元 9）。
+至此主线闭环：**API（单元 1）→ op 入口（单元 6）→ selector 选名（单元 5）→ executor 组装（本单元）→ template 落到 Hcomm 原语（本单元）**。剩下三个单元往扩展走：资源地基与 dlsym 解耦（单元 8），然后转入自定义算子开发——七步流程（单元 9）、MC2 扩展框架（单元 10）。
 
 ## 14. 思考题
 
@@ -374,4 +374,4 @@ InsTempReduceScatterMesh1DIntra::KernelRun
 
 下一单元进入 **[8｜资源地基与 dlsym 解耦](08-resources-dlsym.md)**。
 
-[返回课程导学 →](../hccl-source.md)
+[返回课程导学 →](../hccl-hcomm.md)

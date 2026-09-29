@@ -249,7 +249,7 @@ PD 分离把推理通信从"每层小消息集合通信"（TP/EP 推理）扩展
 
 三行结论：
 
-1. **Decode 的 TP 通信与训练 TP 同构**，但消息更小、频率更高——训练里"够快"的算法（如 Ring）在 Decode 的 5 ms 步预算里可能太慢，小消息算法（低轮次的 Tree 族）反而合适（[HCCL 源码 5](../ascend/hccl-source/05-coll-algorithms.md) 的选型维度）；
+1. **Decode 的 TP 通信与训练 TP 同构**，但消息更小、频率更高——训练里"够快"的算法（如 Ring）在 Decode 的 5 ms 步预算里可能太慢，小消息算法（低轮次的 Tree 族）反而合适（[HCCL 源码 5](../ascend/hccl-hcomm/05-coll-algorithms.md) 的选型维度）；
 2. **PD 的 KV 传输是新增形态**——大块、点对点、延迟宽容但带宽饥渴，正好落在机间高速链路（分层传输）的甜区（[《集合通信》05 章](../collective/05-topology-hierarchical-overlap.md#_05-2-分层算法-先内后外)的分层思想）；
 3. **重叠逻辑两处成立**：KV 传输与后续请求 Prefill 并行、Decode 通信与算子执行交叠（[《单卡执行系统》07-4](../device/07-stream-event-async.md#_07-4-重叠的艺术-让设备闲不下来) 的三条件不变）。
 

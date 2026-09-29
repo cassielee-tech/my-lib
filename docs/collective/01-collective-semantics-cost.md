@@ -206,7 +206,7 @@ AllReduce = ReduceScatter    + AllGather     （先分头规约，再拼完整�
 围绕 **α-β-γ 代价模型** 建立一条可以复述的因果链。读完后，尝试不看正文用一句话解释它。
 :::
 
-语义回答"传什么"，代价模型回答"多久"。它与 [HCCL 源码 5](../ascend/hccl-source/05-coll-algorithms.md) 的代价模型是同一套思想。
+语义回答"传什么"，代价模型回答"多久"。它与 [HCCL 源码 5](../ascend/hccl-hcomm/05-coll-algorithms.md) 的代价模型是同一套思想。
 
 ### 5. 一条公式三本账
 
@@ -286,7 +286,7 @@ Roofline 是"单算子三本账"（FLOPs/Bytes/峰值），本模型是"通信�
 2. **rank 数 N**：轮次项随 N 增长的速度不同（Ring 是 O(N)，Tree/RD 是 O(log N)）；
 3. **拓扑**：机内/机间带宽差一个量级，非对称拓扑改变一切（第 5 章）。
 
-这三张牌怎么打，正是第 2-3 章的全部内容；而通信库把这套决策自动化，就是 HCCL 里 **selector** 模块的工作（[HCCL 源码 5](../ascend/hccl-source/05-coll-algorithms.md)）。
+这三张牌怎么打，正是第 2-3 章的全部内容；而通信库把这套决策自动化，就是 HCCL 里 **selector** 模块的工作（[HCCL 源码 5](../ascend/hccl-hcomm/05-coll-algorithms.md)）。
 
 本章收束：**语义卡片是词汇，α-β-γ 是语法**——下一章用它们完整推导第一个算法：Ring AllReduce。
 
@@ -365,7 +365,7 @@ Roofline 是"单算子三本账"（FLOPs/Bytes/峰值），本模型是"通信�
 ### 参考资料
 
 - [NCCL 官方文档：Collective Operations](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/ops.html)
-- [HCCL 源码 5：集合通信算法与代价模型](../ascend/hccl-source/05-coll-algorithms.md)
+- [HCCL 源码 5：集合通信算法与代价模型](../ascend/hccl-hcomm/05-coll-algorithms.md)
 - [《模型全景》第 1 章：并行为什么产生通信](../model/01-landscape.md#_01-2-并行策略为什么产生通信)
 - [PyTorch Distributed Overview](https://docs.pytorch.org/tutorials/beginner/dist_overview.html)
 

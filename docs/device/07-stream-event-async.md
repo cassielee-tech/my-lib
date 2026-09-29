@@ -407,7 +407,7 @@ for x, y in loader:
 - [PyTorch：CUDA Semantics（异步与流）](https://docs.pytorch.org/docs/stable/notes/cuda.html)
 - [PyTorch NPU：Stream 与 Event](https://www.hiascend.com/document/detail/zh/Pytorch/60RC3/configandinstg/instg/insg_0002.html)
 - [《昇腾与 HCCL》的 01-2：Runtime 的 Stream/Event/Notify 管理](../ascend/00-ascend-cann.md#_0-1-cann-软件栈与模型执行路径)
-- [HCCL 源码 3：通信原语与同步机制](../ascend/hccl-source/03-primitives-and-sync.md)
+- [HCCL 源码 3：通信原语与同步机制](../ascend/hccl-hcomm/03-data-plane.md)
 - [CANN 常用命令速查：异步排障与 msprof](../ascend/cann常用命令.md)
 
 下一课补齐本专栏最后一块拼图：**数据类型、布局与算子融合**——BF16/FP16/FP8、Layout 和 Fusion 怎样影响精度与性能。

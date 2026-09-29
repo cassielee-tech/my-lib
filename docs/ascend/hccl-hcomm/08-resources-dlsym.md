@@ -1,10 +1,10 @@
 # 单元 8｜资源地基与 dlsym 解耦
 
-> 所属课程：[HCCL 源码学习](../hccl-source.md) · 第 8 单元（共 10 单元）
+> 所属课程：[HCCL 与 HCOMM 源码学习](../hccl-hcomm.md) · 第 8 单元（共 12 单元）
 > 精读对象：`src/ops/op_common/op_common.cc`（HcclCalcTopoInfo / HcclGetAlgRes / HcclGetThread / HcclGetChannel）、`src/ops/op_common/topo/topo_host.cc`（1132 行）、`src/common/hcomm_dlsym/`（29 个文件）+ `src/common/compat.cc` + `src/hccl.cmake`
 
 ::: info 本单元目标
-前七个单元讲完"一次调用"的动态执行；本单元往下挖两层地基：**op_common 的资源系统**（engineCtx 缓存主干、topo 计算流水线、通道/线程申请）与 **hcomm_dlsym 解耦机制**（弱符号、三层兼容、版本探测）——回答"拓扑字段谁算的、缓存挂在哪、两仓为什么能独立发版不崩"。
+前面八个单元讲完"一次调用"的动态执行；本单元往下挖两层地基：**op_common 的资源系统**（engineCtx 缓存主干、topo 计算流水线、通道/线程申请）与 **hcomm_dlsym 解耦机制**（弱符号、三层兼容、版本探测）——回答"拓扑字段谁算的、缓存挂在哪、两仓为什么能独立发版不崩"。
 :::
 
 ## 先记住 7 个结论
@@ -410,6 +410,6 @@ weak_alias(__HcclDlopen, HcclDlopen);     // 允许测试环境覆盖 dlopen 行
 
 ---
 
-下一单元进入 **[9｜MC2 自定义算子框架](09-mc2-custom-ops.md)**（收官）。
+下一单元进入 **[9｜自定义算子开发：七步流程](09-custom-op-dev.md)**——从这里开始，视角从"读内置算子"切换为"自己写算子"。
 
-[返回课程导学 →](../hccl-source.md)
+[返回课程导学 →](../hccl-hcomm.md)

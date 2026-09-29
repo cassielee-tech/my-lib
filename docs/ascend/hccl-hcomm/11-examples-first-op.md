@@ -1,9 +1,9 @@
-# 单元 6｜实战：examples 与第一个自定义算子
+# 单元 11｜实战：examples 与第一个自定义算子
 
-> 所属课程：[HCOMM 源码学习](../hcomm-source.md) · 第 6 单元（共 7 单元）
+> 所属课程：[HCCL 与 HCOMM 源码学习](../hccl-hcomm.md) · 第 11 单元（共 12 单元）
 
 ::: info 本单元目标
-读完后，你能够说清 **两个仓库的样例分布**（hcomm：建域三式 + ACL Graph；hccl：自定义算子），理解 ACL Graph 的"一次捕获、多次重放"，并按五步路线图跑通自己的第一个扩展通信算子。
+读完后，你能够说清 **两个仓库的样例分布**（hcomm：建域三式 + ACL Graph；hccl：自定义算子），理解 ACL Graph 的"一次捕获、多次重放"，按五步路线图跑通自己的第一个扩展通信算子——并把整门课程串成一条完整的回环。
 :::
 
 ## 先记住 3 个结论
@@ -22,7 +22,7 @@
 | `02_one_device_per_process_rank_table` | **rank table**：预生成的成员表文件，各进程 `HcclCommInitClusterInfo` | 大规模/静态分配集群 |
 | `03_one_device_per_pthread` | **每线程一设备**：单进程多线程，各线程独立通信域 | 单机多卡推理/测试 |
 
-三个样例练的是 [单元 2](02-control-plane-communicator.md) 建域家族的三个入口——**读样例 = 把 L2 接口表变成肌肉记忆**。
+三个样例练的是 [单元 2](02-control-plane.md) 建域家族的三个入口——**读样例 = 把 L2 接口表变成肌肉记忆**。（单元 6 调用链走读时列过的建域三方式，就是这三式。）
 
 ## 2. ACL Graph：通信任务的"整图重放"
 
@@ -31,7 +31,7 @@
 ```text
 Eager 模式：每个算子 = 一次完整 Host dispatch → Device 空闲等下发
 ACL Graph：  capture 期记录整段任务 DAG（暂存不执行）
-             replay 期 aclmdlRIExecuteAsync 一次性下发整段 → N 次 1-syscall 重放
+              replay 期 aclmdlRIExecuteAsync 一次性下发整段 → N 次 1-syscall 重放
 ```
 
 与 [《单卡执行系统》06-3 图编译](../../device/06-eager-graph-compilation.md#_06-3-图编译-从-trace-到优化执行)同一逻辑（"一次下发、多次执行"摊销 Host 开销），但 ACL Graph 是**运行时捕获**而非编译期构图——通信任务每次形状相同、重复亿次，正是捕获重放的理想客户。官方文档还给出多 stream 拓扑与 torch_npu 对接细节（`aclgraph_introduction.md`）。
@@ -42,10 +42,10 @@ ACL Graph：  capture 期记录整段任务 DAG（暂存不执行）
 
 | 样例 | 内容 | 对应本课程 |
 | --- | --- | --- |
-| [04_custom_ops_p2p](https://gitcode.com/cann/hccl/tree/master/examples/04_custom_ops_p2p) | Send/Receive（AI CPU 引擎） | [单元 4](04-aicpu-op-dev.md) 七步的最小实现 |
+| [04_custom_ops_p2p](https://gitcode.com/cann/hccl/tree/master/examples/04_custom_ops_p2p) | Send/Receive（AI CPU 引擎） | [单元 9](09-custom-op-dev.md) 七步的最小实现 |
 | 05_custom_ops_allgather | AllGather 自定义实现 | 七步 + 算法选择的真实版 |
 
-Send/Recv 样例的接口调用链（单元 4 §5 已列）：`HcclGetRankId/Size → HcclThreadAcquire → HcclChannelAcquire → HcclChannelGetHcclBuffer → HcommLocalCopyOnThread → HcommChannelNotify...`——**建议逐行标注它落在七步的哪一步**，这是最好的自测。HCCL 侧对这两个样例的源码走读见 [HCCL 源码 9：MC2 自定义算子框架](../hccl-source/09-mc2-custom-ops.md)。
+Send/Recv 样例的接口调用链（单元 9 §5 已列）：`HcclGetRankId/Size → HcclThreadAcquire → HcclChannelAcquire → HcclChannelGetHcclBuffer → HcommLocalCopyOnThread → HcommChannelNotify...`——**建议对照五步法逐行标注它落在七步的哪一步**（对照表见 [单元 10 §4](10-mc2-custom-ops.md)），这是最好的自测。源码级的逐行走读（五步法代码、建链两种姿势、样例 05 双引擎对照）见 [单元 10](10-mc2-custom-ops.md)。
 
 ## 4. 五步起步路线图
 
@@ -54,21 +54,39 @@ Send/Recv 样例的接口调用链（单元 4 §5 已列）：`HcclGetRankId/Siz
      ↓
 ② 编译库      按 docs/zh/build/build.md 走 build.sh（版本配套：以 release-management 为准）
      ↓
-③ 读样例      hccl/examples/04_custom_ops_p2p：对照单元 4 七步逐行标注
+③ 读样例      hccl/examples/04_custom_ops_p2p：对照单元 9 七步逐行标注
      ↓
 ④ 改样例      把 Send/Recv 改成"带归约的 Send"（Read 换 ReadReduce）——最小改动练原语
      ↓
 ⑤ 换算法      参考 05_custom_ops_allgather，把直发改成按拓扑分层的两跳——练"查拓扑+选算法"
 ```
 
-第 ⑤ 步正是岗位面试的经典题：**"给定 8 机 64 卡，你的自定义 AllGather 怎么利用 rank graph 分层？"**——答案素材在 [单元 2 的拓扑查询 13 动词](02-control-plane-communicator.md)与 [《集合通信》05 章分层算法](../../collective/05-topology-hierarchical-overlap.md#_05-2-分层算法-先内后外)。
+第 ⑤ 步正是岗位面试的经典题：**"给定 8 机 64 卡，你的自定义 AllGather 怎么利用 rank graph 分层？"**——答案素材在 [单元 2 的拓扑查询 13 动词](02-control-plane.md)与 [《集合通信》05 章分层算法](../../collective/05-topology-hierarchical-overlap.md#_05-2-分层算法-先内后外)。
 
-## 5. 自测题
+## 5. 回环：从第一个算子回到 `dist.all_reduce`
+
+跑通第一个自定义算子之后，回望整门课程的起点——现在你可以把一次 `dist.all_reduce` 从头讲到尾了：
+
+```text
+dist.all_reduce（你的代码）
+  ↓ torch_npu / ProcessGroupHCCL        ← 第 2 章：从 PyTorch 走向 HCCL
+HcclAllReduce（L1，hccl 仓）             ← 单元 1：五层 API；单元 6：三道闸门与四条快速路径
+  ↓ Selector 选算法 → executor → template  ← 单元 5/7：算法名 = 骨架 ×（匹配器 + 模板）
+  ↓ engineCtx / 资源 / dlsym              ← 单元 8：缓存主干与两仓解耦
+HCOMM 控制面（建域时已备好名词）            ← 单元 2：探测→建图→配资源
+HCOMM 数据面（Write/Read/Notify 动词）     ← 单元 3：四家族原语
+  ↓ 引擎：AICPU 动态 / AIV 静态 / CCU 固化 ← 单元 4：三种编排时机
+HCCS / RoCE / UB / 物理链路
+```
+
+而当你**自己写扩展算子**时，路径从 `HcclEngineCtxGet` 直接进入 HCOMM（单元 9/10/11）——**绕过 HCCL 算子层**：查拓扑（L2-res）→ 拿 Thread/Channel（L2-res）→ 用原语编排（L3-prim）。两条路径共享同一套名词与动词，这就是"通信平台与算子开发解耦"的准确含义，也是这门课把两个仓库放在一起讲的理由。
+
+## 6. 自测题
 
 1. 两个仓库的样例分别覆盖什么主题？
 2. 建域三式的初始化方式与适用场景分别是什么？
 3. ACL Graph 解决什么瓶颈？与图编译的异同？
-4. Send/Recv 样例的接口调用序列是什么？对应七步的哪几步？
+4. Send/Recv 样例的接口调用序列对应七步的哪几步？
 5. 路线图第 ⑤ 步"换算法"要用到哪些拓扑查询接口？
 
 ::: details 自测答案
@@ -86,18 +104,18 @@ Send/Recv 样例的接口调用链（单元 4 §5 已列）：`HcclGetRankId/Siz
 - 样例两仓分工：hcomm 管建域与图捕获，hccl 管算子开发；
 - 建域三式覆盖三种部署形态，读样例即背 L2 接口；
 - ACL Graph：capture/replay 摊销通信任务的 Host 开销；
-- 五步路线图：跑建域 → 编译 → 读样例 → 改样例 → 换算法；
-- 换算法 = 拓扑查询 + 分层思想的综合应用（面试高频）。
+- 五步路线图：跑建域 → 编译 → 读样例 → 改样例 → 换算法（面试高频）；
+- 回环收束：内置算子路径（单元 1/5/6/7/8）与自定义算子路径（单元 9/10/11）在 HCOMM 底座汇合——一张完整的 `dist.all_reduce` 地图。
 
 ## 参考资料
 
 - [HCOMM examples 目录](https://gitcode.com/cann/hcomm/tree/master/examples)（建域三式 + ACL Graph）
-- [ACL Graph 介绍](https://gitcode.com/cann/hcomm/blob/master/docs/zh/aclgraph/aclgraph_introduction.md)
+- [ACL Graph 介绍（hcomm 仓）](https://gitcode.com/cann/hcomm/blob/master/docs/zh/aclgraph/aclgraph_introduction.md)
 - [HCCL examples：04_custom_ops_p2p](https://gitcode.com/cann/hccl/tree/master/examples/04_custom_ops_p2p)
 - [源码构建指南](https://gitcode.com/cann/hcomm/blob/master/docs/zh/build/build.md)
 
 ---
 
-进入 **[课程总结：HCOMM 源码阅读地图 →](summary.md)**
+进入 **[课程总结：HCCL 与 HCOMM 源码阅读地图 →](summary.md)**
 
-[返回课程导学 →](../hcomm-source.md)
+[返回课程导学 →](../hccl-hcomm.md)

@@ -1,10 +1,10 @@
-# 单元 9｜MC2 自定义算子框架
+# 单元 10｜MC2 自定义算子框架与官方样例
 
-> 所属课程：[HCCL 源码学习](../hccl-source.md) · 第 9 单元（共 10 单元，收官）
+> 所属课程：[HCCL 与 HCOMM 源码学习](../hccl-hcomm.md) · 第 10 单元（共 12 单元）
 > 精读对象：`include/hccl_mc2.h`（97 行）+ `src/common/hccl_mc2.cc`（168 行）+ `examples/04_custom_ops_p2p` + `examples/05_custom_ops_allgather`
 
 ::: info 本单元目标
-读完本单元，你将知道**自定义通信算子的两条开发路径**（声明式 Kfc 参数包 vs 手写资源编排），并通过官方样例验证一个重要判断：**前面八个单元学的资源模型不是内部实现细节，而是层次清晰的公开编程模型**。最后用一张知识地图收束整个课程。
+读完本单元，你将知道**自定义通信算子的两条开发路径**（声明式 Kfc 参数包 vs 手写资源编排），通过官方样例验证一个重要判断：**单元 7/8 学的资源模型不是内部实现细节，而是层次清晰的公开编程模型**；并把样例五步法与单元 9 的七步流程对齐。
 :::
 
 ## 先记住 3 个结论
@@ -117,29 +117,21 @@ examples/05_custom_ops_allgather/
 
 同一算法、两种引擎各写一遍——单元 4/7"引擎差异在模板层"的知识在这里变成可对照运行的代码。样例 README 明说：AIV 版基于"AIV 通信编程接口"，含 `aiv_communication_base_v2.h`（通信基类）与 `sync_interface.h`（同步接口）。
 
-## 4. 全课程知识地图：十个单元一图收束
+## 4. 五步法 ↔ 七步流程：同一份样例的两种读法
 
-```text
-单元 0  全景与仓库地图      三层架构、目录地图、调用链预览
-单元 1  分层架构 + hccl.h   五层 API；14 个 C ABI 原语；comm/stream/dataType 三概念
-单元 2  通信域与 RankGraph  七个拓扑概念；Edge→Link→Channel 递进链
-单元 3  原语与同步          四原语概念；网络/内存两组动词；ThreadNotify/ChannelNotify
-单元 4  通信引擎            AICPU=控制核+TS调度；AIV=向量核换时延；CCU=专用协处理器
-单元 5  算法 + selector     注册表(priority) + 引擎瀑布(CCU→AIV→AICPU) + 决策树(拓扑×数据量×卡数)
-单元 6  AllReduce 调用链    三道闸门（版本/设备/count==0）→ 校验 → 四条快速路径 → 心脏
-单元 7  executor+template   算法名=骨架×(匹配器+模板)；AllReduce=RS+RS+AG+AG；回退记忆；Mesh RS=全互联write+本地归约
-单元 8  资源 + dlsym        engineCtx 缓存主干；topo 九步流水线；通道=资源交换点；一致性校验；三层兼容
-单元 9  MC2 + examples      Kfc 参数包声明式接口；样例=公开编程模型的活文档
-```
+单元 9 的七步流程是**全流程视角**（官方文档口径），样例 send.cc 的五步法是 **Host 侧代码视角**——两者可以逐段对齐：
 
-贯穿十个单元的四个设计模式：
+| 样例五步法（send.cc） | 七步流程（单元 9） | 对齐说明 |
+| --- | --- | --- |
+| STEP 0 构造上下文（tag / commName / opType） | ① 定义算子接口 | 自定义算子自己起 tag，复用主框架 opType 枚举 |
+| STEP 1 查询 rank / device 信息 | ② 查询拓扑信息 | `HcclGetRankId/Size`、`GetDeviceType` |
+| ——（样例单一实现，省略） | ③ 算法选择 | 只有一个算法时此步可省（单元 9 结论） |
+| STEP 2 建/复用资源（engineCtx / 线程 / 建链 / 缓冲） | ④ 创建资源 | 未命中走完整创建 + 序列化到 Device |
+| STEP 3 `LaunchKernel(param, stream)` | ⑤ 下发 Kernel | AICPU 侧随后反序列化 resCtx |
+| （Kernel 内的编排代码） | ⑥ 任务编排 | `HcommLocalCopy` / `HcommChannelNotify` 系——单元 9 的编排七步 |
+| （Host Thread 等待完成通知） | ⑦ 完成同步 | 控制 Thread 通知 Host 完成 |
 
-| 模式 | 出现位置 |
-| --- | --- |
-| **静态注册 + 工厂** | selector 注册表、executor 注册表（宏 + `__COUNTER__` + 静态初始化） |
-| **责任链降级** | 引擎瀑布、回退记忆、dlsym 弱符号桩、版本闸门 |
-| **序列化缓存** | topoInfo、执行计划、AIV 指令流、回退结果（全挂 engineCtx） |
-| **字符串解耦** | 算法名连接 selector 与 executor；tag 连接一切缓存 |
+记住这张对照表的收益：**读任何自定义算子样例，都能按七步归位**——看到陌生的接口调用序列，先问它属于哪一步。
 
 ## 5. 结业思考题
 
@@ -151,17 +143,16 @@ examples/05_custom_ops_allgather/
 
 ## 6. 下一步建议
 
-- **动手路线**：跑通 `examples/04`（最快见全貌）→ 读 `docs/zh/build/build.md` 上板 → 用 profiling 工具实测一次 AllReduce；
-- **深入路线**：见[课程总结](summary.md)的"继续深入五条路线"（写自定义算子 / 调优 / 排障 / 架构 / 回到训练系统）；
-- **姊妹课程**：继续进入 **[HCOMM 源码学习](../hcomm-source.md)**——下两层（域管理 + 基础通信）深潜与自定义通信算子开发，与本单元路径 B 无缝衔接；
+- **动手路线**：跑通 `examples/04`（最快见全貌）→ 读 `docs/zh/build/build.md` 上板 → 用 profiling 工具实测一次 AllReduce；完整的五步起步路线图（建域 → 编译 → 读样例 → 改样例 → 换算法）见 [单元 11](11-examples-first-op.md)；
+- **深入路线**：见[课程总结](summary.md)的"继续深入的路线"（调优 / 排障 / 架构 / 回到训练系统）；
 - **源码对照**：`experimental/ops/` 是社区试验算子，结构同 `src` 但不编入商用——读它没有历史包袱。
 
 ## 本单元小结
 
 - **两条开发路径**：Kfc 参数包（声明式、面向 MC2 通算融合）vs 资源 API + 原语（手写、完全掌控）；
 - **ABI 哲学**：不透明指针 + setter 校验 + 安全默认值——扩展性不靠改头文件；
-- **样例即文档**：examples/04 的五步法与 op_common 同构，公开编程模型实锤；
-- **知识地图 + 四个设计模式**：整个课程的收束——带着这张图回到训练系统，每个环节都能落到具体文件。
+- **样例即文档**：examples/04 的五步法与 op_common 同构，公开编程模型实锤；五步法 ↔ 七步流程对照表让任何样例都可按七步归位；
+- **知识地图**：全课程十二个单元的收束图与概念清单，见[课程总结](summary.md)。
 
 ## 参考资料
 
@@ -172,6 +163,6 @@ examples/05_custom_ops_allgather/
 
 ---
 
-进入 **[课程总结｜HCCL 源码阅读地图 →](summary.md)**
+下一单元进入 **[11｜实战：examples 与第一个自定义算子](11-examples-first-op.md)**。
 
-[返回课程导学 →](../hccl-source.md)
+[返回课程导学 →](../hccl-hcomm.md)

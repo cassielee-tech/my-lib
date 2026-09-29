@@ -38,7 +38,7 @@
 第 8 章 CP / 第 9 章 ZeRO 与混合并行收口
 ```
 
-PP 的通信原语是 **Send/Recv（P2P）而非集合通信**——[《集合通信》01 章](../collective/01-collective-semantics-cost.md#_01-2-六个核心原语的语义卡片)的原语家族在 HCCL 中同样包含这对兄弟（[HCCL 源码 3](../ascend/hccl-source/03-primitives-and-sync.md)）；而激活内存的问题在 [《训练与推理系统》02-2](../systems/02-training-memory-compute.md#_02-2-activation-checkpointing-用时间换显存) 已有铺垫。
+PP 的通信原语是 **Send/Recv（P2P）而非集合通信**——[《集合通信》01 章](../collective/01-collective-semantics-cost.md#_01-2-六个核心原语的语义卡片)的原语家族在 HCCL 中同样包含这对兄弟（[HCCL 源码 3](../ascend/hccl-hcomm/03-data-plane.md)）；而激活内存的问题在 [《训练与推理系统》02-2](../systems/02-training-memory-compute.md#_02-2-activation-checkpointing-用时间换显存) 已有铺垫。
 
 ---
 
@@ -144,7 +144,7 @@ Layer 0-7     →      Layer 8-15    →     Layer 16-23    →    Layer 24-31 +
 
 PP 的三个结构性优势：
 
-1. **P2P 而非集合**：Send/Recv 只发生在相邻 stage 之间——没有全员集合、没有规约（[HCCL 源码 3](../ascend/hccl-source/03-primitives-and-sync.md) 的 P2P 原语正是干这个的）；
+1. **P2P 而非集合**：Send/Recv 只发生在相邻 stage 之间——没有全员集合、没有规约（[HCCL 源码 3](../ascend/hccl-hcomm/03-data-plane.md) 的 P2P 原语正是干这个的）；
 2. **通信量小**：只传一个 micro-batch 的边界激活（B×S×h×2，MB 级），与模型大小**无关**——模型再大，传的还是那层输出；
 3. **跨机友好**：相邻机器间点对点走网卡，不需要机内全互联的带宽——**PP 段天然横跨多机**，恰好补上 TP"只能住机内"的短板。
 
@@ -364,7 +364,7 @@ S=8，单 micro-batch 前向 40 ms、反向 80 ms。M=32 时一步的流水线�
 - [GPipe 论文](https://arxiv.org/abs/1811.06965) 与 [PipeDream-Flush / Megatron 1F1B](https://arxiv.org/abs/2104.04473)
 - [《集合通信》01-2：原语家族（含 P2P）](../collective/01-collective-semantics-cost.md#_01-2-六个核心原语的语义卡片)
 - [《训练与推理系统》02-1/02-2：显存账与 Activation Checkpointing](../systems/02-training-memory-compute.md#_02-2-activation-checkpointing-用时间换显存)
-- [HCCL 源码 3：通信原语与同步](../ascend/hccl-source/03-primitives-and-sync.md)
+- [HCCL 源码 3：通信原语与同步](../ascend/hccl-hcomm/03-data-plane.md)
 - [第 4 章：Process Group 与三重组身份](04-distributed-basics.md#_04-2-通信域-谁和谁是一伙的)
 
 下一章 **Context Parallel**：长序列把最后一个维度也逼到墙角——单层激活沿序列维放不下，Attention 里 K/V 要交换、Load-Balanced 切分怎么挑最重的活——序列维的并行攻略。

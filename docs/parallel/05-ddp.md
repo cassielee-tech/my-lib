@@ -37,7 +37,7 @@
 第 6-9 章：TP / PP / CP / ZeRO（通信从"步间"走进"层间"）
 ```
 
-模型侧的叙事在 [《模型全景》02-4](../model/02-tensor-autograd.md#_02-4-梯度-shape-与集合通信)（梯度为什么需要通信）与 [《训练与推理系统》01-4](../systems/01-training-loop.md#_01-4-训练显存与梯度通信)（通信发生在反向与更新之间）已埋好——本章把两句"预告"变成完整的推导与账本。HCCL 侧的对应物是 [HCCL 源码 6：AllReduce 调用链走读](../ascend/hccl-source/06-allreduce-call-chain.md)。
+模型侧的叙事在 [《模型全景》02-4](../model/02-tensor-autograd.md#_02-4-梯度-shape-与集合通信)（梯度为什么需要通信）与 [《训练与推理系统》01-4](../systems/01-training-loop.md#_01-4-训练显存与梯度通信)（通信发生在反向与更新之间）已埋好——本章把两句"预告"变成完整的推导与账本。HCCL 侧的对应物是 [HCCL 源码 6：AllReduce 调用链走读](../ascend/hccl-hcomm/06-allreduce-call-chain.md)。
 
 ---
 
@@ -208,7 +208,7 @@ for data in loader:                      # 每卡各自的数据分片
 2. **梯度就绪即通信**：给每个参数注册反向 hook——**某个参数的梯度一算完，立刻发起它的通信**，不等反向结束。通信与剩余层的反向并行，这是重叠的入口；
 3. **Bucket 组织**：就绪即发的粒度不是"单参数"而是"桶"——按反向完成顺序攒桶、桶满即发（05-3 展开）。
 
-从本章往下钻一层：DDP 发起的每次 AllReduce 最终走进 [HCCL 的 AllReduce 调用链](../ascend/hccl-source/06-allreduce-call-chain.md)（HCCL 源码 6）——框架侧"什么时候发"，通信库侧"怎么跑"，正好接成一条线。
+从本章往下钻一层：DDP 发起的每次 AllReduce 最终走进 [HCCL 的 AllReduce 调用链](../ascend/hccl-hcomm/06-allreduce-call-chain.md)（HCCL 源码 6）——框架侧"什么时候发"，通信库侧"怎么跑"，正好接成一条线。
 
 ```text
 DDP（本章）：何时发 → 逐桶、就绪即发
@@ -284,7 +284,7 @@ DDP 不是按模型定义顺序装桶，而是**按反向传播的完成顺序**
 
 重叠不是魔法，三条边界要记牢：
 
-1. **通信 > 反向时藏不住**：小模型、大梯度、慢网络（如跨机 8 卡跑 7B 模型）——通信 M 超过反向 N，多出来的部分照样裸奔。出路：压通信量（梯度量化/压缩）或换算法（[HCCL 源码 5](../ascend/hccl-source/05-coll-algorithms.md)），更彻底的是让通信量本身降下来——**第 9 章 ZeRO/FSDP 的预告**；
+1. **通信 > 反向时藏不住**：小模型、大梯度、慢网络（如跨机 8 卡跑 7B 模型）——通信 M 超过反向 N，多出来的部分照样裸奔。出路：压通信量（梯度量化/压缩）或换算法（[HCCL 源码 5](../ascend/hccl-hcomm/05-coll-algorithms.md)），更彻底的是让通信量本身降下来——**第 9 章 ZeRO/FSDP 的预告**；
 2. **最后的同步点无法去掉**：`optimizer.step()` 必须等最后一桶——同步语义的下界，省不掉，只能靠桶的排布让它早到；
 3. **梯度累积是免费省钱**：累积 K 步再通信 → 通信次数 ÷ K（数学上等价于 K 倍大 batch 的 DP，回扣 [《训练与推理系统》01-2](../systems/01-training-loop.md#_01-2-梯度累积与-adamw-状态)）。
 
@@ -372,7 +372,7 @@ Profiling 显示：反向 4 s、通信流忙 9 s 且从第 1 s 起就在飞、�
 - [《训练与推理系统》01-4：显存与通信](../systems/01-training-loop.md#_01-4-训练显存与梯度通信)
 - [《单卡执行系统》07-4：重叠的艺术](../device/07-stream-event-async.md#_07-4-重叠的艺术-让设备闲不下来)
 - [《集合通信》02 章：Ring AllReduce](../collective/02-ring-allreduce.md#_02-1-为什么是环-拓扑的自然性)
-- [HCCL 源码 6：AllReduce 调用链](../ascend/hccl-source/06-allreduce-call-chain.md)
+- [HCCL 源码 6：AllReduce 调用链](../ascend/hccl-hcomm/06-allreduce-call-chain.md)
 
 下一章进入 **Tensor Parallel**：模型本体登场——Column/Row Parallel 怎样切矩阵、为什么一层之内就产生 AllGather、AllReduce 或 ReduceScatter，以及为什么 TP 组必须住在一台机器里。
 
