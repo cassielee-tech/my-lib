@@ -70,14 +70,14 @@ features:
 
 > 目标岗位：**CANN 的 HCCL 集合通信算子开发**。这门课把大模型、AI Infra 与昇腾平台三块知识，按岗位需要的顺序组织成六大专栏——从"模型在算什么"一路走到"集合通信源码怎么实现"。
 
-| 专栏 | 主题 | 章节 | 状态 | 直达第一课 |
-| --- | --- | --- | --- | --- |
-| [模型全景](model/index.md) | 模型在算什么？通信从哪来？ | 第 1-6 章 | ✅ 已备 | [第 1 章｜从模型到集合通信](model/01-landscape.md) |
-| [训练与推理系统](systems/index.md) | 训练怎样运转？显存花在哪？ | 第 1-6 章 | ✅ 已备 | [第 1 章｜训练循环](systems/01-training-loop.md) |
-| [单卡执行系统](device/index.md) | 算子怎样在单卡上跑得快？ | 第 1-8 章 + 专题 | ✅ 已备 | [第 1 章｜全景与性能分析](device/01-landscape-performance.md) |
-| [并行策略](parallel/index.md) | 并行为什么产生通信？ | 第 1-9 章 | ✅ 已备 | [第 4 章｜分布式基础](parallel/04-distributed-basics.md) |
-| [集合通信](collective/index.md) | 语义、算法、代价模型与工程（岗位核心） | 第 1-5 章 | ✅ 已备 | [第 1 章｜Collective 语义与代价模型](collective/01-collective-semantics-cost.md) |
-| [昇腾与 HCCL](ascend/index.md) | 平台机制、调用链与源码落地 | 三类：昇腾 / Ascend C / HCCL 与 HCOMM | 🚧 昇腾+源码课程已备，Ascend C 二梯队 | [第 0 章｜认识昇腾与 CANN](ascend/00-ascend-cann.md) |
+| 专栏 | 主题 | 章节 | 直达第一课 |
+| --- | --- | --- |  --- |
+| [模型全景](model/index.md) | 模型在算什么？通信从哪来？ | 第 1-6 章 | [第 1 章｜从模型到集合通信](model/01-landscape.md) |
+| [训练与推理系统](systems/index.md) | 训练怎样运转？显存花在哪？ | 第 1-6 章 | [第 1 章｜训练循环](systems/01-training-loop.md) |
+| [单卡执行系统](device/index.md) | 算子怎样在单卡上跑得快？ | 第 1-8 章 + 专题 |[第 1 章｜全景与性能分析](device/01-landscape-performance.md) |
+| [并行策略](parallel/index.md) | 并行为什么产生通信？ | 第 1-9 章 |  [第 4 章｜分布式基础](parallel/04-distributed-basics.md) |
+| [集合通信](collective/index.md) | 语义、算法、代价模型与工程（岗位核心） | 第 1-5 章 |  [第 1 章｜Collective 语义与代价模型](collective/01-collective-semantics-cost.md) |
+| [昇腾与 HCCL](ascend/index.md) | 平台机制、调用链与源码落地 | 三类：昇腾 / Ascend C / HCCL 与 HCOMM |  [第 0 章｜认识昇腾与 CANN](ascend/00-ascend-cann.md) |
 
 ## 学习路线
 

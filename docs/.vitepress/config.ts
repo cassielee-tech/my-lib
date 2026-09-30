@@ -173,6 +173,7 @@ export default defineConfig({
           items: [
             { text: '目录', link: '/tools-productivity/' },
             { text: 'VS Code + SSH + Jupyter', link: '/tools-productivity/vscode-remote-ssh-jupyter' },
+            { text: 'Linux 服务器常用命令速查', link: '/tools-productivity/linux-server-commands' },
             { text: 'VS Code 快捷键速查', link: '/tools-productivity/vscode-shortcuts' },
             { text: 'opencode 使用教程', link: '/tools-productivity/opencode-tutorial' },
             { text: 'Ghostty 快捷键速查', link: '/tools-productivity/ghostty-shortcuts' },

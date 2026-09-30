@@ -9,6 +9,7 @@
 ## 开发工作流
 
 - [VS Code + Remote SSH + Jupyter：远程做大模型实验](vscode-remote-ssh-jupyter.md)：远程环境、Kernel、GPU/NPU、SSH 隧道与故障排查
+- [Linux 服务器常用命令速查](linux-server-commands.md)：系统体检、进程与服务、网络排查、文本处理与"现象 → 命令链"场景小抄
 - [opencode 使用教程](opencode-tutorial.md)：会话管理、Plan/Build 工作流、AGENTS.md 项目规则与自定义命令
 
 ## 快捷键速查
