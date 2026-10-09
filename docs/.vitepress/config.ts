@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   lang: 'zh-CN',
   title: 'Cassie’s Stack',
-  description: '记录 HCCL 开发主线课程、AI Agent、后端、效率工具与个人思考',
+  description: '记录 HCCL 开发主线课程、后端、效率工具与个人思考',
   base: '/my-lib/',
   cleanUrls: true,
   markdown: {
@@ -19,7 +19,6 @@ export default defineConfig({
       { text: '并行策略', link: '/parallel/' },
       { text: '集合通信', link: '/collective/' },
       { text: '昇腾与 HCCL', link: '/ascend/' },
-      { text: 'AI Agent', link: '/ai-agent/' },
       { text: '后端知识', link: '/backend/' },
       { text: '工具与效率', link: '/tools-productivity/' },
       { text: '个人杂谈', link: '/essays/' }
@@ -149,20 +148,10 @@ export default defineConfig({
                 { text: '9｜自定义算子七步流程', link: '/ascend/hccl-hcomm/09-custom-op-dev' },
                 { text: '10｜MC2 框架与官方样例', link: '/ascend/hccl-hcomm/10-mc2-custom-ops' },
                 { text: '11｜实战与第一个算子', link: '/ascend/hccl-hcomm/11-examples-first-op' },
-                { text: '课程总结｜源码阅读地图', link: '/ascend/hccl-hcomm/summary' }
+                { text: '课程总结｜源码阅读地图', link: '/ascend/hccl-hcomm/summary' },
+                { text: '实践总结｜UBOE/UB_RTP 建链端口注入实战', link: '/ascend/hccl-hcomm/12-practice-port-injection' }
               ]
             }
-          ]
-        }
-      ],
-      '/ai-agent/': [
-        {
-          text: 'AI Agent',
-          items: [
-            { text: '目录', link: '/ai-agent/' },
-            { text: '2026 热门 AI Agent 产品地图', link: '/ai-agent/01-popular-agents' },
-            { text: 'AI Agent 工程化知识树', link: '/ai-agent/agent-engineering-knowledge-tree' },
-            { text: 'AI Coding：从代码补全到智能体协作', link: '/ai-agent/ai-coding-codearts' }
           ]
         }
       ],
@@ -188,7 +177,13 @@ export default defineConfig({
             { text: '目录', link: '/essays/' },
             { text: '《金刚经》研读笔记', link: '/essays/《金刚经》研读笔记' },
             { text: '《金字塔原理》读书笔记', link: '/essays/《金字塔原理》读书笔记' },
-            { text: 'ADHD 日常管理指南', link: '/essays/ADHD日常管理指南' }
+            { text: '《认知觉醒》读书笔记', link: '/essays/《认知觉醒》读书笔记' },
+            { text: '《健身解剖完全手册》学习笔记', link: '/essays/《健身解剖完全手册》学习笔记' },
+            { text: 'ADHD 日常管理指南', link: '/essays/ADHD日常管理指南' },
+            { text: '实用提示词收集', link: '/essays/实用提示词收集' },
+            { text: '2026 热门 AI Agent 产品地图', link: '/essays/01-popular-agents' },
+            { text: 'AI Agent 工程化知识树', link: '/essays/agent-engineering-knowledge-tree' },
+            { text: 'AI Coding：从代码补全到智能体协作', link: '/essays/ai-coding-codearts' }
           ]
         }
       ]

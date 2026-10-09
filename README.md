@@ -11,10 +11,9 @@
 - `docs/collective`：集合通信·岗位核心（专栏五）
 - `docs/ascend`：昇腾与 HCCL（专栏六，含 HCCL 与 HCOMM 源码专题）
 - `docs/index.md`：首页（含课程总览与六专栏导航）
-- `docs/ai-agent`：AI Agent
 - `docs/backend`：后端知识
 - `docs/tools-productivity`：工具与效率
-- `docs/essays`：个人杂谈
+- `docs/essays`：个人杂谈（含 AI Agent 文章与实用提示词收集）
 
 ## 本地运行
 

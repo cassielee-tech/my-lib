@@ -43,11 +43,6 @@ features:
     details: 平台机制、调用链与源码落地 —— 三类：昇腾 / Ascend C / HCCL 与 HCOMM，含双仓源码课程。
     link: /ascend/
     linkText: 进入专栏
-  - icon: 🤖
-    title: AI Agent
-    details: 主线之外的工程应用视角：Agent 产品地图、工程化知识树与 AI Coding 实践。
-    link: /ai-agent/
-    linkText: 查看目录
   - icon: 🧱
     title: 后端知识
     details: 编程语言、数据库、分布式系统与后端工程实践。
@@ -60,7 +55,7 @@ features:
     linkText: 查看目录
   - icon: ✍️
     title: 个人杂谈
-    details: 学习复盘、生活观察，以及一些不设边界的思考。
+    details: 学习复盘、生活观察、AI Agent 观察与实践，以及一些不设边界的思考。
     link: /essays/
     linkText: 查看目录
 ---
