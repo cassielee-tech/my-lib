@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="680" viewBox="0 0 1100 680" role="img" aria-labelledby="title desc">
+  <title id="title">一个梯度张量从模型计算到跨设备传输的过程</title>
+  <desc id="desc">以两张设备上的数据并行训练为例，展示模型产生梯度、DDP将梯度装入桶、HCCL将桶切块并通过链路交换、最后两张设备得到相同聚合梯度的过程。</desc>
+  <defs>
+    <style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",sans-serif;fill:#263238}.h{font-size:23px;font-weight:600}.sub{font-size:17px;font-weight:600}.t{font-size:14px}.s{font-size:12px;fill:#607d8b}.device{fill:#f7f9fb;stroke:#78909c;stroke-width:2}.model{fill:#e3f2fd;stroke:#4285b4;stroke-width:1.8}.grad{fill:#fff3e0;stroke:#ef8c28;stroke-width:1.8}.bucket{fill:#f3e5f5;stroke:#8e5aa7;stroke-width:1.8}.chunkA{fill:#ffcdd2;stroke:#c64c57;stroke-width:1.5}.chunkB{fill:#c8e6c9;stroke:#43964b;stroke-width:1.5}.result{fill:#e8f5e9;stroke:#43a047;stroke-width:1.8}.arrow{stroke:#607d8b;stroke-width:2;fill:none;marker-end:url(#a)}.network{stroke:#d05252;stroke-width:3;fill:none;marker-end:url(#r)}</style>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#607d8b"/></marker><marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#d05252"/></marker>
+  </defs>
+  <text x="550" y="34" text-anchor="middle" class="h">一次数据并行训练中，梯度如何变成链路上的数据</text>
+  <text x="270" y="68" text-anchor="middle" class="sub">Rank 0 / NPU 0</text><text x="830" y="68" text-anchor="middle" class="sub">Rank 1 / NPU 1</text>
+  <rect x="35" y="82" width="470" height="505" rx="16" class="device"/><rect x="595" y="82" width="470" height="505" rx="16" class="device"/>
+
+  <rect x="75" y="112" width="150" height="70" rx="9" class="model"/><text x="150" y="140" text-anchor="middle" class="sub">数据批次 A</text><text x="150" y="164" text-anchor="middle" class="s">不同样本</text>
+  <rect x="315" y="112" width="150" height="70" rx="9" class="model"/><text x="390" y="140" text-anchor="middle" class="sub">模型副本 W</text><text x="390" y="164" text-anchor="middle" class="s">与 Rank 1 相同</text>
+  <path d="M225 147H315" class="arrow"/>
+  <rect x="635" y="112" width="150" height="70" rx="9" class="model"/><text x="710" y="140" text-anchor="middle" class="sub">数据批次 B</text><text x="710" y="164" text-anchor="middle" class="s">不同样本</text>
+  <rect x="875" y="112" width="150" height="70" rx="9" class="model"/><text x="950" y="140" text-anchor="middle" class="sub">模型副本 W</text><text x="950" y="164" text-anchor="middle" class="s">与 Rank 0 相同</text>
+  <path d="M785 147H875" class="arrow"/>
+
+  <path d="M390 182V220" class="arrow"/><path d="M950 182V220" class="arrow"/>
+  <rect x="145" y="222" width="240" height="62" rx="9" class="grad"/><text x="265" y="248" text-anchor="middle" class="sub">本地梯度 dW₀</text><text x="265" y="270" text-anchor="middle" class="s">只反映数据批次 A</text>
+  <rect x="705" y="222" width="240" height="62" rx="9" class="grad"/><text x="825" y="248" text-anchor="middle" class="sub">本地梯度 dW₁</text><text x="825" y="270" text-anchor="middle" class="s">只反映数据批次 B</text>
+  <path d="M265 284V320" class="arrow"/><path d="M825 284V320" class="arrow"/>
+
+  <rect x="105" y="322" width="320" height="76" rx="9" class="bucket"/><text x="265" y="347" text-anchor="middle" class="sub">DDP 梯度 Bucket</text><rect x="135" y="362" width="125" height="20" class="chunkA"/><rect x="260" y="362" width="125" height="20" class="chunkB"/><text x="197" y="377" text-anchor="middle" class="s">chunk 0</text><text x="322" y="377" text-anchor="middle" class="s">chunk 1</text>
+  <rect x="665" y="322" width="320" height="76" rx="9" class="bucket"/><text x="825" y="347" text-anchor="middle" class="sub">DDP 梯度 Bucket</text><rect x="695" y="362" width="125" height="20" class="chunkA"/><rect x="820" y="362" width="125" height="20" class="chunkB"/><text x="757" y="377" text-anchor="middle" class="s">chunk 0</text><text x="882" y="377" text-anchor="middle" class="s">chunk 1</text>
+
+  <text x="550" y="427" text-anchor="middle" class="sub">HCCL：分块交换并归约</text>
+  <path d="M385 372C470 430 625 430 695 372" class="network"/><path d="M820 362C720 300 390 300 260 362" class="network"/>
+  <text x="550" y="458" text-anchor="middle" class="s">链路上传输的是连续内存中的数据块，而不是“模型层”这个抽象概念</text>
+
+  <path d="M265 398V486" class="arrow"/><path d="M825 398V486" class="arrow"/>
+  <rect x="125" y="488" width="280" height="66" rx="9" class="result"/><text x="265" y="514" text-anchor="middle" class="sub">聚合梯度 dW</text><text x="265" y="537" text-anchor="middle" class="s">dW = (dW₀ + dW₁) / 2</text>
+  <rect x="685" y="488" width="280" height="66" rx="9" class="result"/><text x="825" y="514" text-anchor="middle" class="sub">聚合梯度 dW</text><text x="825" y="537" text-anchor="middle" class="s">与 Rank 0 完全相同</text>
+  <path d="M265 554V608H390V182" class="arrow"/><path d="M825 554V608H950V182" class="arrow"/>
+  <text x="550" y="647" text-anchor="middle" class="t">两张设备使用相同聚合梯度更新 W，因此下一步仍保持模型副本一致</text>
+</svg>

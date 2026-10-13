@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="390" viewBox="0 0 960 390" role="img" aria-labelledby="title desc">
+  <title id="title">线性层矩阵乘法的形状变化</title>
+  <desc id="desc">输入 X 的最后一维与权重 W 的第一维相消，得到输出 Y。</desc>
+  <defs><style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",sans-serif;fill:#263238}.h{font-size:23px;font-weight:600}.t{font-size:18px}.s{font-size:15px;fill:#546e7a}.x{fill:#e3f2fd;stroke:#4285b4;stroke-width:2}.w{fill:#fff3e0;stroke:#ef8c28;stroke-width:2}.y{fill:#e8f5e9;stroke:#43a047;stroke-width:2}.dim{stroke:#7b8794;stroke-width:1.5;stroke-dasharray:5 4}</style></defs>
+  <text x="480" y="38" text-anchor="middle" class="h">线性层：Y = XW + b</text>
+  <rect x="90" y="105" width="230" height="150" rx="8" class="x"/><text x="205" y="174" text-anchor="middle" class="h">X</text><text x="205" y="207" text-anchor="middle" class="t">[B×S, H]</text>
+  <text x="354" y="187" text-anchor="middle" class="h">×</text>
+  <rect x="390" y="85" width="145" height="190" rx="8" class="w"/><text x="462" y="174" text-anchor="middle" class="h">W</text><text x="462" y="207" text-anchor="middle" class="t">[H, O]</text>
+  <text x="574" y="187" text-anchor="middle" class="h">=</text>
+  <rect x="615" y="105" width="250" height="150" rx="8" class="y"/><text x="740" y="174" text-anchor="middle" class="h">Y</text><text x="740" y="207" text-anchor="middle" class="t">[B×S, O]</text>
+  <path d="M260 290V327H456V290" class="dim" fill="none"/><text x="358" y="352" text-anchor="middle" class="s">中间维 H 必须相等，被求和消去</text>
+  <text x="205" y="285" text-anchor="middle" class="s">B: batch　S: sequence</text><text x="740" y="285" text-anchor="middle" class="s">H: hidden　O: output</text>
+</svg>

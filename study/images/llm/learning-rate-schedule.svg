@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520">
+  <style>.t{font:700 23px sans-serif;fill:#172033}.s{font:17px sans-serif;fill:#475569}.m{font:17px monospace;fill:#1e293b}</style><rect width="1200" height="520" rx="24" fill="#f8fafc"/><text x="600" y="42" text-anchor="middle" class="t">学习率不是训练速度，而是每次参数更新的步幅</text>
+  <path d="M115 420V90M115 420H1100" stroke="#64748b" stroke-width="3"/><text x="55" y="105" class="s">学习率</text><text x="1010" y="460" class="s">Optimizer Step</text>
+  <path d="M115 420L300 120 C500 135 700 210 870 325 C960 385 1035 410 1100 415" fill="none" stroke="#2563eb" stroke-width="7"/>
+  <path d="M300 90V425" stroke="#f97316" stroke-width="2" stroke-dasharray="8 7"/><text x="205" y="474" text-anchor="middle" class="t" font-size="20">Warmup</text><text x="700" y="474" text-anchor="middle" class="t" font-size="20">Cosine Decay</text>
+  <rect x="140" y="185" width="250" height="105" rx="14" fill="#fff7ed" stroke="#f97316" stroke-width="2"/><text x="265" y="220" text-anchor="middle" class="t" font-size="20">逐渐放大更新</text><text x="265" y="250" text-anchor="middle" class="s">矩估计尚未稳定</text><text x="265" y="277" text-anchor="middle" class="s">避免开局一步跨太远</text>
+  <rect x="635" y="135" width="325" height="105" rx="14" fill="#eef2ff" stroke="#6366f1" stroke-width="2"/><text x="797" y="170" text-anchor="middle" class="t" font-size="20">逐渐缩小更新</text><text x="797" y="200" text-anchor="middle" class="s">前期快速学习，后期细致调整</text><text x="797" y="227" text-anchor="middle" class="s">按参数更新次数计数，不按 Micro-step</text>
+</svg>

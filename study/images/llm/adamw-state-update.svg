@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="540" viewBox="0 0 1200 540">
+  <defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#64748b"/></marker><style>.t{font:700 23px sans-serif;fill:#172033}.s{font:17px sans-serif;fill:#475569}.m{font:18px monospace;fill:#1e293b}.b{fill:#fff;stroke:#64748b;stroke-width:2}</style></defs>
+  <rect width="1200" height="540" rx="24" fill="#f8fafc"/><text x="600" y="42" text-anchor="middle" class="t">AdamW：同一个梯度同时更新“方向记忆”和“尺度记忆”</text>
+  <rect x="55" y="205" width="150" height="70" rx="13" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/><text x="130" y="247" text-anchor="middle" class="t">当前梯度 gₜ</text>
+  <path d="M205 240H275M205 240C245 240 245 375 275 375" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="285" y="125" width="285" height="95" rx="14" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/><text x="427" y="161" text-anchor="middle" class="t">一阶矩 mₜ</text><text x="427" y="192" text-anchor="middle" class="s">平滑方向：最近持续往哪里走？</text>
+  <rect x="285" y="330" width="285" height="95" rx="14" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/><text x="427" y="366" text-anchor="middle" class="t">二阶矩 vₜ</text><text x="427" y="397" text-anchor="middle" class="s">尺度估计：这个方向波动多大？</text>
+  <path d="M570 172C650 172 645 250 700 250M570 377C650 377 645 285 700 285" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="710" y="205" width="250" height="125" rx="15" class="b"/><text x="835" y="242" text-anchor="middle" class="t">自适应梯度更新</text><text x="835" y="279" text-anchor="middle" class="m">m̂ₜ / (√v̂ₜ + ε)</text><text x="835" y="308" text-anchor="middle" class="s">每个方向的步幅不同</text>
+  <path d="M960 267H1015" stroke="#64748b" stroke-width="2" marker-end="url(#a)"/><rect x="1025" y="205" width="130" height="125" rx="15" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/><text x="1090" y="250" text-anchor="middle" class="t">新参数</text><text x="1090" y="282" text-anchor="middle" class="m">θₜ₊₁</text>
+  <path d="M710 390H1155" stroke="#f97316" stroke-width="3" marker-end="url(#a)"/><text x="932" y="378" text-anchor="middle" class="s">独立的 Weight Decay：参数本身按比例收缩</text><text x="932" y="423" text-anchor="middle" class="m">θ ← (1 - ηλ)θ</text>
+  <text x="600" y="492" text-anchor="middle" class="s">代价：每个参数除梯度外，还要保存 m 和 v；这也是训练优化器状态显存很大的原因</text>
+</svg>

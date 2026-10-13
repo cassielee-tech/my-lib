@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="390" viewBox="0 0 960 390" role="img" aria-labelledby="title desc">
+  <title id="title">反向传播与链式法则</title><desc id="desc">梯度从损失函数向预测、乘法节点和参数反向传播，每经过一个节点乘以局部导数。</desc>
+  <defs><style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",sans-serif;fill:#263238}.h{font-size:22px;font-weight:600}.t{font-size:17px}.s{font-size:14px;fill:#546e7a}.node{fill:#eef6ff;stroke:#4f86c6;stroke-width:2}.loss{fill:#ffebee;stroke:#d05252;stroke-width:2}.fwd{stroke:#90a4ae;stroke-width:2;fill:none;marker-end:url(#af)}.bwd{stroke:#d05252;stroke-width:3;fill:none;marker-end:url(#ab)}</style><marker id="af" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#90a4ae"/></marker><marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#d05252"/></marker></defs>
+  <text x="480" y="35" text-anchor="middle" class="h">反向传播 = 上游梯度 × 局部导数</text>
+  <rect x="75" y="105" width="140" height="68" rx="10" class="node"/><text x="145" y="146" text-anchor="middle" class="t">参数 w</text>
+  <rect x="310" y="105" width="140" height="68" rx="10" class="node"/><text x="380" y="146" text-anchor="middle" class="t">z = wx</text>
+  <rect x="545" y="105" width="140" height="68" rx="10" class="node"/><text x="615" y="146" text-anchor="middle" class="t">ŷ = z+b</text>
+  <rect x="780" y="105" width="120" height="68" rx="10" class="loss"/><text x="840" y="146" text-anchor="middle" class="t">Loss L</text>
+  <path d="M215 139H310M450 139H545M685 139H780" class="fwd"/><text x="480" y="88" text-anchor="middle" class="s">前向：从输入计算到损失</text>
+  <path d="M780 245H685M545 245H450M310 245H215" class="bwd"/><text x="733" y="232" text-anchor="middle" class="s">∂L/∂ŷ</text><text x="498" y="232" text-anchor="middle" class="s">× ∂ŷ/∂z</text><text x="263" y="232" text-anchor="middle" class="s">× ∂z/∂w</text>
+  <text x="480" y="300" text-anchor="middle" class="h">∂L/∂w = ∂L/∂ŷ · ∂ŷ/∂z · ∂z/∂w</text>
+  <text x="480" y="342" text-anchor="middle" class="s">在数据并行训练中，每个 Rank 得到自己的 ∂L/∂w，随后通过 AllReduce 聚合梯度</text>
+</svg>

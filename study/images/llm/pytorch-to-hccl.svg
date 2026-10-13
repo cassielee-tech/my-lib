@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="700" viewBox="0 0 1100 700" role="img" aria-labelledby="title desc">
+  <title id="title">DDP反向计算与HCCL梯度通信重叠时序</title>
+  <desc id="desc">展示反向传播从最后一层向前计算，梯度就绪钩子将梯度加入不同Bucket，Bucket就绪后ProcessGroup立即发起HCCL AllReduce，从而与更早网络层的反向计算重叠。</desc>
+  <defs><style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",sans-serif;fill:#263238}.h{font-size:23px;font-weight:600}.name{font-size:16px;font-weight:600}.t{font-size:14px}.s{font-size:12px;fill:#607d8b}.lane{stroke:#b0bec5;stroke-width:1.4}.compute{fill:#bbdefb;stroke:#4285b4;stroke-width:1.5}.hook{fill:#ffe0b2;stroke:#ef8c28;stroke-width:1.5}.comm{fill:#ffcdd2;stroke:#d05252;stroke-width:1.5}.done{fill:#c8e6c9;stroke:#43a047;stroke-width:1.5}.arrow{stroke:#607d8b;stroke-width:1.8;fill:none;marker-end:url(#a)}.trigger{stroke:#d05252;stroke-width:1.8;stroke-dasharray:5 4;fill:none;marker-end:url(#r)}</style><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#607d8b"/></marker><marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#d05252"/></marker></defs>
+  <text x="550" y="34" text-anchor="middle" class="h">DDP 不等反向传播全部结束：Bucket 就绪就开始通信</text>
+  <text x="220" y="70" class="s">时间向右 →</text><path d="M300 66H1015" class="arrow"/>
+
+  <text x="35" y="130" class="name">Autograd 计算流</text><line x1="180" y1="125" x2="1030" y2="125" class="lane"/>
+  <rect x="220" y="98" width="180" height="54" rx="7" class="compute"/><text x="310" y="121" text-anchor="middle" class="t">Layer 4 backward</text><text x="310" y="140" text-anchor="middle" class="s">先算最后一层梯度</text>
+  <rect x="420" y="98" width="180" height="54" rx="7" class="compute"/><text x="510" y="121" text-anchor="middle" class="t">Layer 3 backward</text><text x="510" y="140" text-anchor="middle" class="s">继续向前反传</text>
+  <rect x="620" y="98" width="180" height="54" rx="7" class="compute"/><text x="710" y="121" text-anchor="middle" class="t">Layer 2 backward</text><text x="710" y="140" text-anchor="middle" class="s">通信已在后台进行</text>
+  <rect x="820" y="98" width="180" height="54" rx="7" class="compute"/><text x="910" y="121" text-anchor="middle" class="t">Layer 1 backward</text><text x="910" y="140" text-anchor="middle" class="s">得到最前层梯度</text>
+
+  <text x="35" y="225" class="name">DDP Hook / Bucket</text><line x1="180" y1="220" x2="1030" y2="220" class="lane"/>
+  <rect x="315" y="191" width="165" height="58" rx="7" class="hook"/><text x="397" y="214" text-anchor="middle" class="t">梯度写入 Bucket 0</text><text x="397" y="234" text-anchor="middle" class="s">L4、L3 梯度齐全</text>
+  <rect x="715" y="191" width="165" height="58" rx="7" class="hook"/><text x="797" y="214" text-anchor="middle" class="t">梯度写入 Bucket 1</text><text x="797" y="234" text-anchor="middle" class="s">L2、L1 梯度齐全</text>
+  <path d="M400 152V191" class="arrow"/><path d="M800 152V191" class="arrow"/>
+
+  <text x="35" y="330" class="name">ProcessGroup / HCCL</text><line x1="180" y1="325" x2="1030" y2="325" class="lane"/>
+  <path d="M480 220V292" class="trigger"/><rect x="480" y="292" width="310" height="66" rx="8" class="comm"/><text x="635" y="317" text-anchor="middle" class="t">HCCL AllReduce Bucket 0</text><text x="635" y="339" text-anchor="middle" class="s">切块 → 选择算法/链路 → 跨 Rank 归约</text>
+  <path d="M880 220V375" class="trigger"/><rect x="880" y="375" width="150" height="66" rx="8" class="comm"/><text x="955" y="400" text-anchor="middle" class="t">AllReduce B1</text><text x="955" y="422" text-anchor="middle" class="s">第二桶就绪后启动</text>
+
+  <rect x="620" y="385" width="210" height="44" rx="7" fill="#e8f5e9" stroke="#43a047" stroke-width="1.5"/><text x="725" y="412" text-anchor="middle" class="t">计算与通信重叠区间</text><path d="M620 375V445M830 375V445" stroke="#43a047" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+  <text x="35" y="505" class="name">同步结果</text><line x1="180" y1="500" x2="1030" y2="500" class="lane"/>
+  <path d="M790 358V475" class="arrow"/><rect x="735" y="475" width="175" height="52" rx="7" class="done"/><text x="822" y="497" text-anchor="middle" class="t">Bucket 0 聚合完成</text><text x="822" y="516" text-anchor="middle" class="s">写回参数梯度</text>
+  <path d="M1030 441V550H910" class="arrow"/><rect x="700" y="548" width="210" height="52" rx="7" class="done"/><text x="805" y="570" text-anchor="middle" class="t">全部梯度同步完成</text><text x="805" y="589" text-anchor="middle" class="s">optimizer.step() 才能更新参数</text>
+
+  <rect x="185" y="625" width="855" height="48" rx="8" fill="#f7f9fb" stroke="#c7d1da"/><text x="612" y="646" text-anchor="middle" class="t">优化关键：Bucket 太大启动晚，太小则通信次数与启动开销增加</text><text x="612" y="665" text-anchor="middle" class="s">HCCL 位于通信执行段；它的性能决定红色区间能否被蓝色反向计算充分隐藏</text>
+</svg>

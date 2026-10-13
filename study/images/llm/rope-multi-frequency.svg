@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="560" viewBox="0 0 1100 560">
+  <style>.t{font:700 24px sans-serif;fill:#172033}.s{font:18px sans-serif;fill:#475569}.m{font:17px monospace;fill:#1e293b}</style>
+  <rect width="1100" height="560" rx="24" fill="#f8fafc"/><text x="550" y="42" text-anchor="middle" class="t">不同维度对，用不同速度转动</text>
+  <path d="M120 115H1020M120 245H1020M120 375H1020" stroke="#cbd5e1" stroke-width="2"/>
+  <g fill="#64748b"><circle cx="120" cy="115" r="5"/><circle cx="1020" cy="115" r="5"/><circle cx="120" cy="245" r="5"/><circle cx="1020" cy="245" r="5"/><circle cx="120" cy="375" r="5"/><circle cx="1020" cy="375" r="5"/></g>
+  <text x="35" y="120" class="s">高频</text><text x="35" y="250" class="s">中频</text><text x="35" y="380" class="s">低频</text>
+  <path d="M120 115 C170 45 220 185 270 115 S370 45 420 115 S520 185 570 115 S670 45 720 115 S820 185 870 115 S970 45 1020 115" fill="none" stroke="#ef4444" stroke-width="5"/>
+  <path d="M120 245 C240 125 360 365 480 245 S720 125 840 245 S960 365 1020 300" fill="none" stroke="#7c3aed" stroke-width="5"/>
+  <path d="M120 375 C330 245 540 505 750 375 S960 245 1020 285" fill="none" stroke="#0284c7" stroke-width="5"/>
+  <text x="760" y="83" class="s">相邻位置变化明显 → 区分近距离</text><text x="760" y="342" class="s">变化缓慢 → 覆盖更远距离</text>
+  <rect x="115" y="435" width="910" height="82" rx="15" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="550" y="469" text-anchor="middle" class="t" font-size="21">模型同时读取多把“位置刻度尺”</text><text x="550" y="497" text-anchor="middle" class="s">高频提供细粒度刻度，低频提供大范围刻度；组合后比单一频率更容易判断各种距离</text>
+</svg>

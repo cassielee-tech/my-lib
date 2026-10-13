@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="820" viewBox="0 0 1320 820" role="img" aria-labelledby="title1 desc1">
+  <title id="title1">建链全景：谁会走到 BuildSocket 的写死端口</title>
+  <desc id="desc1">三条建链路径对比：HCCM 集合通信路径预建 socket 提前返回不受影响；直连路径全量执行 BuildSocket 命中写死端口是问题路径；非 V2 独立算子走 legacy Transport 不经过 base_comm。</desc>
+  <defs>
+    <marker id="arrow1" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#64748b"/></marker>
+    <marker id="redArrow1" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#dc2626"/></marker>
+    <marker id="greenArrow1" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#16a34a"/></marker>
+    <style>
+      .title{font:700 27px system-ui,-apple-system,"PingFang SC",sans-serif;fill:#172033}
+      .h{font:700 17px system-ui,-apple-system,"PingFang SC",sans-serif;fill:#24364b}
+      .s{font:13.5px system-ui,-apple-system,"PingFang SC",sans-serif;fill:#526174}
+      .tag{font:700 12.5px system-ui,-apple-system,"PingFang SC",sans-serif}
+      .box{stroke-width:2}
+      .flow{stroke:#64748b;stroke-width:2.2;fill:none;marker-end:url(#arrow1)}
+      .rflow{stroke:#dc2626;stroke-width:2.2;fill:none;marker-end:url(#redArrow1)}
+      .gflow{stroke:#16a34a;stroke-width:2.2;fill:none;stroke-dasharray:7 6;marker-end:url(#greenArrow1)}
+    </style>
+  </defs>
+  <rect width="1320" height="820" rx="26" fill="#f8fafc"/>
+  <text x="660" y="45" text-anchor="middle" class="title">建链全景：谁会走到 BuildSocket 的写死端口</text>
+
+  <!-- 路径1：HCCM 集合通信 -->
+  <rect x="60" y="90" width="360" height="42" rx="21" fill="#eef2ff" stroke="#6366f1" class="box"/>
+  <text x="240" y="117" text-anchor="middle" class="tag" fill="#4f46e5">路径① HCCM 集合通信（A5 / V2）</text>
+
+  <rect x="85" y="160" width="310" height="62" rx="14" fill="#eef2ff" stroke="#6366f1" class="box"/>
+  <text x="240" y="186" text-anchor="middle" class="h">HcclChannelAcquire</text>
+  <text x="240" y="208" text-anchor="middle" class="s">集合通信域取 channel</text>
+
+  <rect x="85" y="248" width="310" height="62" rx="14" fill="#eef2ff" stroke="#6366f1" class="box"/>
+  <text x="240" y="274" text-anchor="middle" class="h">MyRank::CreateChannels</text>
+  <text x="240" y="296" text-anchor="middle" class="s">HCCM 层资源编排</text>
+
+  <rect x="85" y="336" width="310" height="62" rx="14" fill="#e8f5ff" stroke="#0284c7" class="box"/>
+  <text x="240" y="357" text-anchor="middle" class="h">BatchCreateSockets</text>
+  <text x="240" y="377" text-anchor="middle" class="s">QueryListenPort 填 role/port</text>
+  <text x="240" y="393" text-anchor="middle" class="s">＋ 预建 socket 填入 desc.socket</text>
+
+  <rect x="85" y="424" width="310" height="62" rx="14" fill="#e8f5ff" stroke="#0284c7" class="box"/>
+  <text x="240" y="450" text-anchor="middle" class="h">EndpointPair::CreateChannel</text>
+  <text x="240" y="472" text-anchor="middle" class="s">→ HcommCollectiveChannelCreate</text>
+
+  <rect x="85" y="512" width="310" height="66" rx="14" fill="#f0fdf4" stroke="#16a34a" class="box"/>
+  <text x="240" y="538" text-anchor="middle" class="h">BuildSocket()</text>
+  <text x="240" y="560" text-anchor="middle" class="s">socket_ != nullptr → 提前返回</text>
+
+  <rect x="85" y="604" width="310" height="72" rx="14" fill="#f0fdf4" stroke="#16a34a" stroke-dasharray="7 6" class="box"/>
+  <text x="240" y="630" text-anchor="middle" class="h" fill="#15803d">✅ 不受影响</text>
+  <text x="240" y="652" text-anchor="middle" class="s">监听早已由 EndpointPair::ServerInit</text>
+  <text x="240" y="668" text-anchor="middle" class="s">→ legacy SocketManager 完成</text>
+
+  <line x1="240" y1="202" x2="240" y2="244" class="flow"/>
+  <line x1="240" y1="290" x2="240" y2="332" class="flow"/>
+  <line x1="240" y1="378" x2="240" y2="420" class="flow"/>
+  <line x1="240" y1="466" x2="240" y2="508" class="flow"/>
+  <line x1="240" y1="578" x2="240" y2="600" class="gflow"/>
+
+  <!-- 路径2：直连（问题路径） -->
+  <rect x="470" y="90" width="360" height="42" rx="21" fill="#fef2f2" stroke="#dc2626" class="box"/>
+  <text x="650" y="117" text-anchor="middle" class="tag" fill="#b91c1c">路径② 直连 L2-comm（数据面用户）· 问题路径</text>
+
+  <rect x="495" y="160" width="310" height="62" rx="14" fill="#fef2f2" stroke="#dc2626" class="box"/>
+  <text x="650" y="186" text-anchor="middle" class="h">HcommChannelCreate</text>
+  <text x="650" y="208" text-anchor="middle" class="s">socket = NULL（issue #966 客户用法）</text>
+
+  <rect x="495" y="248" width="310" height="62" rx="14" fill="#fef2f2" stroke="#dc2626" class="box"/>
+  <text x="650" y="274" text-anchor="middle" class="h">Channel::CreateChannel → Init()</text>
+  <text x="650" y="296" text-anchor="middle" class="s">AICPU_TS 引擎 + UBOE / UB_RTP</text>
+
+  <rect x="495" y="336" width="310" height="62" rx="14" fill="#fee2e2" stroke="#dc2626" stroke-width="3" class="box"/>
+  <text x="650" y="362" text-anchor="middle" class="h">BuildSocket() 全量执行</text>
+  <text x="650" y="384" text-anchor="middle" class="s">无预建 socket 可提前返回</text>
+
+  <rect x="495" y="424" width="310" height="66" rx="14" fill="#fee2e2" stroke="#dc2626" stroke-width="3" class="box"/>
+  <text x="650" y="448" text-anchor="middle" class="h" fill="#b91c1c">serverSocket_ → Listen(60001)</text>
+  <text x="650" y="470" text-anchor="middle" class="s">SERVER_LISTEN_PORT 常量写死</text>
+  <text x="650" y="486" text-anchor="middle" class="s">channelDesc_.port 从未被读取</text>
+
+  <rect x="495" y="518" width="310" height="62" rx="14" fill="#fef2f2" stroke="#dc2626" class="box"/>
+  <text x="650" y="544" text-anchor="middle" class="h" fill="#b91c1c">⚠ 多 endpoint 抢绑 60001</text>
+  <text x="650" y="566" text-anchor="middle" class="s">多对 endpoint 之间端口冲突</text>
+
+  <rect x="495" y="606" width="310" height="70" rx="14" fill="#f0fdf4" stroke="#16a34a" stroke-dasharray="7 6" class="box"/>
+  <text x="650" y="632" text-anchor="middle" class="h" fill="#15803d">修复后：端口与角色从 channelDesc_ 传入</text>
+  <text x="650" y="654" text-anchor="middle" class="s">0 回退默认；仅 SERVER 端建监听</text>
+
+  <line x1="650" y1="202" x2="650" y2="244" class="rflow"/>
+  <line x1="650" y1="290" x2="650" y2="332" class="rflow"/>
+  <line x1="650" y1="378" x2="650" y2="420" class="rflow"/>
+  <line x1="650" y1="470" x2="650" y2="514" class="rflow"/>
+  <line x1="650" y1="580" x2="650" y2="602" class="gflow"/>
+
+  <!-- 路径3：非 V2 -->
+  <rect x="880" y="90" width="380" height="42" rx="21" fill="#f8fafc" stroke="#64748b" class="box"/>
+  <text x="1070" y="117" text-anchor="middle" class="tag" fill="#475569">路径③ 非 V2 独立算子</text>
+
+  <rect x="905" y="160" width="330" height="62" rx="14" fill="#f8fafc" stroke="#64748b" class="box"/>
+  <text x="1070" y="186" text-anchor="middle" class="h">ChannelManager::ChannelCommCreate</text>
+  <text x="1070" y="208" text-anchor="middle" class="s">老式独立算子通道</text>
+
+  <rect x="905" y="248" width="330" height="62" rx="14" fill="#f8fafc" stroke="#64748b" class="box"/>
+  <text x="1070" y="274" text-anchor="middle" class="h">BuildChannelRequests</text>
+  <text x="1070" y="296" text-anchor="middle" class="s">OpCommTransport + indOpTransportAlloc</text>
+
+  <rect x="905" y="336" width="330" height="62" rx="14" fill="#f8fafc" stroke="#64748b" class="box"/>
+  <text x="1070" y="362" text-anchor="middle" class="h">legacy Transport / link 体系</text>
+  <text x="1070" y="384" text-anchor="middle" class="s">不走 base_comm 的 Channel 对象</text>
+
+  <rect x="905" y="424" width="330" height="66" rx="14" fill="#f0fdf4" stroke="#16a34a" class="box"/>
+  <text x="1070" y="450" text-anchor="middle" class="h" fill="#15803d">✅ 不经过 base_comm channel</text>
+  <text x="1070" y="472" text-anchor="middle" class="s">与本改动零交集</text>
+
+  <line x1="1070" y1="202" x2="1070" y2="244" class="flow"/>
+  <line x1="1070" y1="290" x2="1070" y2="332" class="flow"/>
+  <line x1="1070" y1="378" x2="1070" y2="420" class="flow"/>
+
+  <!-- 底部补充 -->
+  <rect x="60" y="706" width="1200" height="88" rx="16" fill="#fffbeb" stroke="#d97706" class="box"/>
+  <text x="90" y="735" class="tag" fill="#b45309">两个易混点</text>
+  <text x="90" y="758" class="s">· AIV 引擎 + UB_RTP 走 AivUrmaChannel（另一套实现），同样不经过本 helper；</text>
+  <text x="90" y="778" class="s">· UBG 是 COMM_PROTOCOL_UB_RTP 的别名（hcomm_res_defs.h），UBOE / UB_RTP 共用 AicpuTsUboeUbRtpChannelHelper——改一处，两协议同时生效。</text>
+</svg>
