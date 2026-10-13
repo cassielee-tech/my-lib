@@ -100,17 +100,48 @@ INT64 / UINT64 / FP64——每个元素 8 字节（对比 INT8/FP16/FP32 等"窄
 
 ### 3.1 一次 HcclReduce 调用的旅程
 
-〔代码事实〕入口 `HcclReduce`（`include/hccl.h:250`）之后的分层：
+〔代码事实〕入口 `HcclReduce`（`include/hccl.h:250`）之后，一次调用要走过 7 个阶段（函数名与行号均已核对）：
 
 ```
- HcclReduce(...)                          对外 API
-   └→ selector（选算法）                    "这次该用哪个算法？"——按拓扑/数据类型/规约操作点名
-       └→ executor（编排）                  "按什么顺序跑哪些步骤？"——串行/并发/分层编排
-           └→ template（模板，真正干活）      "具体怎么搬数据、怎么做规约"
-               └→ wrapper（动作原语）        LocalCopy / LocalReduce / SendRecvWrite...
-                   └→ HCOMM 基础通信库       独立仓 cann/hcomm，经 dlsym 动态加载
-                       （真正的硬件搬运/规约指令在这里下发）
+ 阶段 0  API 入口与分流          HcclReduce（reduce.cc:23）
+                                   设备/版本判断走新流程；count==0 直接成功返回
+ 阶段 1  入参检查                ReduceInitAndCheck（reduce.cc:129）
+                                   指针、count、数据类型、root 合法性；
+                                   CheckReduceOp(:146) 校验 PROD 的类型白名单
+ 阶段 2  模式分流与参数构造      ReduceOutPlaceCommon（reduce.cc:219）
+                                   单算子 OPBASE / 图模式 OFFLOAD 二选一；
+                                   ReduceConstructOpParam(:179) 把入参装进 OpParam；
+                                   单 rank、缓存命中等短路出口
+ 阶段 3  算法选择 ★改动点 1      Selector（op_common.cc:160）
+                                   取拓扑 → 按引擎跑 ReduceAutoSelector.SelectAicpuAlgo
+                                   （reduce_auto_selector.cc:281 特判分支，本次要改）
+                                   → SetCommEngine 定引擎 → 超时/切分比例
+ 阶段 4  资源计算                HcclExecOp（op_common.cc:812）→ HcclGetAlgRes(:1387)
+                                   CalcAlgHierarchyInfoV2 算分级通信域（框内/框间分组）
+                                   → CalcRes 算线程/notify/channel → 资源不足触发
+                                   FallbackOp 回退换算法
+ 阶段 5  执行编排 ★改动点 2 受益  executor->Orchestrate
+                                   按 RS-L0→RS-L1→AG-L1→AG-L0 逐层调用模板 KernelRun
+                                   （新注册的算法在此被执行，但编排代码一行不改）
+ 阶段 6  模板与硬件执行          template KernelRun → wrapper（动作原语）→ HCOMM
+                                   LocalCopy / LocalReduce / SendRecvWrite... 经 dlsym
+                                   下发，AICPU/SDMA 真正干活
 ```
+
+各阶段大白话：
+
+- **阶段 0–1（门卫）**：先确认"你是谁、带的东西合不合规"。PROD 配了不支持的类型（如 uint8）在这里就被礼貌劝退。
+- **阶段 2（填单）**：把用户参数抄到内部工单 `OpParam` 上，并决定走单算子直发还是图模式卸载。
+- **阶段 3（派单）★**：看拓扑和数据特征，从算法注册表里**点名一个算法名**。这是本次需求修改路由分支的地方。
+- **阶段 4（备料）**：按图纸领工具、派工位——分级通信域（谁属于框内组、谁属于框间组）、线程、notify、通信通道。〔打比方〕工位不够（资源不足）就换一套方案（回退FallbackOp）。
+- **阶段 5（开工）**：executor 按"先框内、再框间、再分发"的顺序逐步调用模板干活。
+- **阶段 6（干活）**：模板发出一条条搬运/规约指令，经 wrapper 封装、HCOMM 落到硬件。
+
+**本需求落在哪（小白版结论）**：
+
+1. **阶段 3（算法选择）**——改 `reduce_auto_selector.cc:281` 的特判分支：这是**每次调用都会走**的运行时路由，把"两级拓扑 + 64bit/PROD → 回退 Sole"改判给新算法名；
+2. **注册表（编译期登记，服务于阶段 3/4/5）**——在 `reduce_sequence_executor_aicpu_3level.cc` 文件尾新增 `REGISTER_EXEC_V2_MULTI`：把"executor + 6 个模板位"的新组合登记进注册表，使阶段 3 能选中这个名字、阶段 4 按它的 executor 算资源、阶段 5 按它的模板编排；
+3. **阶段 5/6 完全复用现有代码，一行不改**——这正是 SE 设计"只加注册、不改框架"的准确含义。
 
 分层是架构硬约束：HCCL 不编译期依赖 HCOMM，跨仓调用全部走 `src/common/hcomm_dlsym/` 的符号表 + dlsym。
 
