@@ -23,6 +23,18 @@ HCCL 是 CANN 的核心集合通信库，Reduce 算子（`HcclReduce`，`include
 
 **责任边界**：本文档仅覆盖 Reduce。AllReduce / ReduceScatter 为同型兄弟需求（由他人负责），三算子 selector/executor 分文件、无共同改动点，仅交付节奏与验收口径需对齐。
 
+根因与现状回退链：
+
+```mermaid
+flowchart LR
+    A["两级拓扑 + 64bit/PROD<br/>INT64/UINT64/FP64 ∥ PROD"] --> B["常规分级算法层间模板<br/>在线归约原语不支持<br/>ins_temp_reduce_scatter_nhr.cc:424"]
+    B --> C["LocalReduce 分流<br/>AICPU 控制核标量规约<br/>alg_data_trans_wrapper.cc:905"]
+    C --> D["需断批同步<br/>仅 aicpu_reduce 系列模板兼容"]
+    D --> E["现状：回退 Sole 扁平算法<br/>gather 全量 + 标量算<br/>通信量放大 rankSize 倍"]
+    E --> F["本需求：两级 sequence 编排<br/>（nhr+nhr）正确性优先"]
+    style F fill:#e8f5e9,stroke:#4caf50
+```
+
 ## 1.2 输入
 
 **API 入参**（与现状一致，无新增）：
@@ -92,13 +104,14 @@ topoInfo->topoLevelNums == TOPO_LEVEL_NUM_2
 
 新增 aicpu 引擎、两级拓扑的 sequence 分级算法（复用 `ReduceSequenceExecutorAicpu3Level`，两级注册 + `skipLevel2_` 跳层，先例 `AicpuReduceSequenceMeshConcurNHR`，`reduce_sequence_executor_aicpu_3level.cc:841`）：
 
-```
-用户输入 ─▶ RS-L0 框内归约：InsTempReduceScatterAicpuReduceNHRPcie
-              （NHR 交换 + AICPU LocalReduce + 断批同步）
-        ─▶ RS-L1 框间归约：InsTempReduceScatterAicpuReduceNHRPcie
-        ─▶ AG-L1 框间分发：InsTempAllGatherNHR
-        ─▶ AG-L0 框内分发：InsTempAllGatherNHR（仅 root 写回用户 output）
-数据超单轮容量时按 maxCountPerLoop 分 loop 循环执行上述 4 步
+```mermaid
+flowchart TD
+    IN["用户输入"] --> RSL0["RS-L0 框内归约<br/>InsTempReduceScatterAicpuReduceNHRPcie<br/>（NHR 交换 + AICPU LocalReduce + 断批同步）"]
+    RSL0 --> RSL1["RS-L1 框间归约<br/>InsTempReduceScatterAicpuReduceNHRPcie"]
+    RSL1 --> AGL1["AG-L1 框间分发<br/>InsTempAllGatherNHR"]
+    AGL1 --> AGL0["AG-L0 框内分发（仅 root 写回）<br/>InsTempAllGatherNHR"]
+    AGL0 --> OUT["root rank recvBuf：全量归约结果"]
+    AGL0 -.->|"数据超单轮容量，按 maxCountPerLoop 分 loop"| RSL0
 ```
 
 注册的 6 个模板位（L2 两位因 skipLevel2 不会被拉起，按现有惯例填同款占位）：
@@ -132,17 +145,33 @@ AllGather 阶段为纯数据搬运、不做规约，64bit 无障碍，复用 `In
 
 一次 `HcclReduce` 调用经过 7 个阶段，本需求改动位于阶段 3 与注册表（阶段定义详见《前置知识.md》3.1）：
 
-```
- 阶段 0  API 入口与分流          HcclReduce（reduce.cc:23）
- 阶段 1  入参检查                ReduceInitAndCheck（reduce.cc:129，CheckReduceOp :146）
- 阶段 2  模式分流与参数构造      ReduceOutPlaceCommon（reduce.cc:219，ReduceConstructOpParam :179）
- 阶段 3  算法选择 ★改动点1       Selector（op_common.cc:160）→ ReduceAutoSelector（:281 特判分支）
- 阶段 4  资源计算                HcclExecOp（op_common.cc:812）→ HcclGetAlgRes（:1387）
- 阶段 5  执行编排 ★改动点2 受益   executor->Orchestrate（RS-L0→RS-L1→AG-L1→AG-L0）
- 阶段 6  模板与硬件执行          template KernelRun → wrapper → HCOMM（dlsym）
+```mermaid
+flowchart TD
+    S0["阶段 0 API 入口与分流<br/>HcclReduce（reduce.cc:23）"] --> S1["阶段 1 入参检查<br/>ReduceInitAndCheck（reduce.cc:129，CheckReduceOp :146）"]
+    S1 --> S2["阶段 2 模式分流与参数构造<br/>ReduceOutPlaceCommon（reduce.cc:219）"]
+    S2 --> S3["阶段 3 算法选择 ★改动点 1<br/>Selector（op_common.cc:160）<br/>→ ReduceAutoSelector :281 特判分支"]
+    S3 --> S4["阶段 4 资源计算<br/>HcclExecOp（op_common.cc:812）→ HcclGetAlgRes（:1387）"]
+    S4 --> S5["阶段 5 执行编排 ★改动点 2 受益<br/>executor→Orchestrate：RS-L0→RS-L1→AG-L1→AG-L0"]
+    S5 --> S6["阶段 6 模板与硬件执行<br/>template KernelRun → wrapper → HCOMM（dlsym）"]
+    style S3 fill:#fff3cd,stroke:#ffc107
+    style S5 fill:#fff3cd,stroke:#ffc107
 ```
 
-**改动点 1——selector 路由**（`reduce_auto_selector.cc` `SelectAicpuAlgo` :281 附近）：
+**改动点 1——selector 路由**（`reduce_auto_selector.cc` `SelectAicpuAlgo` :281 附近），路由决策树：
+
+```mermaid
+flowchart TD
+    A["SelectAicpuAlgo 入口"] --> B{"topoLevelNums > 1 ?"}
+    B -->|"否：单机"| C["单机分支（Mesh OneShot/TwoShot、CLOS 等）<br/>全部不变"]
+    B -->|"是"| D{"Is64BitDataType ∥ PROD ?"}
+    D -->|"否"| E["常规分级算法<br/>Parallel / Sequence 等，不变"]
+    D -->|"是"| F{"topoLevelNums == 2 ?"}
+    F -->|"是：两级"| G["★ 新算法<br/>AicpuReduceSequenceNHRAicpuReduceNHR"]
+    F -->|"否：三级"| H["维持 Sole<br/>AicpuReduceSoleNHRAicpuReduce"]
+    style G fill:#e8f5e9,stroke:#4caf50
+```
+
+对应代码修改：
 
 ```cpp
 if (Is64BitDataType(dataType) || opParam.reduceType == HCCL_REDUCE_PROD) {
