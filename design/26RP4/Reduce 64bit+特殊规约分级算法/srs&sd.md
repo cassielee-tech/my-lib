@@ -93,7 +93,7 @@ topoInfo->topoLevelNums == TOPO_LEVEL_NUM_2
 - task cache：64bit/PROD 维持既有禁用策略（`aicpu_task_cache_policy.cc:198-209`）；
 - 对称内存：随现有 `AicpuReduceSequenceMeshConcurNHR` 行为（不特判，UT/ST 验证项）；
 - 性能：无指标要求，正确性优先；
-- 版本与结构：注册置于 `CANN_VERSION_NUM >= CANN_VERSION(9, 0, 0)` 宏区；无新增文件，不改 CMakeLists.txt；符合仓内编码/静态检查/pre-commit 规范（C++17、`.clang-format`、OAT）；
+- 版本与结构：注册置于 `CANN_VERSION_NUM >= CANN_VERSION(9, 0, 0)` 宏区；模板均为 aicpu 引擎，无需 `#ifndef AICPU_COMPILE` 包裹（与同文件现有 aicpu 注册一致）；无新增文件，不改 CMakeLists.txt；符合仓内编码/静态检查/pre-commit 规范（C++17、`.clang-format`、OAT）；
 - 架构：不新增跨仓依赖，HCOMM 仅使用既有 dlsym 符号。
 
 ---
@@ -184,7 +184,7 @@ if (Is64BitDataType(dataType) || opParam.reduceType == HCCL_REDUCE_PROD) {
 // 其余分支（单机 Mesh/CLOS、保序拦截、非 64bit 常规分级）一律不动
 ```
 
-**改动点 2——注册表登记**（`reduce_sequence_executor_aicpu_3level.cc` 文件尾，置于 9.0.0 版本宏区）：
+**改动点 2——注册表登记**（`reduce_sequence_executor_aicpu_3level.cc` 文件尾，置于 9.0.0 版本宏区；模板均为 aicpu 引擎，无需 `#ifndef AICPU_COMPILE` 包裹）：
 
 ```cpp
 REGISTER_EXEC_V2_MULTI(HCCL_CMD_REDUCE, <新算法名>, ReduceSequenceExecutorAicpu3Level, TopoMatchTwoLevel,
@@ -214,6 +214,7 @@ REGISTER_ALG_ATTRS(<新算法名>, topo.minTopoLevelNum = TOPO_LEVEL_NUM_2;
 | ---- | ---- |
 | `cost_table.cc` / `cost_model.cc` | 不修改；新算法不应参与 cost 排序（依赖 2.9 风险 1 处置落地） |
 | `alg_attrs_registry.*` / `algo_name_mapper.*` | 不修改，注册宏自动登记 |
+| executor `GetAlgNetMeta` | 不修改；均已实现，随注册自动生效（与设计文档 2.6 排查结论一致） |
 | template 层（aicpu 目录） | 不修改、不新增（需求约束） |
 | `CMakeLists.txt` | 不修改（无新文件） |
 
@@ -318,7 +319,17 @@ REGISTER_ALG_ATTRS(<新算法名>, topo.minTopoLevelNum = TOPO_LEVEL_NUM_2;
 | 场景开关 | 对称内存开/关；inplace（预期不支持，校验拒绝路径）；root 非 0 rank |
 | 回归 | 非 64bit 常规场景路由不变；三级/单机场景路由不变 |
 
-**质量门禁**：`bash build.sh --pkg` 编译无告警；`build.sh -u` UT 通过（新增路由矩阵用例）；`build.sh -s` ST 通过；pre-commit（clang-format + OAT）与 CI codecheck 通过；PR 关联 Issue。
+**UT 用例明细**（承接设计文档 4.4 / 第 6 章）：
+
+| 用例 | 预期 |
+| ---- | ---- |
+| 路由矩阵：两级拓扑 × {INT64/UINT64/FP64} / PROD | 选中新算法名 |
+| 路由矩阵：三级拓扑 + 64bit/PROD | 仍选 Sole（AicpuReduceSoleNHRAicpuReduce） |
+| 路由矩阵：非 64bit + sum/min/max | 不进新算法，维持常规算法 |
+| 注册完整性 | 新算法名可从注册表检索；attrs 两级过滤（min/maxTopoLevelNum=2）生效 |
+| （如框架支持）executor CalcRes / 层级切分参数 | 两级切分参数（sliceSize/tailSize/stride/repeatNum）符合预期 |
+
+**质量门禁**：`bash build.sh --pkg` 编译无告警；`build.sh -u` UT 通过（用例明细见上）；`build.sh -s` ST 通过；pre-commit（clang-format + OAT）与 CI codecheck 通过；PR 关联 Issue。
 
 **风险与对策**（承接反串讲，含对 SE 串讲原论断的修正）：
 
@@ -329,3 +340,4 @@ REGISTER_ALG_ATTRS(<新算法名>, topo.minTopoLevelNum = TOPO_LEVEL_NUM_2;
 | loop 暴增误报 CUSTOM_TIMEOUT（scratch 相乘 → 单轮容量骤减 → 断批同步次数线性放大） | 中 | GB 级数据量用例；必要时调整超时语义（另行评审） |
 | 命名尾段与组合不一致（按惯例应为 NHRAicpuReduce×2）及 `HCCL_ALGO` 解析 | 中 | 评审定稿命名后补解析验证用例 |
 | Reduce 对称内存路径未特判 | 低 | 与现有两级算法行为一致，ST 开关覆盖；异常则 attrs `opCustomCheck` 排除 symm 场景并回退 Sole |
+| 设计文档对 Reduce 注册 attrs 细节留白（AllReduce 行明确声明 supportLevel0Topos / isSupportLevel1Nhr / isSupportLevel0PcieMix，Reduce 行仅写"两级拓扑约束 + isSupportInplace=false"） | 待确认 | 设计评审时确认 Reduce 注册是否需显式声明 `isSupportLevel1Nhr = true` 与 level0 拓扑形态；建议对齐既有 Sole 版 attrs（`reduce_sole_executor.cc:360-369`） |
