@@ -146,15 +146,33 @@ AllGather 阶段为纯数据搬运、不做规约，64bit 无障碍，复用 `In
 一次 `HcclReduce` 调用经过 7 个阶段，本需求改动位于阶段 3 与注册表（阶段定义详见《前置知识.md》3.1）：
 
 ```mermaid
-flowchart TD
-    S0["阶段 0 API 入口与分流<br/>HcclReduce（reduce.cc:23）"] --> S1["阶段 1 入参检查<br/>ReduceInitAndCheck（reduce.cc:129，CheckReduceOp :146）"]
-    S1 --> S2["阶段 2 模式分流与参数构造<br/>ReduceOutPlaceCommon（reduce.cc:219）"]
-    S2 --> S3["阶段 3 算法选择 ★改动点 1<br/>Selector（op_common.cc:160）<br/>→ ReduceAutoSelector :281 特判分支"]
-    S3 --> S4["阶段 4 资源计算<br/>HcclExecOp（op_common.cc:812）→ HcclGetAlgRes（:1387）"]
-    S4 --> S5["阶段 5 执行编排 ★改动点 2 受益<br/>executor→Orchestrate：RS-L0→RS-L1→AG-L1→AG-L0"]
-    S5 --> S6["阶段 6 模板与硬件执行<br/>template KernelRun → wrapper → HCOMM（dlsym）"]
-    style S3 fill:#fff3cd,stroke:#ffc107
-    style S5 fill:#fff3cd,stroke:#ffc107
+sequenceDiagram
+    autonumber
+    participant U as 调用方（框架/用户）
+    participant API as HcclReduce 入口
+    participant SEL as Selector
+    participant EXE as Executor（3Level）
+    participant TPL as 模板（NHRPcie / AG NHR）
+    participant HC as HCOMM（dlsym）
+    U->>API: HcclReduce(...)【阶段0，reduce.cc:23】
+    API->>API: ReduceInitAndCheck 入参检查【阶段1，reduce.cc:129】
+    API->>API: 模式分流 + OpParam 构造【阶段2，reduce.cc:219】
+    rect rgb(255,243,205)
+        API->>SEL: OpParam + TopoInfo【阶段3 ★改动点1，op_common.cc:160】
+        SEL-->>API: 两级+64bit/PROD → 选中新算法名（:281 特判分支）
+    end
+    API->>EXE: HcclGetAlgRes：分级通信域 + 资源【阶段4，op_common.cc:1387】
+    EXE->>HC: CalcChannelRequestNhr 按框内/框间建链路
+    rect rgb(255,243,205)
+        loop 数据超单轮容量时分 loop
+            EXE->>TPL: KernelRun(RS-L0 框内)【阶段5 ★改动点2 受益】
+            TPL->>HC: NHR 交换 + 断批标量规约【阶段6】
+            EXE->>TPL: KernelRun(RS-L1 框间)
+            TPL->>HC: NHR 交换 + 断批标量规约
+            EXE->>TPL: KernelRun(AG-L1 → AG-L0 分发)
+            TPL-->>U: 仅 root 写回用户 recvBuf
+        end
+    end
 ```
 
 **改动点 1——selector 路由**（`reduce_auto_selector.cc` `SelectAicpuAlgo` :281 附近），路由决策树：
@@ -218,8 +236,6 @@ REGISTER_ALG_ATTRS(<新算法名>, topo.minTopoLevelNum = TOPO_LEVEL_NUM_2;
 | template 层（aicpu 目录） | 不修改、不新增（需求约束） |
 | `CMakeLists.txt` | 不修改（无新文件） |
 
-**运行时关键路径**：Selector 选中新算法名 → `HcclGetAlgRes` 经 `CalcAlgHierarchyInfoV2` 计算分级通信域（框内/框间分组）→ `CalcRes` 按模板 `CalcChannelRequestNhr` 分别建框内/框间链路 → `Orchestrate` 按 2.1 顺序逐层调用模板 `KernelRun`。
-
 ## 2.3 数据描述
 
 **OpParam 关键字段**（`ReduceConstructOpParam`，`reduce.cc:179` 组装）：
@@ -236,6 +252,20 @@ REGISTER_ALG_ATTRS(<新算法名>, topo.minTopoLevelNum = TOPO_LEVEL_NUM_2;
 **资源（AlgResourceRequest）**：NHRPcie 模板单线程（slaveThreadNum=0），sequence executor 对 thread/notify 取 max 合并；链路按框内/框间 `subCommRanks` 分建。
 
 **scratch**：NHRPcie `CalcScratchMultiple = rankSize*2`（`ins_temp_reduce_scatter_aicpu_reduce_nhr_pcie.cc:282`），两级相乘（≈ 4×L0×L1）后单轮可处理数据量 `maxCountPerLoop` 相应变小，大数据量分多 loop；每 loop 的 RS 阶段伴随一次 `HcommBatchModeEnd/Start + HcommThreadJoin` 断批同步。
+
+断批同步机制时序（代码调用顺序忠实呈现，`ins_temp_reduce_scatter_mesh_1D.cc:139-146`）：
+
+```mermaid
+sequenceDiagram
+    participant T as 模板线程
+    participant B as HCOMM 批量队列
+    participant C as AICPU 控制核
+    T->>B: HcommBatchModeEnd（清空当前批次）
+    T->>B: HcommBatchModeStart（开启新批次）
+    T->>C: AicpuReduce 标量规约（逐元素计算）
+    T->>B: HcommThreadJoin（等待线程收尾，CUSTOM_TIMEOUT）
+    Note over T,B: 每轮规约重复一次，故该路径性能天然较差（需求不设性能指标）
+```
 
 **输出数据流**：通信全程经 ccl buffer 中转；AG-L0 阶段仅 root rank 将结果写入用户 recvBuf。
 
