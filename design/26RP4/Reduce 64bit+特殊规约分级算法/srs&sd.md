@@ -262,20 +262,22 @@ REGISTER_ALG_ATTRS(<新算法名>, topo.minTopoLevelNum = TOPO_LEVEL_NUM_2;
 
 ## 2.3 数据描述
 
-**OpParam 关键字段**（`ReduceConstructOpParam`，`reduce.cc:179` 组装）：
+本需求**不修改任何数据结构**。本节一方面给出数据面零改动的依据（前三项：判定输入来源、编排参数语义对齐、资源计算覆盖），另一方面指出新组合带来的**两处数据行为变化**（后两项：分轮数放大、仅 root 写回），分别支撑 2.9 风险 3 与 root 语义相关用例。
 
-| 字段 | 取值 |
-| ---- | ---- |
-| DataDes.dataType / count | 用户入参（INT64/UINT64/FP64 等） |
-| reduceType | SUM/PROD/MAX/MIN |
-| root / userRank | 用户指定 / 本卡 rank |
-| opType | HCCL_CMD_REDUCE |
+**OpParam 关键字段**（`ReduceConstructOpParam`，`reduce.cc:179` 组装）——改动点 1 的判定输入即取自其中两个字段：
 
-**TemplateDataParams**：sliceSize / tailSize（尾块）/ outputSliceStride / repeatNum / buffInfo——与分级版模板语义完全对齐，executor 编排代码无需修改。
+| 字段 | 取值 | 与本需求的关系 |
+| ---- | ---- | ---- |
+| DataDes.dataType / count | 用户入参（INT64/UINT64/FP64 等） | selector 特判分支按 `dataType` 判定 Is64BitDataType |
+| reduceType | SUM/PROD/MAX/MIN | 特判分支的另一判定条件（==PROD） |
+| root / userRank | 用户指定 / 本卡 rank | AG-L0 仅 root 写回的依据 |
+| opType | HCCL_CMD_REDUCE | 注册表检索键 |
 
-**资源（AlgResourceRequest）**：NHRPcie 模板单线程（slaveThreadNum=0），sequence executor 对 thread/notify 取 max 合并；链路按框内/框间 `subCommRanks` 分建。
+**TemplateDataParams**：sliceSize / tailSize（尾块）/ outputSliceStride / repeatNum / buffInfo——与分级版模板语义完全对齐，executor 编排代码无需修改。这是"只加注册、不改框架"的成立前提：新模板组合消费的参数语义与既有编排逻辑完全一致。
 
-**scratch**：NHRPcie `CalcScratchMultiple = rankSize*2`（`ins_temp_reduce_scatter_aicpu_reduce_nhr_pcie.cc:282`），两级相乘（≈ 4×L0×L1）后单轮可处理数据量 `maxCountPerLoop` 相应变小，大数据量分多 loop；每 loop 的 RS 阶段伴随一次 `HcommBatchModeEnd/Start + HcommThreadJoin` 断批同步。
+**资源（AlgResourceRequest）**：NHRPcie 模板单线程（slaveThreadNum=0），sequence executor 对 thread/notify 取 max 合并；链路按框内/框间 `subCommRanks` 分建——新算法的资源需求被既有 `CalcRes` 路径原样覆盖，是阶段 4（资源计算）零改动的依据。
+
+**scratch（数据行为变化①）**：NHRPcie `CalcScratchMultiple = rankSize*2`（`ins_temp_reduce_scatter_aicpu_reduce_nhr_pcie.cc:282`），两级相乘（≈ 4×L0×L1）后单轮可处理数据量 `maxCountPerLoop` 相应变小，大数据量分多 loop；每 loop 的 RS 阶段伴随一次 `HcommBatchModeEnd/Start + HcommThreadJoin` 断批同步。loop 数与断批同步次数随数据量线性放大——直接支撑 2.9 风险 3（CUSTOM_TIMEOUT 误报）与 ST 的"GB 级大数据分 loop"用例。
 
 断批同步机制时序（代码调用顺序忠实呈现，`ins_temp_reduce_scatter_mesh_1D.cc:139-146`）：
 
@@ -291,7 +293,7 @@ sequenceDiagram
     Note over T,B: 每轮规约重复一次，故该路径性能天然较差（需求不设性能指标）
 ```
 
-**输出数据流**：通信全程经 ccl buffer 中转；AG-L0 阶段仅 root rank 将结果写入用户 recvBuf。
+**输出数据流（数据行为变化②）**：通信全程经 ccl buffer 中转；AG-L0 阶段仅 root rank 将结果写入用户 recvBuf——Reduce 语义在新算法的落点，对应 ST 的"root 非 0 / 非 root 不写"用例。
 
 ## 2.4 依赖性描述
 
