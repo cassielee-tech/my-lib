@@ -217,48 +217,29 @@ REGISTER_ALG_ATTRS(<新算法名>, topo.minTopoLevelNum = TOPO_LEVEL_NUM_2;
 #include "ins_temp_reduce_scatter_aicpu_reduce_nhr_pcie.h"       // 需补 include
 ```
 
-**【待 SE 决策】cost 误选根因详细分析与三种改法**
+**【待 SE 决策】cost 误选风险分析与处置方案**
 
-（对应 2.9 风险表第 1 条；SE 串讲文档 2.6 节"新算法不参与 cost 排序"论断与代码不符，此处给出完整因果链与处置选项，请评审时拍板。）
+（对应 2.9 风险表第 1 条；SE 串讲文档 2.6 节"新算法不参与 cost 排序"论断与代码不符，此处给出因果链与处置选项，请评审时拍板。）
 
-**一、为什么会误选——五环因果链**：
+**问题**：新算法聚合得到的 cost 系数不完整，可能在常规场景被误选。因果链：
 
-```
-环1 模板系数不对齐：6 模板位中 NHRPcie×3 无静态 CalcCostCoeff（基类默认
-   返回空，alg_v2_template_base.h:28），AG NHR×3 有（ins_temp_all_gather_nhr.cc:18）
-    ↓
-环2 聚合无短路：ReduceSequenceExecutorAicpu3Level::CalcCostCoeff 将 p0..p5
-   直接 v.insert 拼接（reduce_sequence_executor_aicpu_3level.cc:78-110），
-   不像 RS executor 那样"任一为空→整体退出"
-   （ins_v2_reduce_scatter_sequence_executor_aicpu.cc:133-136，该处注释即为此
-   目的而写——框架本意的防护模式）
-    ↓
-环3 形成残缺报价：聚合结果非空、但只含 AG 部分，最重的 RS 部分记 0
-    ↓
-环4 候选池无门禁：新算法 attrs 按设计不设 supportedDataTypes 白名单、不限
-   isSupportProd（能力全集，路由交给 selector），常规场景（两级+fp32+sum）
-   下是 cost 候选池合法选手
-    ↓
-环5 比价失真：RS 工作量记 0 → 总耗时系统性低估 → 比价胜出 → 误选 →
-   常规场景被路由到 aicpu 标量慢路径，违背"其余场景路由不变"红线
-```
+1. 6 个模板位中 `InsTempAllGatherNHR`×3 实现了静态 `CalcCostCoeff`，`InsTempReduceScatterAicpuReduceNHRPcie`×3 未实现（基类默认返回空，`alg_v2_template_base.h:28`）；
+2. `ReduceSequenceExecutorAicpu3Level::CalcCostCoeff`（`reduce_sequence_executor_aicpu_3level.cc:78-110`）对 p0..p5 直接拼接，无"任一为空则整体返回空"的短路（RS executor 有此短路且注释即为该目的，`ins_v2_reduce_scatter_sequence_executor_aicpu.cc:133-136`）；
+3. 拼接结果非空但不完整——仅含 AG 项、缺失最重的 RS 项，估算耗时系统性偏低；
+4. 新算法 attrs 不设数据类型白名单与 `isSupportProd` 限制，常规场景（两级 + fp32 + sum）下为 cost 候选池合法候选；
+5. 常规场景 cost 排序时新算法因低估胜出，路由至 aicpu 标量慢路径，违背"其余场景路由不变"约束。
 
-**二、两个旁证**：
+参考：现有 `AicpuAllReduceSequenceMeshNHRAicpuReduce` 同为部分系数组合，靠 `supportedDataTypes={INT64,UINT64,FP64}` + `isSupportProd=true` 限定可选范围（`ins_v2_all_reduce_sequence_executor_aicpu.cc:901-903`）；本需求进入条件含 PROD@非 64bit，无法照搬该白名单。
 
-1. RS executor 的短路注释（"任一 template 未实现 CalcCostCoeff（返回空）则整个算法不参与 CostModel"）证明"空即整体退出"是框架既定的防护模式，方案①属于对齐而非新发明；
-2. 现有 `AicpuAllReduceSequenceMeshNHRAicpuReduce` 同为"NHRPcie（空）+ AG NHR（有）"的部分系数组合，靠 `supportedDataTypes={INT64,UINT64,FP64}` + `isSupportProd=true` 白名单自保（`ins_v2_all_reduce_sequence_executor_aicpu.cc:901-903`）——SE 已有"门禁防误选"先例；但本需求进入条件是"64bit **或** PROD@任意 dtype"，白名单会挡掉 PROD@fp16/fp32，不能照抄。
+**三种处置方案**：
 
-**三、三种改法对照**：
-
-| | ① executor 补短路（推荐） | ② opCustomCheck 门禁 | ③ 证据豁免（不改代码） |
+| 处置方案 | 改法 | 效果与影响 | 代价 |
 | ---- | ---- | ---- | ---- |
-| 改哪里 | `reduce_sequence_executor_aicpu_3level.cc` 的 `CalcCostCoeff` | 新算法的 `REGISTER_ALG_ATTRS` | 无代码改动，产出证据材料 |
-| 怎么改 | p0..p5 聚合前加"任一为空→整体返回空"判断，对齐 RS executor :133-136 模式，约 10 行 | 增加 `op.opCustomCheck = (Is64BitDataType(dt) ∥ reduceType==PROD)`，精确复刻 selector 进入条件（先例：`AicpuReduceSequenceMeshConcurNHR` 的 perRankSize 检查，`reduce_sequence_executor_aicpu_3level.cc:848-850`） | 梳理调用链证据：两级特判分支由 selector 点名返回、不经过 cost table 比价（含图模式离线资源计算路径核查） |
-| 效果 | 新算法彻底退出 cost 比价池，只能被 selector 点名；**根治** | 常规场景进不了候选池；特殊场景仍带残缺报价（由 selector 特判兜住） | 若证据成立则风险不存在 |
-| 影响面 | 同执行器既有算法（`AicpuReduceSequenceMeshConcurNHR`/`NHRNHR`）若含空系数模板将从 cost 池退出——需逐一核查（当前均由 selector 特判点名，预期无影响，实现时验证）；AllReduce 的 sequence executor 同样无短路（`ins_v2_all_reduce_sequence_executor_aicpu.cc:84-105`），需与其负责人对齐同改 | 仅新算法自身，零波及；`opCustomCheck` 的过滤触发点需实现时确认 | 零波及，但结论脆——selector/cost 架构持续演进（topomatch v2），演进后需重新举证 |
-| 代价 | ~10 行 + 影响面核查 | ~3 行 | 分析工作量，无代码 |
+| ① executor 补短路（推荐） | `CalcCostCoeff` 聚合前增加"任一模板系数为空则整体返回空"，对齐 RS executor 既有模式 | 新算法退出 cost 排序、仅可由 selector 指定；需核查同执行器既有算法（MeshConcurNHR/NHRNHR）系数完整性，并与 AllReduce 负责人对齐同改（其 executor 同样无短路，`ins_v2_all_reduce_sequence_executor_aicpu.cc:84-105`） | ~10 行 |
+| ② opCustomCheck 门禁 | attrs 增加 `opCustomCheck = Is64BitDataType ∥ PROD`，与 selector 进入条件一致（先例：`AicpuReduceSequenceMeshConcurNHR` 的 perRankSize 检查，`reduce_sequence_executor_aicpu_3level.cc:848-850`） | 常规场景被 attrs 过滤、不进候选池；特殊场景仍为部分系数（由 selector 特判兜底） | ~3 行 |
+| ③ 证据豁免 | 论证两级特判分支不经过 cost table 排序（含图模式离线资源计算路径） | 若成立无需改动；结论依赖当前架构，selector 演进后需重新评估 | 分析工作 |
 
-**四、决策请求**：请 SE 在设计评审时三选一拍板。个人推荐 ①（根治 + 与框架既有防护模式统一），可与 ② 叠加作双保险；若选 ③ 请附代码级调用链证据。
+**决策请求**：请评审时三选一。建议 ①（与框架既有防护模式统一），可与 ② 叠加；若选 ③ 请附调用链证据。
 
 **修改文件清单**：
 
