@@ -383,17 +383,51 @@ sequenceDiagram
 | 路由矩阵：三级拓扑 + 64bit/PROD | 仍选 Sole（AicpuReduceSoleNHRAicpuReduce） |
 | 路由矩阵：非 64bit + sum/min/max | 不进新算法，维持常规算法 |
 | 注册完整性 | 新算法名可从注册表检索；attrs 两级过滤（min/maxTopoLevelNum=2）生效 |
-| （如框架支持）executor CalcRes / 层级切分参数 | 两级切分参数（sliceSize/tailSize/stride/repeatNum）符合预期 |
 
 **质量门禁**：`bash build.sh --pkg` 编译无告警；`build.sh -u` UT 通过（用例明细见上）；`build.sh -s` ST 通过；pre-commit（clang-format + OAT）与 CI codecheck 通过；PR 关联 Issue。
 
-**风险与对策**（承接反串讲，含对 SE 串讲原论断的修正）：
+**风险与对策**（承接反串讲，含对 SE 串讲原论断的修正；已按 NPU 实测结果刷新）：
 
-| 风险 | 等级 | 对策 |
-| ---- | ---- | ---- |
-| cost 误选：Reduce 3level executor `CalcCostCoeff` 为拼接聚合、无"任一模板空则退出"短路（`reduce_sequence_executor_aicpu_3level.cc:78-110`），且 `InsTempAllGatherNHR` 有静态系数（`ins_temp_all_gather_nhr.cc:18`）→ 新算法形成非空部分系数，可能在常规场景被 cost 低估误选（修正 SE 原论断） | 高 | 处置三选一待评审拍板，完整因果链与改法对照**详见 2.2 改动点 2 后"【待 SE 决策】"节**：① executor 补短路（对齐 RS executor 模式，推荐，约 10 行）；② `opCustomCheck` 精确表达进入条件；③ 提供成本流不覆盖的证据。UT 增加常规场景不选中新算法的断言 |
-| NHRPcie 首次作 L0 模板跑框内 HCCS 链路（此前仅作框间模板用于单机 pcie-mix 场景，零历史验证） | 中 | ST 双机全矩阵覆盖；关注非 pcie 的 SendRecvWrite 路径 |
-| loop 暴增误报 CUSTOM_TIMEOUT（scratch 相乘 → 单轮容量骤减 → 断批同步次数线性放大） | 中 | GB 级数据量用例；必要时调整超时语义（另行评审） |
-| 命名尾段与组合不一致（按惯例应为 NHRAicpuReduce×2）及 `HCCL_ALGO` 解析 | 中 | 评审定稿命名后补解析验证用例 |
-| Reduce 对称内存路径未特判 | 低 | 与现有两级算法行为一致，ST 开关覆盖；异常则 attrs `opCustomCheck` 排除 symm 场景并回退 Sole |
-| 设计文档对 Reduce 注册 attrs 细节留白（AllReduce 行明确声明 supportLevel0Topos / isSupportLevel1Nhr / isSupportLevel0PcieMix，Reduce 行仅写"两级拓扑约束 + isSupportInplace=false"） | 待确认 | 设计评审时确认 Reduce 注册是否需显式声明 `isSupportLevel1Nhr = true` 与 level0 拓扑形态；建议对齐既有 Sole 版 attrs（`reduce_sole_executor.cc:360-369`） |
+| 风险                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 等级         | 对策                                                                                                                                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| cost 误选：Reduce 3level executor `CalcCostCoeff` 为拼接聚合、无"任一模板空则退出"短路（`reduce_sequence_executor_aicpu_3level.cc:78-110`），且 `InsTempAllGatherNHR` 有静态系数（`ins_temp_all_gather_nhr.cc:18`）→ 新算法形成非空部分系数，可能在常规场景被 cost 低估误选（修正 SE 原论断）                                                                                                                                                                                                                                                                                                                                                        | 高（已处置）     | **已实施②（attrs `opustomCheck` 门禁：仅 64bit/PROD 参选，条件与 selector 特判一致）并验证**：实施前 CI 58 个 ST 常规 dtype 误选用例失败（CCL 切片冲突 + Post/Wait 死锁），实施后全部恢复、CI 全绿。另注：需求方向已反转（新算法将真实参与 cost 排序），方案待SE确认                                        |
+| NHRPcie 作 L0 模板（节点内规整 mesh）通信死锁：NPU 16 卡两级 fp64 实测必挂（首轮 NHR 通信即死等 notify 超时），ST 仿真同样复现；经多组对照实验排除 executor 编排因素，根因定位为模板 L0 通信缺陷（**实测记录、尝试明细与根因分析见本节末扩展节**） | 高（已实锤，待拍板） | 待 SE 拍板方案 A/B（详见下方扩展节）；PR 现回退至门禁版（CI 绿）待拍板 |
+| loop 暴增误报 CUSTOM_TIMEOUT（scratch 相乘 → 单轮容量骤减 → 断批同步次数线性放大）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 中          | GB 级数据量用例；必要时调整超时语义（另行评审）；若死锁风险走方案 A（L0 换 Mesh1D）布局变化后需复核本条                                                                                                                                                              |
+| 命名尾段与组合不一致（按惯例应为 NHRAicpuReduce×2）及 `HCCL_ALGO` 解析                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 中          | 评审定稿命名后补解析验证用例                                                                                                                                                                                                           |
+| Reduce 对称内存路径未特判                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 低          | 与现有两级算法行为一致，ST 开关覆盖；异常则 attrs `opCustomCheck` 排除 symm 场景并回退 Sole                                                                                                                                                         |
+| 设计文档对 Reduce 注册 attrs 细节留白（AllReduce 行明确声明 supportLevel0Topos / isSupportLevel1Nhr / isSupportLevel0PcieMix，Reduce 行仅写"两级拓扑约束 + isSupportInplace=false"）                                                                                                                                                                                                                                                                                                                                                                                                                               | 待确认        | 设计评审时确认 Reduce 注册是否需显式声明 `isSupportLevel1Nhr = true` 与 level0 拓扑形态；建议对齐既有 Sole 版 attrs（`reduce_sole_executor.cc:360-369`）；另：实测确认 attrs `isSupportLevel0PcieMix` 仅在拓扑实际为 PCIe 混连时参与过滤（`cost_model.cc:225`），规整 mesh 环境为死代码 |
+
+**NHRPcie L0 通信死锁——实测记录与根因分析**（风险表第 2 条扩展，供 SE 评审拍板）：
+
+**一、现象（NPU 与 ST 双重复现）**
+
+- 测试环境：16 卡（2 节点×8 卡）两级 MESH_1D，`reduce_test` 64m fp64；plog 确认选中新算法（SelectorEngine 路径，`selected algo type is AicpuReduceSequenceNHRAicpuReduceNHR`）。
+- NPU 实测：rank0 死等**同节点 rank7** 的 notify id=88，350s 超时；死锁位置极早（task_pos=1，首轮 NHR 通信开头）。
+- ST 仿真：任务图校验 `unmatched task（rankId:0, queueId:0, index:1）`——确定性任务错配，非时序竞争。
+
+**二、验证尝试（分情况，逐项排除）**
+
+前置已通过项（非死锁因素）：选路（fp64 两级自动选中新算法）、门禁（`opCustomCheck` 后 CI 全绿，存量不受干扰）、建链（CreateChannels 通过）。
+
+| # | 尝试 | 版本 | 结果 | 结论 |
+| ---- | ---- | ---- | ---- | ---- |
+| 1 | 原始注册（NHRPcie×3 + AG_NHR×3，3level executor，pcieMix=true） | 初始版 | 228205 建链失败 | 判定为环境偶发（后续同场景建链通过），非本问题 |
+| 2 | attrs `isSupportLevel0PcieMix` 改 false（门禁版） | e87cee42 | 建链通过，执行死锁（notify wait 350s） | 死锁首次稳定复现；该 attrs 在规整 mesh 下为死代码（`cost_model.cc:225` 仅 PCIe 混连时参与过滤），与死锁无关 |
+| 3 | 3level executor RSL1 buffInfo 修复：`hcclBuffBaseOff` 由 0 改 `meshCommBuffOffset_`，避开 NHRPcie 在 inBuff/hcclBuff 同 BaseOff 时触发的自适应后移错位 | 84e72178 | 同位置死锁 | 排除"自适应后移错位 3level 布局"假设 |
+| 4 | 全新 2level executor：照 AllReduce 已验证编排布局（cclBuffer 对半切）+ Reduce root 语义，四模板 NHRPcie×2 + AG_NHR×2 | 800fa69e | 同位置死锁 | 排除 executor 编排因素——两种截然不同的编排挂同一位置，指向模板自身 |
+
+**三、根因分析（与商用 `InsTempReduceScatterNHR` 的四差异）**
+
+| 维度       | 商用 NHR（L0/L1 商用跑通）                       | NHRPcie（L0 必挂）                                                                                           |
+| -------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| NHR 对端方向 | sendTo≠recvFrom 永不相同，每步两条 link 跨 rank 配对 | 8 卡 step0（delta=4）出现 sendTo==recvFrom 自环：同一条 link 同一 notify idx 上 record ACK + wait ACK（自 record 自 wait） |
+| 通信原语     | SendRecvXXXReduce（DMA 融合规约）              | SendRecvWrite（纯写 + CPU 后置规约）                                                                             |
+| 线程       | threads[channelIdx]（每 channel 独立线程）      | 恒 threads[0]（单线程串行）                                                                                      |
+| 槽位语义     | txSliceIdx=sendTo（写对端槽）                  | txSliceIdx=my（自己槽，靠对端写入对齐）                                                                               |
+
+头号嫌疑：**自环场景下同链路同 idx 的 record/wait 底层语义**（hcomm 仓决定）——若存在自消费/残留，8 卡 8 轮×3 步的多轮次交错误位累积 → 某轮 wait 永等 → 死锁。L1（2 卡）虽也是 1v1，但每轮仅 1 步、交错简单恰好无害——解释"L1 可跑通、L0 必死"。
+
+**四、待 SE 拍板**
+
+- 方案 A（推荐，最小改动）：L0 换 `InsTempReduceScatterMesh1D`、AG-L0 换 AG-Mesh1D，对齐 master 商用孪生 `AicpuAllReduceSequenceMeshNHRAicpuReduce` 布局（其 supportedDataTypes 正是 64bit 三件套，商用验证充分）；NHRPcie 只留 L1。
+- 方案 B（根因修复）：修 NHRPcie 的 L0 支持（对齐商用 NHR 对端方向、消除自环），需模板 owner 投入 + hcomm 底层 notify 语义排查。
