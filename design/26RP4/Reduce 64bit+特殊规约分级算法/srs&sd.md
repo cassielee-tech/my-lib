@@ -118,7 +118,7 @@ flowchart TD
 
 | 模板位 | 模板 | 说明 |
 | ---- | ---- | ---- |
-| T0（RS-L0） | InsTempReduceScatterAicpuReduceNHRPcie | 框内，首次作 L0 使用 |
+| T0（RS-L0） | InsTempReduceScatterAicpuReduceNHRPcie | 框内，首次作 L0 使用，风险高（已实验验证存在问题） |
 | T1（RS-L1） | InsTempReduceScatterAicpuReduceNHRPcie | 框间 |
 | T2（RS-L2） | InsTempReduceScatterAicpuReduceNHRPcie | 占位（skipLevel2） |
 | T3（AG-L2） | InsTempAllGatherNHR | 占位（skipLevel2） |
