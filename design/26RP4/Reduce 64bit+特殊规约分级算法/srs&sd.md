@@ -106,10 +106,10 @@ topoInfo->topoLevelNums == TOPO_LEVEL_NUM_2
 
 ```mermaid
 flowchart TD
-    IN["用户输入"] --> RSL0["RS-L0 框内归约<br/>InsTempReduceScatterAicpuReduceNHRPcie<br/>（NHR 交换 + AICPU LocalReduce + 断批同步）"]
-    RSL0 --> RSL1["RS-L1 框间归约<br/>InsTempReduceScatterAicpuReduceNHRPcie"]
+    IN["用户输入"] --> RSL0["RS-L0 框内归约<br/>InsTempReduceScatterMesh1D<br/>（Mesh1D 交换 + AICPU LocalReduce）"]
+    RSL0 --> RSL1["RS-L1 框间归约<br/>InsTempReduceScatterAicpuReduceNHRPcie<br/>（NHR 交换 + AICPU 标量规约 + 断批同步）"]
     RSL1 --> AGL1["AG-L1 框间分发<br/>InsTempAllGatherNHR"]
-    AGL1 --> AGL0["AG-L0 框内分发（仅 root 写回）<br/>InsTempAllGatherNHR"]
+    AGL1 --> AGL0["AG-L0 框内分发（仅 root 写回）<br/>InsTempAllGatherMesh1D"]
     AGL0 --> OUT["root rank recvBuf：全量归约结果"]
     AGL0 -.->|"数据超单轮容量，按 maxCountPerLoop 分 loop"| RSL0
 ```
@@ -118,14 +118,16 @@ flowchart TD
 
 | 模板位 | 模板 | 说明 |
 | ---- | ---- | ---- |
-| T0（RS-L0） | InsTempReduceScatterAicpuReduceNHRPcie | 框内，首次作 L0 使用，风险高（已实验验证存在问题） |
+| T0（RS-L0） | InsTempReduceScatterMesh1D | 框内；商用孪生同款 Mesh+NHR 布局（SE 拍板，规避 NHRPcie L0 死锁，见 2.9 风险 2） |
 | T1（RS-L1） | InsTempReduceScatterAicpuReduceNHRPcie | 框间 |
 | T2（RS-L2） | InsTempReduceScatterAicpuReduceNHRPcie | 占位（skipLevel2） |
 | T3（AG-L2） | InsTempAllGatherNHR | 占位（skipLevel2） |
 | T4（AG-L1） | InsTempAllGatherNHR | 框间分发 |
-| T5（AG-L0） | InsTempAllGatherNHR | 框内分发，root 输出 |
+| T5（AG-L0） | InsTempAllGatherMesh1D | 框内分发，root 输出 |
 
-**关键选型——两级 RS 为何复用分级版 `InsTempReduceScatterAicpuReduceNHRPcie`**（而非 Sole 版）：分级 executor 以 `algHierarchyInfo.infos[level]`（框内如 `[0..7]`、框间如 `[0,8,16,24]`）构造模板，userRank 不等于算法内索引，Sole 版直接用于两级编排会错乱；分级版具备全部两级编排语义：
+**关键选型——RS-L0 为何用商用 `InsTempReduceScatterMesh1D`**：NHRPcie 作 L0 模板在节点内规整 mesh 实测死锁（NPU notify wait 超时，详见 2.9 风险 2 扩展节），SE 评审拍板 L0 换商用 Mesh1D，整体对齐孪生算法 `AicpuAllReduceSequenceMeshNHRAicpuReduce` 的 Mesh+NHR 布局（其 supportedDataTypes 含 INT64/UINT64/FP64 三件套，商用验证充分）；Mesh1D 模板内部含 AICPU `LocalReduce` 路径（`ins_temp_reduce_scatter_mesh_1D.cc:219`），保证 64bit 兼容。
+
+**关键选型——RS-L1 为何复用分级版 `InsTempReduceScatterAicpuReduceNHRPcie`**（而非 Sole 版）：分级 executor 以 `algHierarchyInfo.infos[level]`（框内如 `[0..7]`、框间如 `[0,8,16,24]`）构造模板，userRank 不等于算法内索引，Sole 版直接用于两级编排会错乱；分级版具备全部两级编排语义：
 
 | 能力 | InsTempReduceScatterAicpuReduceNHR（Sole 版） | InsTempReduceScatterAicpuReduceNHRPcie（分级版） |
 | ---- | ---- | ---- |
@@ -206,20 +208,20 @@ if (Is64BitDataType(dataType) || opParam.reduceType == HCCL_REDUCE_PROD) {
 
 ```cpp
 REGISTER_EXEC_V2_MULTI(HCCL_CMD_REDUCE, <新算法名>, ReduceSequenceExecutorAicpu3Level, TopoMatchTwoLevel,
-    InsTempReduceScatterAicpuReduceNHRPcie,   // RS-L0 框内
+    InsTempReduceScatterMesh1D,               // RS-L0 框内（商用 Mesh+NHR 布局）
     InsTempReduceScatterAicpuReduceNHRPcie,   // RS-L1 框间
     InsTempReduceScatterAicpuReduceNHRPcie,   // RS-L2 占位（skipLevel2）
     InsTempAllGatherNHR,                      // AG-L2 占位（skipLevel2）
     InsTempAllGatherNHR,                      // AG-L1 框间
-    InsTempAllGatherNHR);                     // AG-L0 框内（root 输出）
+    InsTempAllGatherMesh1D);                  // AG-L0 框内（root 输出）
 REGISTER_ALG_ATTRS(<新算法名>, topo.minTopoLevelNum = TOPO_LEVEL_NUM_2;
     topo.maxTopoLevelNum = TOPO_LEVEL_NUM_2; op.isSupportInplace = false;)
 #include "ins_temp_reduce_scatter_aicpu_reduce_nhr_pcie.h"       // 需补 include
 ```
 
-**【待 SE 决策】cost 误选风险分析与处置方案**
+**【已拍板】cost 误选风险处置决策记录**
 
-（对应 2.9 风险表第 1 条；SE 串讲文档 2.6 节"新算法不参与 cost 排序"论断与代码不符，此处给出因果链与处置选项，请评审时拍板。）
+（对应 2.9 风险表第 1 条。**决策结果（2026-10-21 反串讲会）**：已实施方案②门禁并验证（CI 全绿）；需求方向同步反转——新算法将真实参与 cost 排序，NHRPcie 模板级真实系数（含 `CostModelParam` 扩展 `Ds` 字段）由同事在 AllReduce 侧 PR #3645 承担，**完全落地后移植到本需求**（届时门禁与真实 cost 并存复核）。以下因果链与三选一分析保留作决策过程记录，方案②为最终选择。）
 
 **问题**：新算法聚合得到的 cost 系数不完整，可能在常规场景被误选。因果链：
 
@@ -239,7 +241,7 @@ REGISTER_ALG_ATTRS(<新算法名>, topo.minTopoLevelNum = TOPO_LEVEL_NUM_2;
 | ② opCustomCheck 门禁 | attrs 增加 `opCustomCheck = Is64BitDataType ∥ PROD`，与 selector 进入条件一致（先例：`AicpuReduceSequenceMeshConcurNHR` 的 perRankSize 检查，`reduce_sequence_executor_aicpu_3level.cc:848-850`） | 常规场景被 attrs 过滤、不进候选池；特殊场景仍为部分系数（由 selector 特判兜底） | ~3 行 |
 | ③ 证据豁免 | 论证两级特判分支不经过 cost table 排序（含图模式离线资源计算路径） | 若成立无需改动；结论依赖当前架构，selector 演进后需重新评估 | 分析工作 |
 
-**决策请求**：请评审时三选一。建议 ①（与框架既有防护模式统一），可与 ② 叠加；若选 ③ 请附调用链证据。
+**决策结果**：已选 ②（attrs `opCustomCheck` 门禁，仅 64bit/PROD 参选，条件与 selector 特判一致）——实施后 CI 全绿（实施前 58 个 ST 常规 dtype 误选用例失败全部恢复）。真实 cost 系数待同事 PR #3645 完全实现后移植。
 
 **修改文件清单**：
 
@@ -277,7 +279,7 @@ REGISTER_ALG_ATTRS(<新算法名>, topo.minTopoLevelNum = TOPO_LEVEL_NUM_2;
 
 **资源（AlgResourceRequest）**：NHRPcie 模板单线程（slaveThreadNum=0），sequence executor 对 thread/notify 取 max 合并；链路按框内/框间 `subCommRanks` 分建——新算法的资源需求被既有 `CalcRes` 路径原样覆盖，是阶段 4（资源计算）零改动的依据。
 
-**scratch（数据行为变化①）**：NHRPcie `CalcScratchMultiple = rankSize*2`（`ins_temp_reduce_scatter_aicpu_reduce_nhr_pcie.cc:282`），两级相乘（≈ 4×L0×L1）后单轮可处理数据量 `maxCountPerLoop` 相应变小，大数据量分多 loop；每 loop 的 RS 阶段伴随一次 `HcommBatchModeEnd/Start + HcommThreadJoin` 断批同步。loop 数与断批同步次数随数据量线性放大——直接支撑 2.9 风险 3（CUSTOM_TIMEOUT 误报）与 ST 的"GB 级大数据分 loop"用例。
+**scratch（数据行为变化①，布局调整后已缓解）**：RS-L0 Mesh1D `CalcScratchMultiple = templateRankSize_`（`ins_temp_reduce_scatter_mesh_1D.cc:107`）、RS-L1 NHRPcie `rankSize*2`（`ins_temp_reduce_scatter_aicpu_reduce_nhr_pcie.cc:286`）——L0 段较原全 NHRPcie 布局减半，单轮可处理数据量 `maxCountPerLoop` 相应改善；断批同步（`HcommBatchModeEnd/Start + HcommThreadJoin`）仅存在于 RS-L1 NHRPcie 段，次数仍随数据量放大但增速放缓——2.9 风险 3 等级相应下调。
 
 断批同步机制时序（代码调用顺序忠实呈现，`ins_temp_reduce_scatter_mesh_1D.cc:139-146`）：
 
@@ -391,8 +393,8 @@ sequenceDiagram
 | 风险                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 等级         | 对策                                                                                                                                                                                                                       |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | cost 误选：Reduce 3level executor `CalcCostCoeff` 为拼接聚合、无"任一模板空则退出"短路（`reduce_sequence_executor_aicpu_3level.cc:78-110`），且 `InsTempAllGatherNHR` 有静态系数（`ins_temp_all_gather_nhr.cc:18`）→ 新算法形成非空部分系数，可能在常规场景被 cost 低估误选（修正 SE 原论断）                                                                                                                                                                                                                                                                                                                                                        | 高（已处置）     | **已实施②（attrs `opustomCheck` 门禁：仅 64bit/PROD 参选，条件与 selector 特判一致）并验证**：实施前 CI 58 个 ST 常规 dtype 误选用例失败（CCL 切片冲突 + Post/Wait 死锁），实施后全部恢复、CI 全绿。另注：需求方向已反转（新算法将真实参与 cost 排序），方案待SE确认                                        |
-| NHRPcie 作 L0 模板（节点内规整 mesh）通信死锁：NPU 16 卡两级 fp64 实测必挂（首轮 NHR 通信即死等 notify 超时），ST 仿真同样复现；经多组对照实验排除 executor 编排因素，根因定位为模板 L0 通信缺陷（**实测记录、尝试明细与根因分析见本节末扩展节**） | 高（已实锤，待拍板） | 待 SE 拍板方案 A/B（详见下方扩展节）；PR 现回退至门禁版（CI 绿）待拍板 |
-| loop 暴增误报 CUSTOM_TIMEOUT（scratch 相乘 → 单轮容量骤减 → 断批同步次数线性放大）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 中          | GB 级数据量用例；必要时调整超时语义（另行评审）；若死锁风险走方案 A（L0 换 Mesh1D）布局变化后需复核本条                                                                                                                                                              |
+| NHRPcie 作 L0 模板（节点内规整 mesh）通信死锁：NPU 16 卡两级 fp64 实测必挂（首轮 NHR 通信即死等 notify 超时），ST 仿真同样复现；经多组对照实验排除 executor 编排因素，根因定位为模板 L0 通信缺陷（**实测记录、尝试明细与根因分析见本节末扩展节**） | 高（**已解决**） | 已按 SE 拍板实施方案 A：L0 换 `InsTempReduceScatterMesh1D`、AG-L0 换 `InsTempAllGatherMesh1D`（`f6e71812`，Mesh+NHR 布局对齐商用孪生）；**16 卡（2 节点×8）fp64 64m NPU 实测跑通**，CI 全绿 |
+| loop 暴增误报 CUSTOM_TIMEOUT（scratch 相乘 → 单轮容量骤减 → 断批同步次数线性放大）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 中          | 布局调整后已缓解（L0 换 Mesh1D，scratch 由 rankSize*2 降为 templateRankSize_，单轮容量改善、loop 放大放缓）；保留 GB 级数据量用例验证；必要时调整超时语义（另行评审）                                                                                                                                                              |
 | 命名尾段与组合不一致（按惯例应为 NHRAicpuReduce×2）及 `HCCL_ALGO` 解析                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 中          | 评审定稿命名后补解析验证用例                                                                                                                                                                                                           |
 | Reduce 对称内存路径未特判                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 低          | 与现有两级算法行为一致，ST 开关覆盖；异常则 attrs `opCustomCheck` 排除 symm 场景并回退 Sole                                                                                                                                                         |
 | 设计文档对 Reduce 注册 attrs 细节留白（AllReduce 行明确声明 supportLevel0Topos / isSupportLevel1Nhr / isSupportLevel0PcieMix，Reduce 行仅写"两级拓扑约束 + isSupportInplace=false"）                                                                                                                                                                                                                                                                                                                                                                                                                               | 待确认        | 设计评审时确认 Reduce 注册是否需显式声明 `isSupportLevel1Nhr = true` 与 level0 拓扑形态；建议对齐既有 Sole 版 attrs（`reduce_sole_executor.cc:360-369`）；另：实测确认 attrs `isSupportLevel0PcieMix` 仅在拓扑实际为 PCIe 混连时参与过滤（`cost_model.cc:225`），规整 mesh 环境为死代码 |
@@ -415,6 +417,7 @@ sequenceDiagram
 | 2 | attrs `isSupportLevel0PcieMix` 改 false（门禁版） | e87cee42 | 建链通过，执行死锁（notify wait 350s） | 死锁首次稳定复现；该 attrs 在规整 mesh 下为死代码（`cost_model.cc:225` 仅 PCIe 混连时参与过滤），与死锁无关 |
 | 3 | 3level executor RSL1 buffInfo 修复：`hcclBuffBaseOff` 由 0 改 `meshCommBuffOffset_`，避开 NHRPcie 在 inBuff/hcclBuff 同 BaseOff 时触发的自适应后移错位 | 84e72178 | 同位置死锁 | 排除"自适应后移错位 3level 布局"假设 |
 | 4 | 全新 2level executor：照 AllReduce 已验证编排布局（cclBuffer 对半切）+ Reduce root 语义，四模板 NHRPcie×2 + AG_NHR×2 | 800fa69e | 同位置死锁 | 排除 executor 编排因素——两种截然不同的编排挂同一位置，指向模板自身 |
+| 5 | **SE 拍板方案 A**：L0 换 `InsTempReduceScatterMesh1D`、AG-L0 换 `InsTempAllGatherMesh1D`（Mesh+NHR，对齐商用孪生布局，回到 3level 六模板、L2 占位） | f6e71812 | **NPU 16 卡（2 节点×8）fp64 64m 跑通，CI 全绿** | 死锁解决，功能验证通过 |
 
 **三、根因分析（与商用 `InsTempReduceScatterNHR` 的四差异）**
 
@@ -427,7 +430,8 @@ sequenceDiagram
 
 头号嫌疑：**自环场景下同链路同 idx 的 record/wait 底层语义**（hcomm 仓决定）——若存在自消费/残留，8 卡 8 轮×3 步的多轮次交错误位累积 → 某轮 wait 永等 → 死锁。L1（2 卡）虽也是 1v1，但每轮仅 1 步、交错简单恰好无害——解释"L1 可跑通、L0 必死"。
 
-**四、待 SE 拍板**
+**四、处置结论（已拍板并验证）**
 
-- 方案 A（最小改动）：L0 换 `InsTempReduceScatterMesh1D`、AG-L0 换 AG-Mesh1D，对齐 master 商用孪生 `AicpuAllReduceSequenceMeshNHRAicpuReduce` 布局（其 supportedDataTypes 正是 64bit 三件套，商用验证充分）；NHRPcie 只留 L1。
-- 方案 B（根因修复）：修 NHRPcie 的 L0 支持（对齐商用 NHR 对端方向、消除自环），需模板 owner 投入 + hcomm 底层 notify 语义排查。
+- **SE 反串讲会（2026-10-21）拍板方案 A**：L0 换 `InsTempReduceScatterMesh1D`、AG-L0 换 `InsTempAllGatherMesh1D`，整体 Mesh+NHR，对齐 master 商用孪生 `AicpuAllReduceSequenceMeshNHRAicpuReduce` 布局；仍用三级 6 模板实现（`ReduceSequenceExecutorAicpu3Level` + `REGISTER_EXEC_V2_MULTI`），L2 占位。已实施（`f6e71812`）并经 NPU 16 卡（2 节点×8）fp64 64m 实测跑通 + CI 全绿。
+- 方案 B（修 NHRPcie L0 支持）不再采用，本节分析记录保留供模板 owner 后续参考。
+- cost 相关：冻结不动，等同事 PR #3645 完全实现后移植到本需求。
