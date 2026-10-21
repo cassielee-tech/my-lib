@@ -429,5 +429,5 @@ sequenceDiagram
 
 **四、待 SE 拍板**
 
-- 方案 A（推荐，最小改动）：L0 换 `InsTempReduceScatterMesh1D`、AG-L0 换 AG-Mesh1D，对齐 master 商用孪生 `AicpuAllReduceSequenceMeshNHRAicpuReduce` 布局（其 supportedDataTypes 正是 64bit 三件套，商用验证充分）；NHRPcie 只留 L1。
+- 方案 A（最小改动）：L0 换 `InsTempReduceScatterMesh1D`、AG-L0 换 AG-Mesh1D，对齐 master 商用孪生 `AicpuAllReduceSequenceMeshNHRAicpuReduce` 布局（其 supportedDataTypes 正是 64bit 三件套，商用验证充分）；NHRPcie 只留 L1。
 - 方案 B（根因修复）：修 NHRPcie 的 L0 支持（对齐商用 NHR 对端方向、消除自环），需模板 owner 投入 + hcomm 底层 notify 语义排查。
