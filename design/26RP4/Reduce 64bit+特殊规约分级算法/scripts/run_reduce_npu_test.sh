@@ -92,8 +92,8 @@ export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/NPU_RD_008
 echo "NPU_RD_008"
 mpirun -f /home/l00841484/hostfile -n 16 ./bin/reduce_test -b 4g -e 4g -f 2 -d int64 -o sum -p 8 -a aicpu_ts
 
-# NPU_RD_009a | STC NPU_RD_009 | 指定新算法（token 以 alg_parse 实际解析为准）
-export HCCL_ALGO="reduce:sequence{mesh,nhraicpureduce}"
+# NPU_RD_009a | STC NPU_RD_009 | 指定新算法（token 按算法名段匹配，实测验证）
+export HCCL_ALGO="reduce:sequence{nhraicpureduce,nhr}"
 export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/NPU_RD_009a
 echo "NPU_RD_009a"
 mpirun -f /home/l00841484/hostfile -n 16 ./bin/reduce_test -b 64m -e 64m -f 2 -d int64 -o sum -p 8 -a aicpu_ts
