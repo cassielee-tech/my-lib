@@ -366,7 +366,16 @@ sequenceDiagram
 
 ## 2.9 性能&&质量
 
-**性能**：不设指标（aicpu 标量规约 + 断批同步天然较慢，需求明确正确性优先）。可选保留：与回退算法 `AicpuReduceSoleNHRAicpuReduce` 的耗时对照数据，供后续性能需求参考。
+**性能**：不设指标（aicpu 标量规约 + 断批同步天然较慢，需求明确正确性优先）。**实测对照数据（2026-10-23，16 卡 2 节点×8 两级 MESH_1D，`f6e71812` Mesh+NHR 布局，日志 `npu_logs/20261023_145851`）**：
+
+| 场景（64m，iters=20） | 耗时 | 带宽 | 对照 |
+| ---- | ---- | ---- | ---- |
+| 新算法自适应（=自动选中） | 27185.17 us | 2.469 GB/s | — |
+| 新算法指定 `reduce:sequence{mesh,nhraicpureduce}` | 27271.25 us | 2.461 GB/s | 与自适应一致（指定写法生效） |
+| Sole 对照 `reduce:sole{nhraicpureduce}` | 183155.58 us | 0.366 GB/s | **新算法加速 6.7 倍** |
+| 常规算法（int32+min，门禁放行常规路径） | 17047.94 us | 3.936 GB/s | 印证新算法为 64bit/PROD 专用兜底（常规 dtype 不误入） |
+
+补充：4G 大包 920419.20 us / 4.666 GB/s（多 loop 无 CUSTOM_TIMEOUT，风险 3 缓解真机验证）；dtype×规约（int64/uint64/fp64 × sum/max/min/prod）与边界（8B/24B）13 用例 check_result 全 success。
 
 **正确性验收矩阵（ST，双机两级环境）**：
 
