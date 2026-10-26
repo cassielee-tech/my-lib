@@ -77,15 +77,43 @@ export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/NPU_RD_005
 echo "NPU_RD_005"
 mpirun -f /home/l00841484/hostfile -n 16 ./bin/reduce_test -b 64m -e 64m -f 2 -d int32 -o prod -p 8 -a aicpu_ts
 
-# NPU_RD_006 | STC NPU_RD_006 | 小消息边界 8B（count=1）
-export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/NPU_RD_006
-echo "NPU_RD_006"
+# NPU_RD_006a | STC NPU_RD_006 | 8B 小消息 | 自适应基线（v2 cost 当前选中 SoleMesh）
+export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/NPU_RD_006a
+echo "NPU_RD_006a (自适应)"
 mpirun -f /home/l00841484/hostfile -n 16 ./bin/reduce_test -b 8 -e 8 -f 2 -d int64 -o sum -p 8 -a aicpu_ts
 
-# NPU_RD_007 | STC NPU_RD_007 | 小消息边界 24B（3 元素非对齐）
-export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/NPU_RD_007
-echo "NPU_RD_007"
+# NPU_RD_006b | 8B 小消息 | 强制新算法（token 生效性以 plog selected 为准）
+export HCCL_ALGO="reduce:sequence{nhraicpureduce,nhr}"
+export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/NPU_RD_006b
+echo "NPU_RD_006b (新算法)"
+mpirun -f /home/l00841484/hostfile -n 16 ./bin/reduce_test -b 8 -e 8 -f 2 -d int64 -o sum -p 8 -a aicpu_ts
+
+# NPU_RD_006c | 8B 小消息 | 强制 Sole
+export HCCL_ALGO="reduce:sole{nhraicpureduce}"
+export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/NPU_RD_006c
+echo "NPU_RD_006c (Sole)"
+mpirun -f /home/l00841484/hostfile -n 16 ./bin/reduce_test -b 8 -e 8 -f 2 -d int64 -o sum -p 8 -a aicpu_ts
+
+unset HCCL_ALGO
+
+# NPU_RD_007a | STC NPU_RD_007 | 24B 小消息 | 自适应基线（v2 cost 当前选中 SoleMesh）
+export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/NPU_RD_007a
+echo "NPU_RD_007a (自适应)"
 mpirun -f /home/l00841484/hostfile -n 16 ./bin/reduce_test -b 24 -e 24 -f 2 -d int64 -o sum -p 8 -a aicpu_ts
+
+# NPU_RD_007b | 24B 小消息 | 强制新算法（token 生效性以 plog selected 为准）
+export HCCL_ALGO="reduce:sequence{nhraicpureduce,nhr}"
+export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/NPU_RD_007b
+echo "NPU_RD_007b (新算法)"
+mpirun -f /home/l00841484/hostfile -n 16 ./bin/reduce_test -b 24 -e 24 -f 2 -d int64 -o sum -p 8 -a aicpu_ts
+
+# NPU_RD_007c | 24B 小消息 | 强制 Sole
+export HCCL_ALGO="reduce:sole{nhraicpureduce}"
+export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/NPU_RD_007c
+echo "NPU_RD_007c (Sole)"
+mpirun -f /home/l00841484/hostfile -n 16 ./bin/reduce_test -b 24 -e 24 -f 2 -d int64 -o sum -p 8 -a aicpu_ts
+
+unset HCCL_ALGO
 
 # NPU_RD_008 | STC NPU_RD_008 | 4G 大包多 loop 压力（风险3缓解验证）
 export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/NPU_RD_008
