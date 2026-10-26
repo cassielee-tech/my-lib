@@ -348,7 +348,7 @@ sequenceDiagram
 | 校验内容 | 级别 | 搜索内容 |
 | -------- | ---- | -------- |
 | 入参合法性（指针/count/数据类型/PROD 白名单/root 越界） | ERROR | `EI0003`、`CheckReduceDataType` |
-| 算法选择结果（确认两级场景选中新算法、三级仍选 Sole） | INFO | `[ReduceAutoSelector]` + `Algo match` |
+| 算法选择结果（两级 MESH_1D 选路=cost 最小者：SoleMesh/新算法均合法、三级仍选 Sole；CLOS L0 两级走特判无条件选中新算法） | INFO | `[SelectorEngine]` + `selected algo type`（两级 MESH_1D/单机/三级 cost 排序路径，NPU plog 与 ST gtest stdout 均可检索）；`[ReduceAutoSelector]` + `Algo match`（仅 CLOS L0 特判路径） |
 | 资源分配（线程数/每层 channel 数/引擎/algTag） | RUN | `[HcclGetAlgRes] resource allocated` |
 | 两级编排起止与分轮 | INFO | `[ReduceSequenceExecutorAicpu3Level][OrchestrateLoop]` |
 | 执行失败（executor 检索失败/IDE 错误定位） | ERROR | `Fail to find executor`、opTag（`CHK_RET_AND_PRINT_IDE`） |
