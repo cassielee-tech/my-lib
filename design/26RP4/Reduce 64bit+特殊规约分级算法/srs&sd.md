@@ -366,16 +366,18 @@ sequenceDiagram
 
 ## 2.9 性能&&质量
 
-**性能**：不设指标（aicpu 标量规约 + 断批同步天然较慢，需求明确正确性优先）。**实测对照数据（2026-10-23，16 卡 2 节点×8 两级 MESH_1D，`f6e71812` Mesh+NHR 布局，日志 `npu_logs/20261023_145851`）**：
+**性能**：不设指标（aicpu 标量规约 + 断批同步天然较慢，需求明确正确性优先）。**最终实测对照（2026-10-26，16 卡 2 节点×8 两级 MESH_1D，`574e85da` = Mesh+NHR + cost v2 + SoleMesh 计价补漏，日志 `npu_logs/20261026_193438`，17 用例全 success）**：
 
-| 场景（64m，iters=20） | 耗时 | 带宽 | 对照 |
-| ---- | ---- | ---- | ---- |
-| 新算法自适应（=自动选中） | 27185.17 us | 2.469 GB/s | — |
-| 新算法指定 `reduce:sequence{mesh,nhraicpureduce}` | 27271.25 us | 2.461 GB/s | 与自适应一致（指定写法生效） |
-| Sole 对照 `reduce:sole{nhraicpureduce}` | 183155.58 us | 0.366 GB/s | **新算法加速 6.7 倍** |
-| 常规算法（int32+min，门禁放行常规路径） | 17047.94 us | 3.936 GB/s | 印证新算法为 64bit/PROD 专用兜底（常规 dtype 不误入） |
+| 场景（64m，iters=20） | 耗时 | 带宽 | cost 计价 | 说明 |
+| ---- | ---- | ---- | ---- | ---- |
+| 新算法自适应（=自动选中） | 26992.83 us | 2.486 GB/s | 0.010383 | 三算法中最小，选路正确 |
+| 新算法指定 `reduce:sequence{nhraicpureduce,nhr}` | 27128.97 us | 2.474 GB/s | 0.010383（count=1 收敛） | token 三轮实测确认有效 |
+| Sole 对照 `reduce:sole{nhraicpureduce}` | 183180.91 us | 0.366 GB/s | 0.159733（count=1 收敛） | **新算法加速 6.8 倍** |
+| SoleMesh（补漏后计价） | （上轮实测 220458 us） | — | **0.159441** | 与实测吻合（此前 0.0084 失真低价抢占，见下） |
 
-补充：4G 大包 920419.20 us / 4.666 GB/s（多 loop 无 CUSTOM_TIMEOUT，风险 3 缓解真机验证）；dtype×规约（int64/uint64/fp64 × sum/max/min/prod）与边界（8B/24B）13 用例 check_result 全 success。
+补充：4G 大包 919540.60 us / **4.671 GB/s**（多 loop 无 CUSTOM_TIMEOUT，风险 3 缓解验证）；PROD@int32 27131 us（Breduce 按双倍 count 计价生效）；小消息 8B/24B 自适应选 SoleMesh（9.4ms，Breduce∝dataSize 趋零属真实排序；实测三算法对照 Sole 3.5ms 最快——小消息时延建模为框架遗留项）；单机 8p 选 TwoShot 31.2ms 路由不变。
+
+**cost v2 迭代记录（三轮 NPU 实测驱动）**：①v1（Ds 口径，`316e57f0`）规约项进 totalD max 地板被吞、新算法低价 0.000893 侥幸胜出；②v2（reduceCopies 口径，`1bf16813`）规约如实加法计价后暴露 **SoleMesh 存量建模缺失 AICPU 规约**（64bit 走 host 标量 LocalReduce 实测 ~150ms 零计价，8.4ms 失真低价抢走全部 64bit 场景、实测慢 7.7 倍）；③补漏（`574e85da`）给 ReduceMesh1D 补 `reduceCopies=(N-1)×dataRatio×rankSize` 后 SoleMesh 计价恢复 0.159，三算法计价与实测全部同量级吻合，自适应公平竞争下新算法自然胜出。**结论：64bit 池内所有候选算法的规约计价必须补齐**（ReduceMesh1DTwoShot/ReduceNHR 经查不参选问题池未改，列为框架侧后续项）。
 
 **正确性验收矩阵（ST，双机两级环境）**：
 
