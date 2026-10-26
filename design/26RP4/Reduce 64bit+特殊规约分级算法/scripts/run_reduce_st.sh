@@ -9,8 +9,8 @@
 # See LICENSE in the root of the software repository for the full text of the License.
 # -----------------------------------------------------------------------------------------------------------
 # Reduce 64bit/PROD 两级分级 ST（仓内仿真）一键构建+运行
-# 配套 STC 的 ST_RD_2L_001~015（注意：ST 用例代码尚未随 PR 提交，本脚本先就绪；
-# 用例合入后 gtest 套件名为 ST_REDUCE_2LEVEL_HIER_TEST，二进制 st_reduce_aicpu_test）
+# 配套 STC 的 ST_RD_2L_001~015（用例已随 PR#3650 提交 817dc2d2；
+# gtest 套件名 ST_REDUCE_AICPU_TEST，二进制 st_reduce_aicpu_test，auto/spec 双模式共 22 条）
 #
 # 用法：
 #   bash run_reduce_st.sh -r <hccl仓路径> [-c <CANN路径>] [选项]
@@ -56,28 +56,39 @@ log "CANN 就绪: ${ASCEND_HOME_PATH}"
 cd "${REPO}"
 log "代码基线: $(git rev-parse --short HEAD) @ $(git rev-parse --abbrev-ref HEAD)"
 
-# ---------- 1. 构建 ST 框架（BUILD_OPEN_PROJECT + ST_TASKS=reduce） ----------
+# ---------- 0. 安装目录 libhccl.so 部署自检（ST 链接安装目录的库，官方 run 包不含新算法） ----------
+INSTALLED_LIB="${ASCEND_HOME_PATH}/x86_64-linux/lib64/libhccl.so"
+if [[ -f "${INSTALLED_LIB}" ]] && strings "${INSTALLED_LIB}" | grep -q "AicpuReduceSequenceNHRAicpuReduceNHR"; then
+    log "libhccl.so 部署自检通过（含新算法注册: ${INSTALLED_LIB}）"
+else
+    fail "安装目录 libhccl.so 未包含新算法（${INSTALLED_LIB}）。请先在仓内执行:
+  source ${CANN}/set_env.sh && bash build.sh --pkg
+  然后将产物（find build_out -name libhccl.so）备份并替换 ${INSTALLED_LIB} 后重跑本脚本"
+fi
+
+# ---------- 1. 构建 ST 框架（BUILD_OPEN_PROJECT + ST_TASKS=reduce_aicpu） ----------
 ST_DIR="${REPO}/test/st/algorithm"
 [[ ${CLEAN} -eq 1 ]] && rm -rf "${ST_DIR}/build"
-log "构建 ST 框架（ST_TASKS=reduce，首次较慢）"
-(cd "${ST_DIR}" && ST_TASKS=reduce bash build.sh) >"${LOG_DIR}/st_build.log" 2>&1 \
+log "构建 ST 框架（ST_TASKS=reduce_aicpu，首次较慢）"
+(cd "${ST_DIR}" && ST_TASKS=reduce_aicpu bash build.sh) >"${LOG_DIR}/st_build.log" 2>&1 \
     || { tail -30 "${LOG_DIR}/st_build.log"; fail "ST 构建失败，详见 ${LOG_DIR}/st_build.log"; }
 
-# ---------- 2. 定位 reduce ST 二进制 ----------
-ST_BIN=$(find "${ST_DIR}/build" -type f -name "st_reduce*test" -executable 2>/dev/null | head -1)
-[[ -z "${ST_BIN}" ]] && { find "${ST_DIR}/build" -type f -executable | head -20; fail "未找到 st_reduce*test 二进制（ST 用例是否已合入？）"; }
+# ---------- 2. 定位 reduce_aicpu ST 二进制 ----------
+ST_BIN=$(find "${ST_DIR}/build" -type f -name "st_reduce_aicpu_test" -executable 2>/dev/null | head -1)
+[[ -z "${ST_BIN}" ]] && { find "${ST_DIR}/build" -type f -executable | head -20; fail "未找到 st_reduce_aicpu_test 二进制（817dc2d2 是否已合入该分支？）"; }
 log "ST 二进制: ${ST_BIN}"
 
-# ---------- 3. 运行（LD_LIBRARY_PATH 对齐 ST 五段） ----------
-export LD_LIBRARY_PATH="${ST_DIR}/utils/src:${ST_DIR}/utils/hccl_verifier:${ST_DIR}/utils/hccl_depends_stub:${ST_DIR}/utils/aicpu:${ASCEND_HOME_PATH}/x86_64-linux/lib64:${LD_LIBRARY_PATH:-}"
+# ---------- 3. 运行（LD_LIBRARY_PATH 对齐主 build.sh run_st 的桩库四段 + 安装目录 lib64） ----------
+export LD_LIBRARY_PATH="${ST_DIR}/build/utils/src:${ST_DIR}/build/utils/src/hccl_verifier:${ST_DIR}/build/utils/src/hccl_depends_stub:${ST_DIR}/build/utils/src/aicpu:${ASCEND_HOME_PATH}/x86_64-linux/lib64:${LD_LIBRARY_PATH:-}"
+export ASCEND_GLOBAL_LOG_LEVEL=1
 log "运行 gtest_filter='${FILTER}'"
 "${ST_BIN}" --gtest_filter="${FILTER}" >"${LOG_DIR}/st_run.txt" 2>&1
 RET=$?
 grep -E "\[==========\]|\[  PASSED  \]|\[  FAILED  \]" "${LOG_DIR}/st_run.txt" | tail -6
 log "退出码 ${RET}，完整输出: ${LOG_DIR}/st_run.txt"
 
-# ---------- 4. 算法选中复核 ----------
-grep -E "Algo match|OrchestrateLoop" "${LOG_DIR}/st_run.txt" | sort -u | head -10 >"${LOG_DIR}/kw_hits.txt" || true
+# ---------- 4. 选路结果复核（SelectorEngine cost 排序口径） ----------
+grep -E "selected algo type|OrchestrateLoop|SelectMinCost" "${LOG_DIR}/st_run.txt" | sort -u | head -12 >"${LOG_DIR}/kw_hits.txt" || true
 log "关键字命中: ${LOG_DIR}/kw_hits.txt"
 log "完成。日志目录: ${LOG_DIR}"
 exit ${RET}
