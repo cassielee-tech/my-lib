@@ -9,7 +9,7 @@
 # See LICENSE in the root of the software repository for the full text of the License.
 # -----------------------------------------------------------------------------------------------------------
 # 单条 Checker（L2 仿真）用例一键执行：hccl-vm 起环境 → mock-comm → mpirun reduce_test → @checker → 关键字复核
-# 配套 STC 的 CHK_RD_* 用例（23 条），每条 STC 行的参数按下表传入：
+# 配套 STC 的 CHK_RD_* 用例（28 条），每条 STC 行的参数按下表传入：
 #   topo_meta→-m, np→-n, dataType→-d, 数据量→-s, 规约→-o, root→-r
 #
 # 用法：
@@ -18,7 +18,7 @@
 #   -r, --repo     hccl 仓库路径（必填，用于 hccl-vm 配置定位与日志检索起点）
 #   -m, --meta     mock-comm 拓扑名（如 148；特殊 yaml 用全名，如 228_asym_16_8）
 #   -n, --np       mpirun 进程数
-#   -d, --dtype    int64|uint64|fp64|int32|fp16|fp32
+#   -d, --dtype    int64|uint64|fp64|int32|fp16|fp32|int8
 #   -s, --size     单卡数据量（如 4K/8M/64M/1G）
 #   -o, --op       sum|prod|max|min
 #   -r, --root     root rank（默认 0）
