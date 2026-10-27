@@ -14,8 +14,11 @@
 # -----------------------------------------------------------------------------------------------------------
 # Reduce 64bit/PROD 两级分级算法 ST（仓内仿真）用例脚本
 # 对应 STC 的 ST_RD_2L_001~015（echo 编号与 STC 一致，a=自适应 / b=指定，跑完直接回填执行情况列）
-# 用例代码已随 PR#3650 提交（817dc2d2）：test/st/algorithm/testcase/reduce_aicpu_testcase.cc
+# 用例代码已随 PR#3650 提交：test/st/algorithm/testcase/reduce_aicpu_testcase.cc
 # 不想跑的用例整段用 # 注释掉即可（010 的 16M 用例仿真耗时最长，建议先注释最后单跑）
+#
+# CI 现状：run#4167 首条 auto 用例段错误（0.91s 无堆栈）——本脚本环境准备段含一键构建部署
+# libhccl.so，跑首条时自动抓崩溃现场（INFO 日志尾部），用于定位崩溃点
 # -----------------------------------------------------------------------------------------------------------
 
 # ============================== 环境准备 ==============================
@@ -27,11 +30,18 @@ Ascend_dir="/home/l00841484/Ascend"
 source $Ascend_dir/cann/set_env.sh
 
 # libhccl.so 部署自检：ST 用例链接的是安装目录的库，官方 run 包不含新算法，必须先部署 PR 分支版本
-# （不通过时按脚本尾部"附：libhccl.so 构建部署"操作一次后重跑）
 INSTALLED_LIB=$(find $Ascend_dir -name libhccl.so -path "*lib64*" | head -1)
-strings $INSTALLED_LIB | grep -q AicpuReduceSequenceNHRAicpuReduceNHR \
-    && echo "libhccl.so 自检通过: $INSTALLED_LIB" \
-    || { echo "libhccl.so 未含新算法（$INSTALLED_LIB），先按脚本尾部部署节操作"; exit 1; }
+if strings $INSTALLED_LIB | grep -q AicpuReduceSequenceNHRAicpuReduceNHR; then
+    echo "[自检] libhccl.so 已含新算法: $INSTALLED_LIB"
+else
+    echo "[自检] libhccl.so 未含新算法，开始构建部署（约 17-25 分钟，仅首次）"
+    cd $REPO
+    bash build.sh --pkg
+    NEW_LIB=$(find $REPO/build_out -name libhccl.so | head -1)
+    cp $INSTALLED_LIB ${INSTALLED_LIB}.bak
+    cp $NEW_LIB $INSTALLED_LIB
+    echo "[部署] $NEW_LIB -> $INSTALLED_LIB（原库备份为 .bak）"
+fi
 
 # 进入 ST 目录构建（ST_TASKS=reduce_aicpu 只编本需求用例目标，首次较慢，重复执行幂等）
 cd $REPO/test/st/algorithm
@@ -41,12 +51,26 @@ ST_TASKS=reduce_aicpu bash build.sh
 ST_BIN=$REPO/test/st/algorithm/build/testcase/st_reduce_aicpu_test
 export LD_LIBRARY_PATH=$REPO/test/st/algorithm/build/utils/src:$REPO/test/st/algorithm/build/utils/src/hccl_verifier:$REPO/test/st/algorithm/build/utils/src/hccl_depends_stub:$REPO/test/st/algorithm/build/utils/src/aicpu:$LD_LIBRARY_PATH
 
-# INFO 级日志：stdout 含 [SelectorEngine] selected algo type 选路日志，便于确认选中算法
+# INFO 级日志：stdout 含 [SelectorEngine] selected algo type 选路日志 + 各模板执行日志（定位崩溃点用）
 export ASCEND_GLOBAL_LOG_LEVEL=1
 
 # 日志根目录（时间戳隔离，每个用例单独日志文件，多次运行不互相覆盖）
 LOG_ROOT=$(pwd)/st_logs/$(date +%Y%m%d_%H%M%S)
 mkdir -p $LOG_ROOT
+
+# ============================== 崩溃现场抓取（CI 复现定位，确认后可删此段） ==============================
+echo "========== 首条 auto 用例单独跑（CI run#4167 段错误复现） =========="
+$ST_BIN --gtest_filter='st_reduce_aicpu_2level_16rank_int64_sum_auto_test' 2>&1 | tee $LOG_ROOT/CI_crash_repro.txt
+CRASH_RET=$?
+echo "[首条退出码: $CRASH_RET]"
+if [ $CRASH_RET -ne 0 ]; then
+    echo "========== 崩溃现场：最后 60 行日志 =========="
+    tail -60 $LOG_ROOT/CI_crash_repro.txt
+    echo "========== 选路关键行 =========="
+    grep -E "SelectorEngine|SelectMinCost|selected algo|OrchestrateLoop|ReduceMesh1D|ReduceSoleExecutor|CalcCostCoeff" $LOG_ROOT/CI_crash_repro.txt | tail -30
+    echo "========== 完整日志: $LOG_ROOT/CI_crash_repro.txt —— 请把以上输出发给定位 =========="
+    exit $CRASH_RET
+fi
 
 # ============================== 用例区 ==============================
 # 说明：spec（指定）模式由用例内 setenv HCCL_ALGO="reduce:sequence{nhraicpureduce,nhr}" 实现，
@@ -143,7 +167,3 @@ $ST_BIN --gtest_filter='st_reduce_aicpu_2level_16rank_int64_sum_count1_spec_test
 # ============================== 结果汇总 ==============================
 grep -H "\[  PASSED  \]\|\[  FAILED  \]" $LOG_ROOT/*.txt | sort
 echo "全部日志目录: $LOG_ROOT"
-
-# ============================== 附：libhccl.so 构建部署（自检不通过时执行一次） ==============================
-# cd $REPO && bash build.sh --pkg
-# cp $(find $REPO/build_out -name libhccl.so | head -1) $INSTALLED_LIB    # 建议先 cp $INSTALLED_LIB{,.bak} 备份
