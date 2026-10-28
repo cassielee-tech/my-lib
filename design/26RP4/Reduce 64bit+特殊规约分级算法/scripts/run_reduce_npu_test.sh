@@ -148,4 +148,61 @@ export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/NPU_RD_011b
 echo "NPU_RD_011b"
 mpirun -f /home/l00841484/hostfile -n 8 ./bin/reduce_test -b 64m -e 64m -f 2 -d int64 -o sum -p 8 -a aicpu_ts
 
+# ============================== 临界点验证实验区（NPU_RD_TH_*） ==============================
+# 背景: ST 仿真(2026-10-28, aarch64 实验服务器)测得两级 16rank × INT64+SUM 场景 SelectorEngine
+#       cost 排序的 SoleMesh→新算法翻转临界点: count*=13549(INT64 元素)=每 rank 108392B≈105.85KB;
+#       count<=13548 选 SoleMesh, >=13549 选新算法(黑盒二分+解析互验, 偏差<0.1%)。
+# 本区实验(对应 STC 待补的临界点验证行, 编号 NPU_RD_TH_*):
+#   实验一 NPU_RD_TH_S_* : 自适应选路(auto)邻域扫描 → 实测真机【选路翻转点】, 对照 ST 的 108392B
+#   实验二 NPU_RD_TH_P_* : 强制双算法计时 → 实测真机【性能交叉点】, 对照选路翻转点(评估 cost 模型校准)
+# 判读: TH_S 中 winner 由 SoleMesh 变为 Sequence 的首个点位=真机选路临界; TH_P 中同点位
+#       P_M(SoleMesh) 耗时 > P_N(新算法) 的最小点位=真机性能交叉。真机 cost 系数来自真实带宽查询,
+#       与 ST 桩系数不同, 临界点相对 108392B 偏移属正常, 重点看量级; 若性能交叉与选路翻转偏差大,
+#       说明 cost 系数需校准(记录两个点位反馈调参)。
+# 仅跑本区: 将上方用例区 NPU_RD_001~011b 各段用 # 注释掉即可。
+
+# 实验一: 自适应选路邻域扫描(8=远端SoleMesh校准, 67108864=64m远端新算法校准, 其余为临界邻域)
+TH_SIZES_AUTO=(8 65536 98304 106496 108384 108392 108400 110592 131072 163840 196608 262144 67108864)
+
+# 实验二: 双算法强制计时点位(每点跑 SoleMesh 与新算法各一次)
+TH_SIZES_PERF=(65536 98304 108392 131072 262144 1048576 16777216)
+
+th_run() { # $1=用例名 $2=每rank字节数 $3=HCCL_ALGO(空=自适应)
+    mkdir -p $LOG_ROOT/$1
+    export ASCEND_PROCESS_LOG_PATH=$LOG_ROOT/$1
+    echo "$1 (bytesPerRank=$2, HCCL_ALGO=${3:-auto})"
+    if [ -n "$3" ]; then
+        export HCCL_ALGO="$3"
+    else
+        unset HCCL_ALGO
+    fi
+    mpirun -f /home/l00841484/hostfile -n 16 ./bin/reduce_test -b $2 -e $2 -f 2 -d int64 -o sum -p 8 -a aicpu_ts \
+        2>&1 | tee $LOG_ROOT/$1/stdout.log | tail -3
+    unset HCCL_ALGO
+}
+
+for sz in "${TH_SIZES_AUTO[@]}"; do
+    th_run "NPU_RD_TH_S_${sz}" "$sz" ""
+done
+
+for sz in "${TH_SIZES_PERF[@]}"; do
+    th_run "NPU_RD_TH_P_M_${sz}" "$sz" "reduce:sole{mesh}"
+    th_run "NPU_RD_TH_P_N_${sz}" "$sz" "reduce:sequence{nhraicpureduce,nhr}"
+done
+
+# 汇总: 每点选中算法(取 plog 首条 selected 日志) + 耗时(stdout 尾部提取, best-effort 需人工复核)
+SUMMARY=$LOG_ROOT/threshold_summary.tsv
+echo -e "case\tbytesPerRank\tselectedAlgo\telapsedHint" > $SUMMARY
+for d in $LOG_ROOT/NPU_RD_TH_*; do
+    [ -d "$d" ] || continue
+    name=$(basename $d)
+    sz=${name##*_}
+    alg=$(grep -rh "selected algo type is" $d 2>/dev/null | head -1 | awk '{print $NF}')
+    el=$(grep -oE "[0-9]+\.[0-9]+(us|ms|s)\b" $d/stdout.log 2>/dev/null | tail -1)
+    echo -e "$name\t$sz\t$alg\t$el" >> $SUMMARY
+done
+echo "===== 临界点实验汇总 ====="
+column -t $SUMMARY 2>/dev/null || cat $SUMMARY
+echo "汇总文件: $SUMMARY"
+
 echo "全部日志目录: $LOG_ROOT"
