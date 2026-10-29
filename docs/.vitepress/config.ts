@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   lang: 'zh-CN',
   title: 'Cassie’s Stack',
   description: '记录 HCCL 开发主线课程、后端、效率工具与个人思考',
@@ -9,6 +10,22 @@ export default defineConfig({
   markdown: {
     math: true
   },
+  mermaid: {
+    flowchart: { wrappingWidth: 360 }
+  },
+  vite: {
+    optimizeDeps: {
+      include: ['fastdom', 'mermaid']
+    }
+  },
+
+  head: [
+    [
+      'script',
+      {},
+      "(function(){try{var d=document.documentElement;if(localStorage.getItem('vp-sidebar-collapsed')==='1')d.classList.add('sidebar-collapsed');if(localStorage.getItem('vp-aside-collapsed')==='1')d.classList.add('aside-collapsed')}catch(e){}})()"
+    ]
+  ],
 
   themeConfig: {
     nav: [
@@ -117,7 +134,7 @@ export default defineConfig({
             { text: '专栏目录', link: '/ascend/' },
             { text: '← 返回首页', link: '/' },
             {
-              text: '昇腾', collapsed: false,
+              text: '昇腾', collapsed: true,
               items: [
                 { text: '第 0 章｜认识昇腾与 CANN', link: '/ascend/00-ascend-cann' },
                 { text: '第 1 章｜Runtime 与任务执行', link: '/ascend/01-runtime-task-execution' },
@@ -127,13 +144,13 @@ export default defineConfig({
               ]
             },
             {
-              text: 'Ascend C', collapsed: false,
+              text: 'Ascend C', collapsed: true,
               items: [
                 { text: '第 0-2 章｜算子开发（待写·二梯队）', link: '/ascend/' }
               ]
             },
             {
-              text: 'HCCL 与 HCOMM', collapsed: false,
+              text: 'HCCL 与 HCOMM', collapsed: true,
               items: [
                 { text: '课程导学｜HCCL 与 HCOMM 源码学习', link: '/ascend/hccl-hcomm' },
                 { text: '0｜双仓全景与调用链旅程', link: '/ascend/hccl-hcomm/00-repo-map' },
@@ -148,8 +165,15 @@ export default defineConfig({
                 { text: '9｜自定义算子七步流程', link: '/ascend/hccl-hcomm/09-custom-op-dev' },
                 { text: '10｜MC2 框架与官方样例', link: '/ascend/hccl-hcomm/10-mc2-custom-ops' },
                 { text: '11｜实战与第一个算子', link: '/ascend/hccl-hcomm/11-examples-first-op' },
-                { text: '课程总结｜源码阅读地图', link: '/ascend/hccl-hcomm/summary' },
-                { text: '实践总结｜UBOE/UB_RTP 建链端口注入实战', link: '/ascend/hccl-hcomm/12-practice-port-injection' }
+                { text: '课程总结｜源码阅读地图', link: '/ascend/hccl-hcomm/summary' }
+              ]
+            },
+            {
+              text: '实践总结', collapsed: true,
+              items: [
+                { text: '专栏目录', link: '/ascend/practice/' },
+                { text: '1｜UBOE/UB_RTP 建链端口注入实战', link: '/ascend/practice/01-uboe-ubrtp-port-injection' },
+                { text: '2｜Reduce 64bit 特殊规约分级算法', link: '/ascend/practice/02-reduce-64bit-hierarchical-algorithm' }
               ]
             }
           ]
@@ -163,10 +187,12 @@ export default defineConfig({
             { text: '目录', link: '/tools-productivity/' },
             { text: 'VS Code + SSH + Jupyter', link: '/tools-productivity/vscode-remote-ssh-jupyter' },
             { text: 'Linux 服务器常用命令速查', link: '/tools-productivity/linux-server-commands' },
+            { text: 'Git 实用速查', link: '/tools-productivity/git-cheatsheet' },
             { text: 'VS Code 快捷键速查', link: '/tools-productivity/vscode-shortcuts' },
             { text: 'opencode 使用教程', link: '/tools-productivity/opencode-tutorial' },
             { text: 'Ghostty 快捷键速查', link: '/tools-productivity/ghostty-shortcuts' },
-            { text: 'macOS 快捷键速查', link: '/tools-productivity/macos-shortcuts' }
+            { text: 'macOS 快捷键速查', link: '/tools-productivity/macos-shortcuts' },
+            { text: 'Vim 常用按键与技巧', link: '/tools-productivity/vim-essentials' }
           ]
         }
       ],
@@ -174,16 +200,36 @@ export default defineConfig({
         {
           text: '个人杂谈',
           items: [
-            { text: '目录', link: '/essays/' },
-            { text: '《金刚经》研读笔记', link: '/essays/《金刚经》研读笔记' },
-            { text: '《金字塔原理》读书笔记', link: '/essays/《金字塔原理》读书笔记' },
-            { text: '《认知觉醒》读书笔记', link: '/essays/《认知觉醒》读书笔记' },
-            { text: '《健身解剖完全手册》学习笔记', link: '/essays/《健身解剖完全手册》学习笔记' },
-            { text: 'ADHD 日常管理指南', link: '/essays/ADHD日常管理指南' },
-            { text: '实用提示词收集', link: '/essays/实用提示词收集' },
-            { text: '2026 热门 AI Agent 产品地图', link: '/essays/01-popular-agents' },
-            { text: 'AI Agent 工程化知识树', link: '/essays/agent-engineering-knowledge-tree' },
-            { text: 'AI Coding：从代码补全到智能体协作', link: '/essays/ai-coding-codearts' }
+            { text: '专栏目录', link: '/essays/' },
+            { text: '← 返回首页', link: '/' },
+            {
+              text: '读书笔记',
+              collapsed: true,
+              items: [
+                { text: '《金刚经》研读笔记', link: '/essays/《金刚经》研读笔记' },
+                { text: '《金字塔原理》读书笔记', link: '/essays/《金字塔原理》读书笔记' },
+                { text: '《认知觉醒》读书笔记', link: '/essays/《认知觉醒》读书笔记' },
+                { text: '《当下的力量》读书笔记', link: '/essays/《当下的力量》读书笔记' }
+              ]
+            },
+            {
+              text: 'AI 观察',
+              collapsed: true,
+              items: [
+                { text: '2026 热门 AI Agent 产品地图', link: '/essays/01-popular-agents' },
+                { text: 'AI Agent 工程化知识树', link: '/essays/agent-engineering-knowledge-tree' },
+                { text: 'AI Coding：从代码补全到智能体协作', link: '/essays/ai-coding-codearts' },
+                { text: '实用提示词收集', link: '/essays/实用提示词收集' }
+              ]
+            },
+            {
+              text: '生活与健康',
+              collapsed: true,
+              items: [
+                { text: '《健身解剖完全手册》学习笔记', link: '/essays/《健身解剖完全手册》学习笔记' },
+                { text: 'ADHD 日常管理指南', link: '/essays/ADHD日常管理指南' }
+              ]
+            }
           ]
         }
       ]
@@ -198,4 +244,4 @@ export default defineConfig({
     darkModeSwitchLabel: '主题',
     socialLinks: [{ icon: 'github', link: 'https://github.com/cassielee-tech' }]
   }
-})
+}))

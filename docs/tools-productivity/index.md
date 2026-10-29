@@ -10,6 +10,7 @@
 
 - [VS Code + Remote SSH + Jupyter：远程做大模型实验](vscode-remote-ssh-jupyter.md)：远程环境、Kernel、GPU/NPU、SSH 隧道与故障排查
 - [Linux 服务器常用命令速查](linux-server-commands.md)：系统体检、进程与服务、网络排查、文本处理与"现象 → 命令链"场景小抄
+- [Git 实用速查](git-cheatsheet.md)：每日循环、撤销与找回、分支合并变基、远程协作与急救清单
 - [opencode 使用教程](opencode-tutorial.md)：会话管理、Plan/Build 工作流、AGENTS.md 项目规则与自定义命令
 
 ## 快捷键速查
@@ -17,5 +18,6 @@
 - [VS Code 快捷键速查](vscode-shortcuts.md)：按使用频率排列的编辑、导航、搜索与终端快捷键
 - [Ghostty 快捷键速查](ghostty-shortcuts.md)：窗口、标签页、分屏、字体、配置与 Shell 行编辑
 - [macOS 快捷键速查](macos-shortcuts.md)：应用窗口、文本编辑、Finder、截图与系统控制
+- [Vim 常用按键与技巧](vim-essentials.md)：模式思维、移动与编辑组合、搜索替换、宏与寄存器
 
 快捷键可能受软件版本、键盘布局和个人配置影响。文章会尽量区分系统默认值、应用默认值和建议自定义项。

@@ -8,7 +8,7 @@
 
 ## 专栏分类
 
-本专栏按主题分为三类，**每类编号独立从 0 开始**：昇腾（平台机制与框架调用链）、Ascend C（算子开发，待写）、HCCL 与 HCOMM（双仓源码课程）。
+本专栏按主题分为四类，**每类编号独立编排**：昇腾（平台机制与框架调用链）、Ascend C（算子开发，待写）、HCCL 与 HCOMM（双仓源码课程）、实践总结（真实需求复盘）。
 
 ### 一、昇腾
 
@@ -42,6 +42,17 @@
 | 课程 | [HCCL 与 HCOMM 源码学习](hccl-hcomm.md) | 12 个单元（0-11）+ 总结，分四幕：双仓全景与架构；底座（控制面 / 数据面 / 引擎）；算子层（算法与 selector、AllReduce 调用链、executor/template、资源与 dlsym）；扩展（七步流程、MC2、实战） | ✅ |
 
 一门课程读透两个仓：基于 [HCCL 开源仓库](https://gitcode.com/cann/hccl) 读"内置算子怎么跑"，基于 [HCOMM 通信基础库仓库](https://gitcode.com/cann/hcomm) 练"自己写扩展算子"——概念与源码配对成单元，一条主线从 `HcclAllReduce` 走到第一个自定义算子。
+
+### 四、实践总结
+
+真实需求的完整生命周期复盘——把课程知识落到 Issue → 定位 → 方案 → 验证 → 检视 → 合入的工程链路：
+
+| 篇 | 主题 | 读完能够带走 | 状态 |
+| ---: | --- | --- | --- |
+| 1 | [UBOE/UB_RTP 建链端口注入：从 Issue 到合入](practice/01-uboe-ubrtp-port-injection.md) | channel 建链知识链路 + 影响面矩阵、分层验证、检视闭环方法论 | ✅ |
+| 2 | [Reduce 64bit/特殊规约分级算法](practice/02-reduce-64bit-hierarchical-algorithm.md) | Reduce 分级原理与通信量账本、selector/cost 选路链、64bit/PROD 执行分流 + 死锁与计价排障方法论 | ✅ |
+
+后续实践文章统一收录在[实践总结专栏目录](practice/index.md)。
 
 ::: warning 版本提醒
 CANN 的组件、接口和源码结构会随版本变化。学概念可用最新资料；运行代码和读源码，必须以工作环境中的 **驱动、固件、CANN 与框架插件版本** 为准。

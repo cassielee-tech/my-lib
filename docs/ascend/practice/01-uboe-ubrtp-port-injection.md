@@ -280,8 +280,8 @@ Issue 查重/创建 → feature 分支（基于最新 upstream/master，squash �
 - [Issue #966｜UBOE/UB_RTP 通道 BuildSocket 监听端口硬编码 60001](https://gitcode.com/cann/hcomm/issues/966)
 - [PR #5614｜UBOE/UB_RTP 建链监听端口支持从 channelDesc_.port 传入](https://gitcode.com/cann/hcomm/pull/5614)
 - 涉及源码：`src/base_comm/resources/endpoint_pairs/channels/aicpu/aicpu_ts_uboe_ub_rtp_channel_helper.{h,cc}`、`aicpu_ts_urma_channel.cc`、`sockets/socket_mgr.cc`、`endpoints/server_socket_context/`、legacy `socket_config.h`
-- 课程关联：[单元 1 架构分层](01-architecture-layering.md) · [单元 2 控制面与 HCCM](02-control-plane.md) · [单元 3 数据面名词](03-data-plane.md) · [单元 11 实战起步](11-examples-first-op.md)
+- 课程关联：[单元 1 架构分层](../hccl-hcomm/01-architecture-layering.md) · [单元 2 控制面与 HCCM](../hccl-hcomm/02-control-plane.md) · [单元 3 数据面名词](../hccl-hcomm/03-data-plane.md) · [单元 11 实战起步](../hccl-hcomm/11-examples-first-op.md)
 
 ---
 
-[返回课程导学 →](../hccl-hcomm.md) · [返回课程总结 →](summary.md) · [返回专栏目录 →](../index.md)
+[返回课程导学 →](../hccl-hcomm.md) · [返回课程总结 →](../hccl-hcomm/summary.md) · [返回实践总结 →](index.md) · [返回专栏目录 →](../index.md)

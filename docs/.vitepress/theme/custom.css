@@ -9,6 +9,13 @@
   line-height: 1.85;
 }
 
+/* Mermaid 通过 foreignObject 渲染 HTML 标签，正文的行高/边距会撑破
+   Mermaid 按 line-height:1.5 计算出的标签高度，导致文字被裁切 */
+.vp-doc .mermaid p {
+  margin: 0;
+  line-height: 1.5;
+}
+
 /* 用颜色表达信息层级，但避免把整页染成高亮。 */
 .vp-doc strong {
   color: var(--vp-c-brand-1);
@@ -184,5 +191,87 @@
 @media (min-width: 1920px) {
   :root {
     --vp-layout-max-width: 1920px;
+  }
+}
+
+/* ===== 左侧目录 / 右侧大纲折叠 ===== */
+.panel-toggle {
+  position: fixed;
+  top: 50%;
+  z-index: 35;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 56px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  color: var(--vp-c-text-3);
+  background: color-mix(in srgb, var(--vp-c-bg) 92%, transparent);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transform: translateY(-50%);
+  transition: left 0.25s ease, color 0.25s, border-color 0.25s;
+}
+
+.panel-toggle:hover {
+  color: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+}
+
+.panel-toggle--sidebar {
+  border-radius: 0 8px 8px 0;
+}
+
+.panel-toggle--outline {
+  right: 0;
+  border-radius: 8px 0 0 8px;
+}
+
+/* 左侧按钮贴着侧边栏右边界滑动，收起后停在屏幕左缘 */
+@media (min-width: 960px) {
+  .panel-toggle--sidebar {
+    display: flex;
+    left: calc(
+      var(--vp-sidebar-width) + max(0px, (100vw - var(--vp-layout-max-width)) / 2)
+    );
+  }
+
+  html.sidebar-collapsed .panel-toggle--sidebar {
+    left: 0;
+  }
+
+  html.sidebar-collapsed .VPSidebar {
+    visibility: hidden;
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s ease, visibility 0.25s;
+  }
+
+  html.sidebar-collapsed .VPContent.has-sidebar {
+    padding-left: 0 !important;
+  }
+
+  /* 侧边栏隐藏后，其顶部 curtain 不再给左上角标题区提供背景，
+     参考 VitePress 无侧边栏页面的做法给整条导航栏着色 */
+  html.sidebar-collapsed .VPNavBar:not(.home) {
+    background-color: var(--vp-nav-bg-color);
+  }
+}
+
+@media (min-width: 1440px) {
+  html.sidebar-collapsed .VPContent.has-sidebar {
+    padding-left: calc((100vw - var(--vp-layout-max-width)) / 2) !important;
+  }
+}
+
+/* 右侧按钮：≥1280px 才有大纲栏 */
+@media (min-width: 1280px) {
+  .panel-toggle--outline {
+    display: flex;
+  }
+
+  html.aside-collapsed .VPDoc.has-aside .aside {
+    display: none !important;
   }
 }

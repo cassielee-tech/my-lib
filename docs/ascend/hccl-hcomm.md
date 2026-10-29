@@ -22,7 +22,7 @@
 
 - **参考资料**：[HCCL 开源仓库](https://gitcode.com/cann/hccl) 与 [HCOMM 通信基础库仓库](https://gitcode.com/cann/hcomm) 及各自的 `docs/zh` 目录（架构简介、用户指南、通信算子开发指南、API 参考）；
 - **前置知识**：[第 0 章｜认识昇腾与 CANN](00-ascend-cann.md)、[第 1 章｜Runtime 与任务执行](01-runtime-task-execution.md)、[第 2 章｜从 PyTorch 走向 HCCL](02-pytorch-to-hccl.md)；
-- **学习节奏**：**12 个学习单元 + 1 篇总结 + 1 篇实践复盘**，分四幕推进，每单元约 20～30 分钟；强烈建议本地 `git clone --depth 1` 两个仓库对照目录与代码阅读；
+- **学习节奏**：**12 个学习单元 + 1 篇总结**，分四幕推进，每单元约 20～30 分钟；强烈建议本地 `git clone --depth 1` 两个仓库对照目录与代码阅读；
 - **行号约定**：精读段的行号引用格式 `文件:行号`，均以课程整理时的仓快照为准。
 
 ## 单元列表
@@ -61,7 +61,6 @@
 | 10 | [MC2 自定义算子框架与官方样例](hccl-hcomm/10-mc2-custom-ops.md) | `hccl_mc2.h` + `examples/04、05`（五步法 ↔ 七步对照） |
 | 11 | [实战：examples 与第一个自定义算子](hccl-hcomm/11-examples-first-op.md) | 建域三式 + ACL Graph + 五步起步路线图 |
 | 总结 | [HCCL 与 HCOMM 源码阅读地图](hccl-hcomm/summary.md) | 概念清单 + 岗位能力对照 + 六条深入路线 |
-| 实践 | [UBOE/UB_RTP 建链端口注入：从 Issue 到合入](hccl-hcomm/12-practice-port-injection.md) | 真实需求复盘：知识点 + 定位 + 三轮方案演进 + 分层验证 + 合入流程 |
 
 **阅读主线**：`双仓地图（0）→ 六族 API（1）→ 底座三单元（2/3/4）→ 算法选名（5）→ 算子入口（6）→ executor 组装（7）→ 资源与 dlsym（8）→ 自定义算子（9 → 10 → 11）`；赶时间可走最小闭环 `0 → 1 → 6 → 5 → 7`，再按需补底座与扩展。
 
