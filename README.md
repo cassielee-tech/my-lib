@@ -19,14 +19,14 @@ my-cann/
 
 | 专栏 | 主题 | 章节 |
 | ---- | ---- | ---- |
-| [模型全景](study/model/index.md) | 模型在算什么？通信从哪来？ | 6 章 |
-| [训练与推理系统](study/systems/index.md) | 训练怎样运转？显存花在哪？ | 6 章 |
-| [单卡执行系统](study/device/index.md) | 算子怎样在单卡上跑得快？ | 8 章 + 专题 |
-| [并行策略](study/parallel/index.md) | 并行为什么产生通信？多少字节？ | 9 章 |
-| [集合通信](study/collective/index.md) | 语义、算法、代价模型与工程（岗位核心） | 5 章 |
-| [昇腾与 HCCL](study/ascend/index.md) | 平台机制、调用链与源码落地 | 昇腾 / Ascend C / HCCL 三类 |
+| [模型全景](study/模型全景/index.md) | 模型在算什么？通信从哪来？ | 6 章 |
+| [训练与推理系统](study/训练与推理系统/index.md) | 训练怎样运转？显存花在哪？ | 6 章 |
+| [单卡执行系统](study/单卡执行系统/index.md) | 算子怎样在单卡上跑得快？ | 8 章 + 专题 |
+| [并行策略](study/并行策略/index.md) | 并行为什么产生通信？多少字节？ | 9 章 |
+| [集合通信](study/集合通信/index.md) | 语义、算法、代价模型与工程（岗位核心） | 5 章 |
+| [昇腾与 HCCL](study/昇腾与HCCL/index.md) | 平台机制、调用链与源码落地 | 昇腾 / Ascend C / HCCL 三类 |
 
-其中 [HCCL 与 HCOMM 源码学习](study/ascend/hccl-hcomm.md) 为 13 单元源码精读课程（架构分层 → 控制面/数据面 → 引擎算法调用链 → executor/template → 资源与 dlsym → 自定义算子），带 [总结地图](study/ascend/hccl-hcomm/summary.md)。
+其中 [HCCL 与 HCOMM 源码学习](study/昇腾与HCCL/HCCL与HCOMM源码学习.md) 为 13 单元源码精读课程（架构分层 → 控制面/数据面 → 引擎算法调用链 → executor/template → 资源与 dlsym → 自定义算子），带 [总结地图](study/昇腾与HCCL/HCCL与HCOMM源码/总结-源码阅读地图.md)。
 
 ## design｜需求材料
 
