@@ -61,8 +61,6 @@ my-cann/
 
 上游 [cann/hccl](https://gitcode.com/cann/hccl)（fork：cassielee-tech/hccl）· [cann/hcomm](https://gitcode.com/cann/hcomm)
 
-## 更易读的博客版本
+## 其他学习资料收集
 
-[Cassie’s Stack
-](
-https://cassielee-tech.github.io/my-lib/)
+[对称内存](https://gitcode.com/zhangzhuopan/hccl_work/blob/main/symmetric_memory/README.md)
