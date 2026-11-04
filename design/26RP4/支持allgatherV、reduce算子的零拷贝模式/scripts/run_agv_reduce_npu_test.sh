@@ -73,6 +73,14 @@ echo "NPU_AGV_SYM_001_sym_4r_16m_fp16"
 mpirun -f ${HOSTFILE} -n 4 ./bin/all_gatherv_test -b 16m -e 16m -f 2 -d fp16 -m 1 -a aicpu_ts -p 4 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_AGV_SYM_001_sym_4r_16m_fp16/stdout.log
 fi
 
+# NPU_AGV_SYM_001_base_8r_512m | 512m 基线
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_AGV_SYM_001_base_8r_512m "* ]]; then
+mkdir -p ${LOG_ROOT}/NPU_AGV_SYM_001_base_8r_512m
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_AGV_SYM_001_base_8r_512m
+echo "NPU_AGV_SYM_001_base_8r_512m"
+mpirun -f ${HOSTFILE} -n 8 ./bin/all_gatherv_test -b 512m -e 512m -f 2 -d fp32 -m 0 -a aicpu_ts -p 8 -c 1 -n 3 2>&1 | tee ${LOG_ROOT}/NPU_AGV_SYM_001_base_8r_512m/stdout.log
+fi
+
 # NPU_AGV_SYM_001_sym_8r_512m | >256MB 单 loop
 if [[ -z "${CASES}" || " ${CASES} " == *" NPU_AGV_SYM_001_sym_8r_512m "* ]]; then
 mkdir -p ${LOG_ROOT}/NPU_AGV_SYM_001_sym_8r_512m
@@ -85,47 +93,58 @@ fi
 
 # NPU_RED_SYM_001_sole_base_4r_1m | 基线
 if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_sole_base_4r_1m "* ]]; then
+export HCCL_ALGO="reduce:sole{nhr}"
 mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_sole_base_4r_1m
 export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_sole_base_4r_1m
 echo "NPU_RED_SYM_001_sole_base_4r_1m"
 mpirun -f ${HOSTFILE} -n 4 ./bin/reduce_test -b 1m -e 1m -f 2 -d fp32 -o sum -r 0 -m 0 -a aicpu_ts -p 4 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_sole_base_4r_1m/stdout.log
+unset HCCL_ALGO
 fi
 
 # NPU_RED_SYM_001_sole_sym_4r_1m | 对称内存 root=0
 if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_sole_sym_4r_1m "* ]]; then
+export HCCL_ALGO="reduce:sole{nhr}"
 mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_sole_sym_4r_1m
 export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_sole_sym_4r_1m
 echo "NPU_RED_SYM_001_sole_sym_4r_1m"
 mpirun -f ${HOSTFILE} -n 4 ./bin/reduce_test -b 1m -e 1m -f 2 -d fp32 -o sum -r 0 -m 1 -a aicpu_ts -p 4 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_sole_sym_4r_1m/stdout.log
+unset HCCL_ALGO
 fi
 
 # NPU_RED_SYM_001_sole_sym_4r_root3 | 非 0 root
 if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_sole_sym_4r_root3 "* ]]; then
+export HCCL_ALGO="reduce:sole{nhr}"
 mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_sole_sym_4r_root3
 export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_sole_sym_4r_root3
 echo "NPU_RED_SYM_001_sole_sym_4r_root3"
 mpirun -f ${HOSTFILE} -n 4 ./bin/reduce_test -b 1m -e 1m -f 2 -d fp32 -o sum -r 3 -m 1 -a aicpu_ts -p 4 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_sole_sym_4r_root3/stdout.log
+unset HCCL_ALGO
 fi
 
 # ============================== Reduce ParallelMeshNHR：16p（2 节点×8） ==============================
 # 注意：当前 Parallel 零拷贝未启用（enableRemoteMemAccess=false），预期 CCL 回退；
 # 本组只验证正确性，不按零拷贝收益评估。
 
+# 8p 环境默认注释；16p（2 节点×8）时取消下面两段的注释。
 # NPU_RED_SYM_001_parallel_base_16r_16m | 基线
-if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_parallel_base_16r_16m "* ]]; then
-mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_16m
-export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_16m
-echo "NPU_RED_SYM_001_parallel_base_16r_16m"
-mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o max -r 0 -m 0 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_16m/stdout.log
-fi
+# if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_parallel_base_16r_16m "* ]]; then
+# export HCCL_ALGO="reduce:parallel{mesh,nhr}"
+# mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_16m
+# export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_16m
+# echo "NPU_RED_SYM_001_parallel_base_16r_16m"
+# mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o max -r 0 -m 0 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_16m/stdout.log
+# unset HCCL_ALGO
+# fi
 
 # NPU_RED_SYM_001_parallel_sym_16r_16m | 对称内存
-if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_parallel_sym_16r_16m "* ]]; then
-mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_16m
-export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_16m
-echo "NPU_RED_SYM_001_parallel_sym_16r_16m"
-mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o max -r 0 -m 1 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_16m/stdout.log
-fi
+# if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_parallel_sym_16r_16m "* ]]; then
+# export HCCL_ALGO="reduce:parallel{mesh,nhr}"
+# mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_16m
+# export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_16m
+# echo "NPU_RED_SYM_001_parallel_sym_16r_16m"
+# mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o max -r 0 -m 1 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_16m/stdout.log
+# unset HCCL_ALGO
+# fi
 
 # ============================== 大包多轮 / 确定性 ==============================
 
@@ -194,6 +213,7 @@ for dir in $(find "${LOG_ROOT}" -mindepth 1 -maxdepth 1 -type d -name 'NPU_*' | 
     fi
     algo=$(grep -rhoIE 'selected algo type is [^ ,]+' "${dir}" 2>/dev/null | sed 's/.*is //' | sort -u | paste -sd, - || true)
     sym=$(grep -rhoIE 'supportSymmetricMemory[^ ,;]*' "${dir}" 2>/dev/null | sort -u | head -3 | paste -sd, - || true)
+    symlog=$(grep -rhoIE 'HcclCommSymWinRegister|remoteOutputGraphMode|symmetric|RefreshSymmetricMemory' "${dir}" 2>/dev/null | sort -u | head -3 | paste -sd, - || true)
     symroot=$(grep -rhoIE 'symmetric root [a-z ]+' "${dir}" 2>/dev/null | sort -u | head -2 | paste -sd, - || true)
     err_count=$(grep -rhIcE '\[ERROR\]|HCCL_E_[A-Z_]+|check result failed' "${dir}" 2>/dev/null | awk '{s+=$1} END{print s+0}')
     err_samples=$(grep -rhIE '\[ERROR\]|HCCL_E_[A-Z_]+|check result failed' "${dir}" 2>/dev/null | sed 's/^[[:space:]]*//' | sort -u | head -3 || true)
@@ -201,6 +221,9 @@ for dir in $(find "${LOG_ROOT}" -mindepth 1 -maxdepth 1 -type d -name 'NPU_*' | 
     echo "  result : ${result} (success=${pass}, failed=${fail})"
     echo "  algo   : ${algo:-<none>}"
     echo "  sym    : ${sym:-<none>}"
+    if [ -n "${symlog}" ]; then
+        echo "  symlog : ${symlog}"
+    fi
     echo "  root   : ${symroot:-<none>}"
     echo "  errors : ${err_count}"
     if [ -n "${err_samples}" ]; then
