@@ -272,7 +272,7 @@ PyTorch / MindSpore / TensorFlow
 | **ops-cv** | 视觉任务核心操作 | NMS、ROIAlign、Resize |
 | **ops-transformer** | Transformer 相关算子 | FlashAttention、KVCache |
 
-当预置算子不够用时，就用 **Ascend C**（本专栏第 4、5 章的主角）开发自定义算子。
+当预置算子不够用时，就用 **Ascend C** 开发自定义算子。
 
 #### 3.3 图引擎 GE：全局优化的大脑
 

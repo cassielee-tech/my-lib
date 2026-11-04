@@ -149,12 +149,6 @@ export default withMermaid(defineConfig({
               ]
             },
             {
-              text: 'Ascend C', collapsed: true,
-              items: [
-                { text: '第 0-2 章｜算子开发（待写·二梯队）', link: '/ascend/' }
-              ]
-            },
-            {
               text: 'HCCL 与 HCOMM', collapsed: true,
               items: [
                 { text: '课程导学｜HCCL 与 HCOMM 源码学习', link: '/ascend/hccl-hcomm' },

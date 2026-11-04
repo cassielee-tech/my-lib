@@ -205,7 +205,7 @@ int main() {
         CPU 直接解引用 devPtr → 崩溃/脏数据
 ```
 
-Device 内存就是第 0 章说的 **Global Memory（HBM）**——算子的输入输出都住在这里；AI Core 干活时还要从 Global Memory 搬进片上 Local Memory（那是 Ascend C 篇的故事）。
+Device 内存就是第 0 章说的 **Global Memory（HBM）**——算子的输入输出都住在这里；AI Core 干活时还要从 Global Memory 搬进片上 Local Memory（那是 Ascend C 编程模型的内容）。
 
 ::: tip 为什么设计成两个空间？
 隔离带来高性能：HBM 带宽按大规模并行设计，Host 内存按通用性设计；DMA 引擎在两者之间异步搬运，搬运期间 CPU 可以继续干别的。隔离的代价就是"过桥必须显式"。
@@ -655,7 +655,7 @@ Device 时间线（干活，stream 队列 FIFO）
 
 ### 下一章预告
 
-按学习顺序进入 **Ascend C 篇：算子开发基础**（二梯队）；按 HCCL 主线，可直接跳到 **第 2 章：从 PyTorch 走向 HCCL**——把本章的 Runtime 世界观接到 `torch.distributed` → torch_npu → HCCL 的调用链上。
+按 HCCL 主线，下一站直接进入 **第 2 章：从 PyTorch 走向 HCCL**——把本章的 Runtime 世界观接到 `torch.distributed` → torch_npu → HCCL 的调用链上。
 
 无论走哪条，本章的双时间线都是后面所有内容的底图。
 
