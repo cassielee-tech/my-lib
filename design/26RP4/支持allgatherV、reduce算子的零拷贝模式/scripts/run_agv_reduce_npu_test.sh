@@ -148,12 +148,24 @@ fi
 
 # ============================== 大包多轮 / 确定性 ==============================
 
+# NPU_RED_SYM_002_base_4r_512m_sum | 512m 多轮基线
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_002_base_4r_512m_sum "* ]]; then
+export HCCL_ALGO="reduce:sole{nhr}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_002_base_4r_512m_sum
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_002_base_4r_512m_sum
+echo "NPU_RED_SYM_002_base_4r_512m_sum"
+mpirun -f ${HOSTFILE} -n 4 ./bin/reduce_test -b 512m -e 512m -f 2 -d fp32 -o sum -r 0 -m 0 -a aicpu_ts -p 4 -c 1 -n 10 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_002_base_4r_512m_sum/stdout.log
+unset HCCL_ALGO
+fi
+
 # NPU_RED_SYM_002_sym_4r_512m_sum | 512m 多轮
 if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_002_sym_4r_512m_sum "* ]]; then
+export HCCL_ALGO="reduce:sole{nhr}"
 mkdir -p ${LOG_ROOT}/NPU_RED_SYM_002_sym_4r_512m_sum
 export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_002_sym_4r_512m_sum
 echo "NPU_RED_SYM_002_sym_4r_512m_sum"
 mpirun -f ${HOSTFILE} -n 4 ./bin/reduce_test -b 512m -e 512m -f 2 -d fp32 -o sum -r 0 -m 1 -a aicpu_ts -p 4 -c 1 -n 10 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_002_sym_4r_512m_sum/stdout.log
+unset HCCL_ALGO
 fi
 
 # 3 级 32rank：hostfile 支持 32 进程时再放开
@@ -212,8 +224,9 @@ for dir in $(find "${LOG_ROOT}" -mindepth 1 -maxdepth 1 -type d -name 'NPU_*' | 
         last_perf=$(cat ${stdout_files} 2>/dev/null | grep -E '\| (success|failed)[[:space:]]*$' | tail -1 || true)
     fi
     algo=$(grep -rhoIE 'selected algo type is [^ ,]+' "${dir}" 2>/dev/null | sed 's/.*is //' | sort -u | paste -sd, - || true)
-    sym=$(grep -rhoIE 'supportSymmetricMemory[^ ,;]*' "${dir}" 2>/dev/null | sort -u | head -3 | paste -sd, - || true)
-    symlog=$(grep -rhoIE 'HcclCommSymWinRegister|remoteOutputGraphMode|symmetric|RefreshSymmetricMemory' "${dir}" 2>/dev/null | sort -u | head -3 | paste -sd, - || true)
+    sym=$(grep -rhoIE 'symMem\[[01]\]' "${dir}" 2>/dev/null | sort -u | head -3 | paste -sd, - || true)
+    symcache=$(grep -rhoIE 'supportSymmetricMemory\[[01]\]' "${dir}" 2>/dev/null | sort -u | head -3 | paste -sd, - || true)
+    symlog=$(grep -rhoIE 'HcclCommSymWinRegister|HcclCommSymWinGet|remoteOutputGraphMode|symmetric|RefreshSymmetricMemory' "${dir}" 2>/dev/null | sort -u | head -3 | paste -sd, - || true)
     symroot=$(grep -rhoIE 'symmetric root [a-z ]+' "${dir}" 2>/dev/null | sort -u | head -2 | paste -sd, - || true)
     err_count=$(grep -rhIcE '\[ERROR\]|HCCL_E_[A-Z_]+|check result failed' "${dir}" 2>/dev/null | awk '{s+=$1} END{print s+0}')
     err_samples=$(grep -rhIE '\[ERROR\]|HCCL_E_[A-Z_]+|check result failed' "${dir}" 2>/dev/null | sed 's/^[[:space:]]*//' | sort -u | head -3 || true)
@@ -221,6 +234,9 @@ for dir in $(find "${LOG_ROOT}" -mindepth 1 -maxdepth 1 -type d -name 'NPU_*' | 
     echo "  result : ${result} (success=${pass}, failed=${fail})"
     echo "  algo   : ${algo:-<none>}"
     echo "  sym    : ${sym:-<none>}"
+    if [ -n "${symcache}" ]; then
+        echo "  symcache: ${symcache}"
+    fi
     if [ -n "${symlog}" ]; then
         echo "  symlog : ${symlog}"
     fi
