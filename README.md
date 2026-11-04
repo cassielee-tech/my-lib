@@ -48,9 +48,19 @@ my-cann/
 
 开放项追踪：芯片支持口径待 SE 确认（srs&sd 1.5）；NPU_RD_TH_* 阈值实验真机结果待回填（srs&sd 2.9）；STC TOPO/CHK 三条 GTEST_SKIP 待真机补验。
 
-### 26RP4｜支持 AllGatherV、Reduce 算子的零拷贝模式（预调研）
+### 26RP4｜支持 AllGatherV、Reduce 算子的零拷贝模式（[目录](design/26RP4/支持allgatherV、reduce算子的零拷贝模式/)）
 
-[预调研-AllGatherV与Reduce零拷贝模式.md](design/26RP4/支持allgatherV、reduce算子的零拷贝模式/预调研-AllGatherV与Reduce零拷贝模式.md)——零拷贝机制现状摸底，`file:line` 事实与【待确认】判断分离，供 SE 需求串讲前对齐。
+需求 AR20261029516478（AllGatherV）/ AR20261029517134（Reduce），事实基准 hccl 仓 `master@7585a50c`：
+
+| 材料 | 说明 |
+| ---- | ---- |
+| [预调研-AllGatherV与Reduce零拷贝模式.md](design/26RP4/支持allgatherV、reduce算子的零拷贝模式/预调研-AllGatherV与Reduce零拷贝模式.md) | 零拷贝机制现状摸底，`file:line` 事实与【待确认】判断分离，供 SE 串讲前对齐 |
+| [前置知识.md](design/26RP4/支持allgatherV、reduce算子的零拷贝模式/前置知识.md) | 小白版理论向导（集合通信 → 零拷贝/对称内存 → HCCL 结构 → 现有实现 → 目标算子差距） |
+| [SRS_SD-AllGatherV与Reduce零拷贝.md](design/26RP4/支持allgatherV、reduce算子的零拷贝模式/SRS_SD-AllGatherV与Reduce零拷贝.md) | SRS/SD 全文：判定标准、逐算法可行性、公共层扩展、AGV/Reduce 接入方案 |
+| [se设计文档.md](design/26RP4/支持allgatherV、reduce算子的零拷贝模式/se设计文档.md) | SE 设计：对称内存扩展至 ReduceScatterV / Scatter / AllGatherV / Reduce，含算法级零拷贝判定与不支持根因 |
+| [AllGatherV与Reduce零拷贝_STC.xlsx](design/26RP4/支持allgatherV、reduce算子的零拷贝模式/AllGatherV与Reduce零拷贝_STC.xlsx) | 用例台账 25 条（ST 20 / UT 3 / Checker 2），执行情况已反填，含 3 条真机待补验 |
+
+开放项：NPU 真机 3 条（AGV 1 / Reduce 2）留待补验，部分 ST/UT 待补（见台账“用例执行情况”列）。
 
 ### 通用材料
 
