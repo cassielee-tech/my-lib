@@ -1,0 +1,334 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1010" viewBox="0 0 1400 1010" role="img" aria-labelledby="title desc">
+<title id="title">HCCL 通信算子数据流语义图</title>
+<desc id="desc">用九个数据流原型展示 HCCL 十五个通信原语的输入输出、归约、root 与变长特征。</desc>
+<defs>
+<marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#94a3b8"/></marker>
+</defs>
+<rect width="1400" height="1010" rx="24" fill="#f8fafc"/>
+<text x="700.0" y="42.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#182230">HCCL 通信算子数据流语义图（15 个原语）</text>
+<text x="700.0" y="70.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" font-weight="400" text-anchor="middle" fill="#64748b">左侧为各 rank 输入，中心为通信 / 归约操作，右侧为各 rank 输出；9 类原型覆盖全部集合通信与点对点原语</text>
+<rect x="30.0" y="100.0" width="430.0" height="250.0" rx="14" fill="#ffffff" stroke="#d5dde5" stroke-width="1.5"/>
+<text x="46.0" y="126.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" font-weight="700" text-anchor="start" fill="#24364b">Broadcast｜一对多复制</text>
+<text x="46.0" y="146.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#64748b">root 的整块数据复制到所有 rank</text>
+<circle cx="46.0" cy="179.0" r="8" fill="#24364b"/>
+<text x="46.0" y="182.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">0</text>
+<circle cx="46.0" cy="217.0" r="8" fill="#24364b"/>
+<text x="46.0" y="220.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">1</text>
+<circle cx="46.0" cy="255.0" r="8" fill="#24364b"/>
+<text x="46.0" y="258.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">2</text>
+<circle cx="46.0" cy="293.0" r="8" fill="#24364b"/>
+<text x="46.0" y="296.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
+<rect x="198.0" y="158.0" width="94.0" height="144.0" rx="12" fill="#ffedd5" stroke="#db7c20" stroke-width="1.5"/>
+<text x="245.0" y="235.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#24364b">复制</text>
+<text x="46.0" y="332.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" font-weight="400" text-anchor="start" fill="#64748b">root 持有唯一输入；非 root 只接收</text>
+<rect x="60.0" y="166.0" width="110.0" height="26.0" rx="5" fill="#dbeafe" stroke="#3677d2" stroke-width="1.5"/>
+<rect x="60.0" y="204.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="115.0" y="221.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<rect x="60.0" y="242.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="115.0" y="259.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<rect x="60.0" y="280.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="115.0" y="297.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<rect x="320.0" y="166.0" width="110.0" height="26.0" rx="5" fill="#dcfce7" stroke="#2f855a" stroke-width="1.5"/>
+<rect x="320.0" y="204.0" width="110.0" height="26.0" rx="5" fill="#dcfce7" stroke="#2f855a" stroke-width="1.5"/>
+<rect x="320.0" y="242.0" width="110.0" height="26.0" rx="5" fill="#dcfce7" stroke="#2f855a" stroke-width="1.5"/>
+<rect x="320.0" y="280.0" width="110.0" height="26.0" rx="5" fill="#dcfce7" stroke="#2f855a" stroke-width="1.5"/>
+<line x1="172.0" y1="179.0" x2="196.0" y2="179.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="294.0" y1="179.0" x2="318.0" y2="179.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="294.0" y1="217.0" x2="318.0" y2="217.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="294.0" y1="255.0" x2="318.0" y2="255.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="294.0" y1="293.0" x2="318.0" y2="293.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<rect x="480.0" y="100.0" width="430.0" height="250.0" rx="14" fill="#ffffff" stroke="#d5dde5" stroke-width="1.5"/>
+<text x="496.0" y="126.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" font-weight="700" text-anchor="start" fill="#24364b">Scatter｜一对多分片</text>
+<text x="496.0" y="146.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#64748b">root 的数据均分后各 rank 拿一片</text>
+<circle cx="496.0" cy="179.0" r="8" fill="#24364b"/>
+<text x="496.0" y="182.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">0</text>
+<circle cx="496.0" cy="217.0" r="8" fill="#24364b"/>
+<text x="496.0" y="220.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">1</text>
+<circle cx="496.0" cy="255.0" r="8" fill="#24364b"/>
+<text x="496.0" y="258.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">2</text>
+<circle cx="496.0" cy="293.0" r="8" fill="#24364b"/>
+<text x="496.0" y="296.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
+<rect x="648.0" y="158.0" width="94.0" height="144.0" rx="12" fill="#ffedd5" stroke="#db7c20" stroke-width="1.5"/>
+<text x="695.0" y="235.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#24364b">分片</text>
+<text x="496.0" y="332.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" font-weight="400" text-anchor="start" fill="#64748b">root 提供 sendBuf；各 rank 仅收自己那片</text>
+<rect x="510.0" y="166.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="537.5" y="166.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="565.0" y="166.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="592.5" y="166.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="510.0" y="204.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="565.0" y="221.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<rect x="510.0" y="242.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="565.0" y="259.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<rect x="510.0" y="280.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="565.0" y="297.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<rect x="770.0" y="166.0" width="110.0" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="770.0" y="204.0" width="110.0" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="770.0" y="242.0" width="110.0" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="770.0" y="280.0" width="110.0" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<line x1="622.0" y1="179.0" x2="646.0" y2="179.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="744.0" y1="179.0" x2="768.0" y2="179.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="744.0" y1="217.0" x2="768.0" y2="217.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="744.0" y1="255.0" x2="768.0" y2="255.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="744.0" y1="293.0" x2="768.0" y2="293.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<rect x="930.0" y="100.0" width="430.0" height="250.0" rx="14" fill="#ffffff" stroke="#d5dde5" stroke-width="1.5"/>
+<text x="946.0" y="126.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" font-weight="700" text-anchor="start" fill="#24364b">Reduce｜多对一归约</text>
+<text x="946.0" y="146.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#64748b">所有 rank 的输入归约到 root</text>
+<circle cx="946.0" cy="179.0" r="8" fill="#24364b"/>
+<text x="946.0" y="182.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">0</text>
+<circle cx="946.0" cy="217.0" r="8" fill="#24364b"/>
+<text x="946.0" y="220.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">1</text>
+<circle cx="946.0" cy="255.0" r="8" fill="#24364b"/>
+<text x="946.0" y="258.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">2</text>
+<circle cx="946.0" cy="293.0" r="8" fill="#24364b"/>
+<text x="946.0" y="296.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
+<rect x="1098.0" y="158.0" width="94.0" height="144.0" rx="12" fill="#ffedd5" stroke="#db7c20" stroke-width="1.5"/>
+<text x="1145.0" y="237.7" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="700" text-anchor="middle" fill="#24364b">Σ</text>
+<text x="946.0" y="332.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" font-weight="400" text-anchor="start" fill="#64748b">非 root 的 recvBuf 输出语义无效</text>
+<rect x="960.0" y="166.0" width="110.0" height="26.0" rx="5" fill="#dbeafe" stroke="#3677d2" stroke-width="1.5"/>
+<rect x="960.0" y="204.0" width="110.0" height="26.0" rx="5" fill="#dbeafe" stroke="#3677d2" stroke-width="1.5"/>
+<rect x="960.0" y="242.0" width="110.0" height="26.0" rx="5" fill="#dbeafe" stroke="#3677d2" stroke-width="1.5"/>
+<rect x="960.0" y="280.0" width="110.0" height="26.0" rx="5" fill="#dbeafe" stroke="#3677d2" stroke-width="1.5"/>
+<rect x="1220.0" y="166.0" width="110.0" height="26.0" rx="5" fill="#dcfce7" stroke="#2f855a" stroke-width="1.5"/>
+<rect x="1220.0" y="204.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="1275.0" y="221.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<rect x="1220.0" y="242.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="1275.0" y="259.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<rect x="1220.0" y="280.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="1275.0" y="297.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<line x1="1072.0" y1="179.0" x2="1096.0" y2="179.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="1072.0" y1="217.0" x2="1096.0" y2="217.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="1072.0" y1="255.0" x2="1096.0" y2="255.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="1072.0" y1="293.0" x2="1096.0" y2="293.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="1194.0" y1="179.0" x2="1218.0" y2="179.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="1194.0" y1="217.0" x2="1218.0" y2="217.0" stroke="#94a3b8" stroke-width="2.0" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="1194.0" y1="255.0" x2="1218.0" y2="255.0" stroke="#94a3b8" stroke-width="2.0" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="1194.0" y1="293.0" x2="1218.0" y2="293.0" stroke="#94a3b8" stroke-width="2.0" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<rect x="30.0" y="370.0" width="430.0" height="250.0" rx="14" fill="#ffffff" stroke="#d5dde5" stroke-width="1.5"/>
+<text x="46.0" y="396.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" font-weight="700" text-anchor="start" fill="#24364b">AllReduce｜多对多归约</text>
+<text x="46.0" y="416.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#64748b">所有 rank 输入归约后发回所有 rank</text>
+<circle cx="46.0" cy="449.0" r="8" fill="#24364b"/>
+<text x="46.0" y="452.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">0</text>
+<circle cx="46.0" cy="487.0" r="8" fill="#24364b"/>
+<text x="46.0" y="490.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">1</text>
+<circle cx="46.0" cy="525.0" r="8" fill="#24364b"/>
+<text x="46.0" y="528.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">2</text>
+<circle cx="46.0" cy="563.0" r="8" fill="#24364b"/>
+<text x="46.0" y="566.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
+<rect x="198.0" y="428.0" width="94.0" height="144.0" rx="12" fill="#ffedd5" stroke="#db7c20" stroke-width="1.5"/>
+<text x="245.0" y="507.7" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="700" text-anchor="middle" fill="#24364b">Σ</text>
+<text x="46.0" y="602.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" font-weight="400" text-anchor="start" fill="#64748b">支持 in-place（CCU / AIV 引擎）</text>
+<rect x="60.0" y="436.0" width="110.0" height="26.0" rx="5" fill="#dbeafe" stroke="#3677d2" stroke-width="1.5"/>
+<rect x="60.0" y="474.0" width="110.0" height="26.0" rx="5" fill="#dbeafe" stroke="#3677d2" stroke-width="1.5"/>
+<rect x="60.0" y="512.0" width="110.0" height="26.0" rx="5" fill="#dbeafe" stroke="#3677d2" stroke-width="1.5"/>
+<rect x="60.0" y="550.0" width="110.0" height="26.0" rx="5" fill="#dbeafe" stroke="#3677d2" stroke-width="1.5"/>
+<rect x="320.0" y="436.0" width="110.0" height="26.0" rx="5" fill="#dcfce7" stroke="#2f855a" stroke-width="1.5"/>
+<rect x="320.0" y="474.0" width="110.0" height="26.0" rx="5" fill="#dcfce7" stroke="#2f855a" stroke-width="1.5"/>
+<rect x="320.0" y="512.0" width="110.0" height="26.0" rx="5" fill="#dcfce7" stroke="#2f855a" stroke-width="1.5"/>
+<rect x="320.0" y="550.0" width="110.0" height="26.0" rx="5" fill="#dcfce7" stroke="#2f855a" stroke-width="1.5"/>
+<line x1="172.0" y1="449.0" x2="196.0" y2="449.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="172.0" y1="487.0" x2="196.0" y2="487.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="172.0" y1="525.0" x2="196.0" y2="525.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="172.0" y1="563.0" x2="196.0" y2="563.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="294.0" y1="449.0" x2="318.0" y2="449.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="294.0" y1="487.0" x2="318.0" y2="487.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="294.0" y1="525.0" x2="318.0" y2="525.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="294.0" y1="563.0" x2="318.0" y2="563.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<rect x="480.0" y="370.0" width="430.0" height="250.0" rx="14" fill="#ffffff" stroke="#d5dde5" stroke-width="1.5"/>
+<text x="496.0" y="396.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" font-weight="700" text-anchor="start" fill="#24364b">AllGather / AllGatherV｜全收集</text>
+<text x="496.0" y="416.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#64748b">各 rank 的输入按 rank 拼接后发回所有 rank</text>
+<circle cx="496.0" cy="449.0" r="8" fill="#24364b"/>
+<text x="496.0" y="452.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">0</text>
+<circle cx="496.0" cy="487.0" r="8" fill="#24364b"/>
+<text x="496.0" y="490.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">1</text>
+<circle cx="496.0" cy="525.0" r="8" fill="#24364b"/>
+<text x="496.0" y="528.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">2</text>
+<circle cx="496.0" cy="563.0" r="8" fill="#24364b"/>
+<text x="496.0" y="566.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
+<rect x="648.0" y="428.0" width="94.0" height="144.0" rx="12" fill="#ffedd5" stroke="#db7c20" stroke-width="1.5"/>
+<text x="695.0" y="505.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#24364b">拼接</text>
+<text x="496.0" y="602.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" font-weight="400" text-anchor="start" fill="#64748b">V：各 rank 数据长度可不同；输出各 rank 相同</text>
+<rect x="510.0" y="436.0" width="110.0" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="510.0" y="474.0" width="110.0" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="510.0" y="512.0" width="110.0" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="510.0" y="550.0" width="110.0" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="770.0" y="436.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="797.5" y="436.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="825.0" y="436.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="852.5" y="436.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="770.0" y="474.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="797.5" y="474.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="825.0" y="474.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="852.5" y="474.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="770.0" y="512.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="797.5" y="512.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="825.0" y="512.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="852.5" y="512.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="770.0" y="550.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="797.5" y="550.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="825.0" y="550.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="852.5" y="550.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<line x1="622.0" y1="449.0" x2="646.0" y2="449.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="622.0" y1="487.0" x2="646.0" y2="487.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="622.0" y1="525.0" x2="646.0" y2="525.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="622.0" y1="563.0" x2="646.0" y2="563.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="744.0" y1="449.0" x2="768.0" y2="449.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="744.0" y1="487.0" x2="768.0" y2="487.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="744.0" y1="525.0" x2="768.0" y2="525.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="744.0" y1="563.0" x2="768.0" y2="563.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<rect x="930.0" y="370.0" width="430.0" height="250.0" rx="14" fill="#ffffff" stroke="#d5dde5" stroke-width="1.5"/>
+<text x="946.0" y="396.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" font-weight="700" text-anchor="start" fill="#24364b">ReduceScatter / ReduceScatterV｜归约分片</text>
+<text x="946.0" y="416.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#64748b">所有 rank 归约后按 rank 分片</text>
+<circle cx="946.0" cy="449.0" r="8" fill="#24364b"/>
+<text x="946.0" y="452.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">0</text>
+<circle cx="946.0" cy="487.0" r="8" fill="#24364b"/>
+<text x="946.0" y="490.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">1</text>
+<circle cx="946.0" cy="525.0" r="8" fill="#24364b"/>
+<text x="946.0" y="528.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">2</text>
+<circle cx="946.0" cy="563.0" r="8" fill="#24364b"/>
+<text x="946.0" y="566.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
+<rect x="1098.0" y="428.0" width="94.0" height="144.0" rx="12" fill="#ffedd5" stroke="#db7c20" stroke-width="1.5"/>
+<text x="1145.0" y="505.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#24364b">Σ→分片</text>
+<text x="946.0" y="602.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" font-weight="400" text-anchor="start" fill="#64748b">V：各 rank 分片长度可不同；对称内存下 sendBuf 可能被污染</text>
+<rect x="960.0" y="436.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="987.5" y="436.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="1015.0" y="436.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="1042.5" y="436.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="960.0" y="474.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="987.5" y="474.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="1015.0" y="474.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="1042.5" y="474.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="960.0" y="512.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="987.5" y="512.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="1015.0" y="512.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="1042.5" y="512.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="960.0" y="550.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="987.5" y="550.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="1015.0" y="550.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="1042.5" y="550.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="1220.0" y="436.0" width="110.0" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="1220.0" y="474.0" width="110.0" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="1220.0" y="512.0" width="110.0" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="1220.0" y="550.0" width="110.0" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<line x1="1072.0" y1="449.0" x2="1096.0" y2="449.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="1072.0" y1="487.0" x2="1096.0" y2="487.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="1072.0" y1="525.0" x2="1096.0" y2="525.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="1072.0" y1="563.0" x2="1096.0" y2="563.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="1194.0" y1="449.0" x2="1218.0" y2="449.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="1194.0" y1="487.0" x2="1218.0" y2="487.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="1194.0" y1="525.0" x2="1218.0" y2="525.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="1194.0" y1="563.0" x2="1218.0" y2="563.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<rect x="30.0" y="640.0" width="430.0" height="250.0" rx="14" fill="#ffffff" stroke="#d5dde5" stroke-width="1.5"/>
+<text x="46.0" y="666.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" font-weight="700" text-anchor="start" fill="#24364b">AlltoAll / V / VC｜全交换</text>
+<text x="46.0" y="686.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#64748b">每个 rank 向每个 rank 发送不同分片</text>
+<circle cx="46.0" cy="719.0" r="8" fill="#24364b"/>
+<text x="46.0" y="722.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">0</text>
+<circle cx="46.0" cy="757.0" r="8" fill="#24364b"/>
+<text x="46.0" y="760.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">1</text>
+<circle cx="46.0" cy="795.0" r="8" fill="#24364b"/>
+<text x="46.0" y="798.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">2</text>
+<circle cx="46.0" cy="833.0" r="8" fill="#24364b"/>
+<text x="46.0" y="836.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
+<rect x="198.0" y="698.0" width="94.0" height="144.0" rx="12" fill="#ffedd5" stroke="#db7c20" stroke-width="1.5"/>
+<text x="245.0" y="775.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#24364b">全交换</text>
+<text x="46.0" y="872.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" font-weight="400" text-anchor="start" fill="#64748b">V：按 counts / displs；VC：按 sendCountMatrix</text>
+<rect x="60.0" y="706.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="87.5" y="706.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="115.0" y="706.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="142.5" y="706.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="60.0" y="744.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="87.5" y="744.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="115.0" y="744.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="142.5" y="744.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="60.0" y="782.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="87.5" y="782.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="115.0" y="782.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="142.5" y="782.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="60.0" y="820.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="87.5" y="820.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="115.0" y="820.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="142.5" y="820.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="320.0" y="706.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="347.5" y="706.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="375.0" y="706.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="402.5" y="706.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="320.0" y="744.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="347.5" y="744.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="375.0" y="744.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="402.5" y="744.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="320.0" y="782.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="347.5" y="782.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="375.0" y="782.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="402.5" y="782.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="320.0" y="820.0" width="27.5" height="26.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<rect x="347.5" y="820.0" width="27.5" height="26.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="375.0" y="820.0" width="27.5" height="26.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="402.5" y="820.0" width="27.5" height="26.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<line x1="172.0" y1="719.0" x2="196.0" y2="719.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="172.0" y1="757.0" x2="196.0" y2="757.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="172.0" y1="795.0" x2="196.0" y2="795.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="172.0" y1="833.0" x2="196.0" y2="833.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="294.0" y1="719.0" x2="318.0" y2="719.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="294.0" y1="757.0" x2="318.0" y2="757.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="294.0" y1="795.0" x2="318.0" y2="795.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<line x1="294.0" y1="833.0" x2="318.0" y2="833.0" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)"/>
+<rect x="480.0" y="640.0" width="430.0" height="250.0" rx="14" fill="#ffffff" stroke="#d5dde5" stroke-width="1.5"/>
+<text x="496.0" y="666.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" font-weight="700" text-anchor="start" fill="#24364b">Send / Recv / BatchSendRecv｜点对点</text>
+<text x="496.0" y="686.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#64748b">一个 rank 定向发送，另一个 rank 接收</text>
+<circle cx="496.0" cy="719.0" r="8" fill="#24364b"/>
+<text x="496.0" y="722.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">0</text>
+<circle cx="496.0" cy="757.0" r="8" fill="#24364b"/>
+<text x="496.0" y="760.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">1</text>
+<circle cx="496.0" cy="795.0" r="8" fill="#24364b"/>
+<text x="496.0" y="798.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">2</text>
+<circle cx="496.0" cy="833.0" r="8" fill="#24364b"/>
+<text x="496.0" y="836.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
+<rect x="510.0" y="706.0" width="110.0" height="26.0" rx="5" fill="#dbeafe" stroke="#3677d2" stroke-width="1.5"/>
+<rect x="510.0" y="744.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="565.0" y="761.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<rect x="510.0" y="820.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="565.0" y="837.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<rect x="770.0" y="782.0" width="110.0" height="26.0" rx="5" fill="#dcfce7" stroke="#2f855a" stroke-width="1.5"/>
+<rect x="770.0" y="706.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="825.0" y="723.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<rect x="770.0" y="744.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="825.0" y="761.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<rect x="770.0" y="820.0" width="110.0" height="26.0" rx="5" fill="none" stroke="#9aa8b6" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="825.0" y="837.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#9aa8b6">—</text>
+<path d="M622.0 719.0 H695.0 V795.0 H768.0" fill="none" stroke="#94a3b8" stroke-width="2.0" marker-end="url(#arr)" stroke-linejoin="round"/>
+<text x="700.0" y="764.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#24364b">P2P</text>
+<text x="496.0" y="872.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" font-weight="400" text-anchor="start" fill="#64748b">Send/Recv 必须配对；BatchSendRecv 一次下发多组收发任务</text>
+<rect x="930.0" y="640.0" width="430.0" height="250.0" rx="14" fill="#ffffff" stroke="#d5dde5" stroke-width="1.5"/>
+<text x="946.0" y="666.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" font-weight="700" text-anchor="start" fill="#24364b">Barrier｜同步</text>
+<text x="946.0" y="686.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#64748b">所有 rank 到达同步点后继续，无数据交换</text>
+<circle cx="990.0" cy="719.0" r="8" fill="#24364b"/>
+<text x="990.0" y="722.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">0</text>
+<line x1="1000.0" y1="719.0" x2="1135.0" y2="719.0" stroke="#805ad5" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+<circle cx="990.0" cy="757.0" r="8" fill="#24364b"/>
+<text x="990.0" y="760.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">1</text>
+<line x1="1000.0" y1="757.0" x2="1135.0" y2="757.0" stroke="#805ad5" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+<circle cx="990.0" cy="795.0" r="8" fill="#24364b"/>
+<text x="990.0" y="798.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">2</text>
+<line x1="1000.0" y1="795.0" x2="1135.0" y2="795.0" stroke="#805ad5" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+<circle cx="990.0" cy="833.0" r="8" fill="#24364b"/>
+<text x="990.0" y="836.2" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
+<line x1="1000.0" y1="833.0" x2="1135.0" y2="833.0" stroke="#805ad5" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+<line x1="1145.0" y1="702.0" x2="1145.0" y2="846.0" stroke="#805ad5" stroke-width="3" stroke-dasharray="6 4"/>
+<text x="1158.0" y="770.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="13" font-weight="700" text-anchor="start" fill="#24364b">同步点</text>
+<text x="946.0" y="872.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" font-weight="400" text-anchor="start" fill="#64748b">不计入数据传输量；用于控制流对齐</text>
+<text x="30.0" y="930.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="13" font-weight="700" text-anchor="start" fill="#24364b">图例：</text>
+<rect x="80.0" y="917.0" width="44.0" height="18.0" rx="4" fill="#dbeafe" stroke="#3677d2" stroke-width="1.5"/>
+<text x="132.0" y="930.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#64748b">输入数据</text>
+<rect x="205.0" y="917.0" width="44.0" height="18.0" rx="4" fill="#dcfce7" stroke="#2f855a" stroke-width="1.5"/>
+<text x="257.0" y="930.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#64748b">输出数据</text>
+<rect x="330.0" y="917.0" width="44.0" height="18.0" rx="4" fill="#ffedd5" stroke="#db7c20" stroke-width="1.5"/>
+<text x="382.0" y="930.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#64748b">归约 / 变换</text>
+<rect x="470.0" y="917.0" width="11.0" height="18.0" rx="0" fill="#bfdbfe" stroke="#3677d2" stroke-width="1.2"/>
+<rect x="481.0" y="917.0" width="11.0" height="18.0" rx="0" fill="#fde68a" stroke="#b45309" stroke-width="1.2"/>
+<rect x="492.0" y="917.0" width="11.0" height="18.0" rx="0" fill="#bbf7d0" stroke="#2f855a" stroke-width="1.2"/>
+<rect x="503.0" y="917.0" width="11.0" height="18.0" rx="0" fill="#fbcfe8" stroke="#be185d" stroke-width="1.2"/>
+<text x="522.0" y="930.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#64748b">分片（一色一片）</text>
+<line x1="650.0" y1="926.0" x2="700.0" y2="926.0" stroke="#805ad5" stroke-width="2.5" stroke-dasharray="5 4"/>
+<text x="710.0" y="930.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#64748b">同步 / 非参与 rank</text>
+<text x="30.0" y="980.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#64748b">说明：AllGatherV / ReduceScatterV / AlltoAllV / AlltoAllVC 复用对应基础面板，差异仅在各 rank 数据量描述；BatchSendRecv 复用 Send / Recv 面板。</text>
+<text x="30.0" y="1002.0" font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#64748b">依据 cann/hccl @ 965b682f 的 include/hccl.h、src/ops/、docs/zh/api_ref/comm_op_interface/ 梳理。</text>
+</svg>
