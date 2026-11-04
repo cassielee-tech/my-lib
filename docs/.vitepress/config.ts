@@ -47,6 +47,7 @@ export default withMermaid(defineConfig({
           text: '模型全景',
           items: [
             { text: '专栏目录', link: '/model/' },
+            { text: '⚡ 速通版｜整专栏速览', link: '/model/00-速通' },
             { text: '← 返回首页', link: '/' },
             { text: '第 1 章｜从模型到集合通信', link: '/model/01-landscape' },
             { text: '第 2 章｜张量、计算图与反向传播', link: '/model/02-tensor-autograd' },
@@ -63,6 +64,7 @@ export default withMermaid(defineConfig({
           text: '训练与推理系统',
           items: [
             { text: '专栏目录', link: '/systems/' },
+            { text: '⚡ 速通版｜整专栏速览', link: '/systems/00-速通' },
             { text: '← 返回首页', link: '/' },
             { text: '第 1 章｜训练循环', link: '/systems/01-training-loop' },
             { text: '第 2 章｜训练显存与计算优化', link: '/systems/02-training-memory-compute' },
@@ -79,6 +81,7 @@ export default withMermaid(defineConfig({
           text: '单卡执行系统',
           items: [
             { text: '专栏目录', link: '/device/' },
+            { text: '⚡ 速通版｜整专栏速览', link: '/device/00-速通' },
             { text: '← 返回首页', link: '/' },
             { text: '第 1 章｜全景与性能分析', link: '/device/01-landscape-performance' },
             { text: '第 2 章｜GPU/NPU 执行模型', link: '/device/02-execution-model' },
@@ -98,6 +101,7 @@ export default withMermaid(defineConfig({
           text: '并行策略',
           items: [
             { text: '专栏目录', link: '/parallel/' },
+            { text: '⚡ 速通版｜整专栏速览', link: '/parallel/00-速通' },
             { text: '← 返回首页', link: '/' },
             { text: '第 1 章｜MoE 与 Expert Parallel', link: '/parallel/01-moe-expert-parallel' },
             { text: '第 2 章｜效率设计（选修）', link: '/parallel/02-efficient-llm-design' },
@@ -117,6 +121,7 @@ export default withMermaid(defineConfig({
           text: '集合通信',
           items: [
             { text: '专栏目录', link: '/collective/' },
+            { text: '⚡ 速通版｜整专栏速览', link: '/collective/00-速通' },
             { text: '← 返回首页', link: '/' },
             { text: '第 1 章｜Collective 语义与代价模型', link: '/collective/01-collective-semantics-cost' },
             { text: '第 2 章｜Ring AllReduce 推导', link: '/collective/02-ring-allreduce' },
