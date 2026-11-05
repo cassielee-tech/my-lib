@@ -328,7 +328,7 @@ recvBuf:  │ r0│ r0│   │   │   │ r1│ r1│ r1│ r2│
 | 支持的数据类型 | 排除 INT64/UINT64/FP64 与 PROD；其余按算法 attrs |
 | 支持的数据量 | 支持多轮 loop；非 root 交换槽仍受 CCL 槽位约束 |
 | 是否支持绕路 | 否 |
-| 是否支持确定性计算 | 是（固定成对序，逐 bit 一致） |
+| 是否支持确定性计算 | 是（NHR 固定步序，逐 bit 一致） |
 
 其他约束：
 
@@ -343,7 +343,7 @@ recvBuf:  │ r0│ r0│   │   │   │ r1│ r1│ r1│ r2│
 
 ## 4.1 功能描述
 
-- **SoleNHR**：root 的本地工作区从 CCL 改为自身 userOut；PreCopy 目的、halving/doubling 的原位归约介质、终局落点都指向 userOut；root 跳过 PostCopy。归约顺序与交换模式不变。
+- **SoleNHR**：root 的本地工作区从 CCL 改为自身 userOut；PreCopy 目的、NHR 的 ReduceScatter/AllGather 原位归约介质、终局落点都指向 userOut；root 跳过 PostCopy。NHR 步序与交换模式不变。
 - **ParallelMeshNHR / ParallelNHRNHR**：最终 AG 阶段 root 侧工作区/最终落点改 userOut，移除 root 终局 LocalCopy。
 - **RS 阶段 input 窗口判断**：`InsTempReduceScatterMesh1D` / `InsTempReduceScatterNHR` 与 AR/RS 共用。Reduce 只注册 `recvBuf`（output），`sendBuf` 不注册，因此 `inputSymWindow` 为空；模板不能只凭 `supportSymmetricMemory` 走对称，还必须满足 `param.inputSymWindow != nullptr`。条件不满足时 RS 阶段自动回退 CCL，避免空 input 地址和污染 user input；最终 AG 阶段仍可使用 root 的 output 窗口。
 
@@ -429,27 +429,42 @@ flowchart TD
 
 **改动点 2——SoleNHR**
 
-**图 4-3：SoleNHR 的 root 工作区与固定成对归约**
+**图 4-3：SoleNHR 的基线路径 vs root 零拷贝路径**
 
 ```mermaid
-flowchart TD
-    A["各 rank 输入 D<br/>sendBuf 只读"] --> B{"rank == root?"}
-    B -- 是 --> C["PreCopy：input → userOut<br/>输入已在 userOut 时跳过"]
-    C --> D["halving/doubling<br/>root 工作区 = userOut<br/>原位累加"]
-    D --> E["root 终局结果已在 userOut<br/>跳过 PostCopy"]
-    B -- 否 --> F["非 root 工作区 / 交换槽 = CCL"]
-    F --> G["非 root 按固定成对顺序参与归约<br/>输出语义无效"]
-    D -.->|固定成对 / 固定序| G
-    H["归约顺序与交换模式不变"] --- D
-    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
-    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
-    classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
-    class A,F,G,H existing;
-    class B changed;
-    class C,D,E direct;
+flowchart TB
+    subgraph BASE["基线：NHR 工作区都在 CCL"]
+        direction LR
+        B0["userIn<br/>整块 D"] --> B1["PreCopy<br/>userIn → CCL"]
+        B1 --> B2["NHR：ReduceScatter + AllGather<br/>工作区 = CCL"]
+        B2 --> B3["root：PostCopy<br/>CCL → userOut"]
+        B2 --> B4["非 root：不写 output"]
+    end
+    subgraph SYM["零拷贝：只替换 root 的工作区"]
+        direction LR
+        R0["root userIn<br/>整块 D"] --> R1["PreCopy<br/>userIn → userOut"]
+        R1 --> R2["NHR：ReduceScatter + AllGather<br/>工作区 = root userOut"]
+        R2 --> R3["结果已在 userOut<br/>跳过 PostCopy"]
+        N0["非 root userIn<br/>整块 D"] --> N1["PreCopy<br/>userIn → CCL"]
+        N1 --> N2["NHR：ReduceScatter + AllGather<br/>工作区 = CCL"]
+        N2 --> N3["非 root：不写 output"]
+    end
+    NOTE["同一套 NHR 步序：每步 peer、slice 编号不变<br/>零拷贝只换 root 的读写地址"]
+    B2 -.-> NOTE
+    R2 -.-> NOTE
+    classDef base fill:#f5f5f5,stroke:#999,color:#333;
+    classDef root fill:#e8f5e9,stroke:#2e7d32,color:#000;
+    classDef other fill:#e3f2fd,stroke:#1565c0,color:#000;
+    classDef note fill:#fff3cd,stroke:#d39e00,color:#000;
+    class B0,B1,B2,B3,B4 base;
+    class R0,R1,R2,R3 root;
+    class N0,N1,N2,N3 other;
+    class NOTE note;
 ```
 
-SoleNHR 只把 root 的 PreCopy 目的、工作区和终局落点改到 userOut；非 root 工作区/交换槽仍使用 CCL，halving/doubling 的成对顺序不变。
+SoleNHR 只替换 root 自己的 CCL 工作区：root 的 PreCopy 直接写 userOut，NHR 的 ReduceScatter/AllGather 在 userOut 上原位完成，终局跳过 PostCopy；非 root 仍走 `userIn → CCL → NHR`，不写 output。上下两行的 NHR 步序、每步 peer 与 slice 编号完全相同，归约顺序不变。
+
+root 的 userOut 是唯一合法替换介质：`userIn` 只读，非 root 的 output 语义无效，都不能作为工作区。
 
 **改动点 3——Parallel**
 
@@ -584,7 +599,7 @@ flowchart LR
 | 支持的数据类型 | 排除 INT64/UINT64/FP64 与 PROD；其余按算法 attrs |
 | 支持的数据量 | 支持多轮 loop；非 root 交换槽仍受 CCL 槽位约束 |
 | 是否支持绕路 | 否 |
-| 是否支持确定性计算 | 是（固定成对序，逐 bit 一致） |
+| 是否支持确定性计算 | 是（NHR 固定步序，逐 bit 一致） |
 
 补充约束：
 
