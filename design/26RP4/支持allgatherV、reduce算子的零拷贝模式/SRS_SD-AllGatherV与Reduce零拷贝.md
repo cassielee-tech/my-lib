@@ -78,7 +78,7 @@
 **图 2-1：AllGatherV 对称门禁流程**
 
 ```mermaid
-flowchart TD
+flowchart LR
     A["HcclAllGatherV"] --> B["AllGatherVOutPlace<br/>修正 outputSize"]
     B --> C["Selector<br/>AicpuAllGatherVSoleMesh"]
     C --> D["HcclExecOp<br/>RefreshSymmetricMemory"]
