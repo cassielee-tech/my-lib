@@ -48,6 +48,8 @@
 
 ## 0.3 公共层改造
 
+> **图例（图 0-3 ~ 4-2）**：黄色=本次新增/修改逻辑；绿色=本次新增的对称直写/生效路径；灰色=既有 CCL/未改路径；红色=回退/不支持。
+
 ### 0.3.1 白名单
 
 `RefreshSymmetricMemory`（`src/ops/op_common/op_common.cc:4619`）新增两个 case：
@@ -75,11 +77,15 @@ sequenceDiagram
     R1->>H: HcclCommSymWinRegister(comm, ptr, size, flag=1)
     H->>HCOMM: 记录窗口与 offset
     Note over R0,R1: 全 rank 全部注册或全不注册
+    rect rgb(255, 243, 205)
     R0->>H: HcclCommSymWinGet(comm, ptr, size)
     H-->>R0: winHandle + offset
     R0->>H: GetSymWinRemoteMem(winHandle, offset, peer=1)
     H-->>R0: peer1 的 user buffer 地址
+    end
+    rect rgb(232, 245, 233)
     R0->>R1: 直接写/读 peer1 的 userOut
+    end
     Note over R0,R1: 任一 rank 查询失败 → 本 rank 回退 CCL
 ```
 
@@ -136,6 +142,14 @@ flowchart TD
     H -- 是 --> G
     G --> I["executor / template 对称分支"]
     X --> J["executor / template CCL 回退"]
+    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
+    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
+    classDef fallback fill:#fdecea,stroke:#c62828,color:#000;
+    classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
+    class A,C,D existing;
+    class B,E,F,H,G changed;
+    class X,J fallback;
+    class I direct;
 ```
 
 > 串讲要点：AGV/Reduce 入口不再单独探测；`HcclExecOp → RefreshSymmetricMemory` 是唯一门禁。AGV 需要双侧窗口，Reduce 只需要 output；Reduce 单级 `topoLevelNums==1` 直接被白名单函数排除。
@@ -191,6 +205,10 @@ flowchart LR
     O["outputSize = max(displs[i] + counts[i])"] --- A
     N["rank i 写各 rank 的 displs[i] 区间<br/>非空区间不得重叠"] --- B
     T["所有 rank 使用同一 recvCounts/recvDispls 布局"] --- C
+    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
+    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
+    class O,N changed;
+    class A,G,B,C,T existing;
 ```
 
 > 串讲要点：displs 允许空洞，但所有 rank 的布局必须一致；`outputSize` 取最大落点；rank i 只写各 rank 的 `displs[i]` 区间，因此并发写彼此不重叠。
@@ -291,6 +309,10 @@ flowchart TD
         S0 -->|N-1 线程并发直写| S2["对端 userOut[displs0]"]
     end
     N3 -.->|消除接收侧 CCL→userOut 拷贝| S2
+    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
+    classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
+    class N0,N1,N2,N3 existing;
+    class S0,S1,S2 direct;
 ```
 
 > 串讲要点：两种路径都保留一次自贡献本地拷贝；差异只在跨卡落点——普通路径先写对端 CCL 再 PostLocalCopy，对称路径直接写对端 userOut。每对端一线程，不能串行化。
@@ -379,6 +401,12 @@ flowchart LR
     F --> O["root userOut<br/>1×D"]
     N["非 root userOut<br/>语义无效"] -.->|不能作累加介质| C
     S["userIn 只读"] -.->|不能作累加介质| C
+    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
+    classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
+    classDef fallback fill:#fdecea,stroke:#c62828,color:#000;
+    class I0,I1,I2,C,F existing;
+    class O direct;
+    class N,S fallback;
 ```
 
 > 串讲要点：确定性 + fullmesh 要求 N 份源数据都有落点；root 只有 1×D 的合法输出，非 root output 语义无效、input 只读，所以只有 root 侧环节能换 user buffer。
@@ -457,6 +485,14 @@ flowchart TD
     F -- 否 --> E
     F -- 是 --> G["SoleNHR / ParallelMeshNHR / ParallelNHRNHR<br/>root 侧部分零拷贝"]
     C --> H["CCL 回退 / 无收益"]
+    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
+    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
+    classDef fallback fill:#fdecea,stroke:#c62828,color:#000;
+    classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
+    class A existing;
+    class B,D,F changed;
+    class G direct;
+    class C,E,H fallback;
 ```
 
 > 串讲要点：单级 MESH_1D 选到 SoleMesh/TwoShot，不是 SoleNHR/Parallel；即使强制单级 SoleNHR，也会被 `topoLevelNums == 1` 门禁拒绝。Reduce 零拷贝必须多级拓扑。
@@ -501,6 +537,12 @@ flowchart TD
     F --> G["非 root 按固定成对顺序参与归约<br/>输出语义无效"]
     D -.->|固定成对 / 固定序| G
     H["归约顺序与交换模式不变"] --- D
+    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
+    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
+    classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
+    class A,F,G,H existing;
+    class B changed;
+    class C,D,E direct;
 ```
 
 > 串讲要点：SoleNHR 只把 root 的工作区换成 userOut；非 root 仍用 CCL。halving/doubling 的成对顺序不变，所以结果确定性不变。
@@ -515,6 +557,14 @@ flowchart LR
     D --> E["rootOutputWritten_<br/>跳过终局 LocalCopy"]
     B -.-> G["B 守卫：inputSymWindow == nullptr → RS 回退 CCL"]
     F["当前实现：enableRemoteMemAccess = false<br/>Parallel 的 AG 仍走 CCL 回退"] -.-> D
+    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
+    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
+    classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
+    classDef fallback fill:#fdecea,stroke:#c62828,color:#000;
+    class A,B,C existing;
+    class G changed;
+    class D,E direct;
+    class F fallback;
 ```
 
 > 串讲要点：设计目标是 RS 阶段保 CCL、最终 AG 的 root 落点换 userOut。现状 `enableRemoteMemAccess` 未启用，Parallel 仍是 CCL 回退；图中 root 直写是待启用路径。
