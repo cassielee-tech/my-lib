@@ -144,14 +144,33 @@ flowchart TD
 
 ## 2.3 数据描述
 
-| 数据 | 说明 |
-|------|------|
-| `param.vDataDes.counts` / `param.varData` | recvCounts 与 recvDispls 合并存放 |
-| `param.outputSize` | 修正为 `max(recvDispls[i] + recvCounts[i]) * typeSize` |
-| `TemplateDataParams.allRankDispls` | 各 rank 在 output 中的偏移 |
-| `TemplateDataParams.allRankSliceSize` | 各 rank 本轮处理的字节数 |
-| `ChannelInfo.remoteOutputGraphMode.addr` | 对端 userOut 地址，由 `FillChannelSymWinPeerAddrs` 填充 |
-| `TemplateDataParams.buffInfo.outputSize` | 本端窗口大小，用于对称落点越界校验 |
+本需求不修改 AllGatherV 的数据面结构（`OpParam` / `TemplateDataParams` / `ChannelInfo` 均复用既有字段）。数据面变化集中在四点：`outputSize` 口径、`recvBuf/displs` 布局校验、对称窗口地址的消费方式，以及 executor 的 loop 参数。本节按“输入字段 → 模板/通道字段 → 布局 → 行为变化”组织。
+
+**OpParam 关键字段**
+
+| 字段 | 含义 | 与本需求的关系 |
+| --- | --- | --- |
+| `vDataDes.dataType` | 元素类型 | 计算 `perDataSize`，决定 `outputSize` 的字节口径 |
+| `vDataDes.counts` | recvCounts 数组 | 与 recvDispls 一起计算真实最大落点 |
+| `varData` | recvCounts + recvDispls 合并存放 | 模板侧 `allRankDispls` 的来源 |
+| `inputPtr/inputSize` | 本端 `sendBuf` 及其字节数 | 对称路径 input 窗口探测依据 |
+| `outputPtr/outputSize` | `recvBuf` 及修正后的字节数 | 对称路径 output 窗口探测与越界校验依据 |
+| `opType/opMode` | `HCCL_CMD_ALLGATHER_V` / `OPBASE` | 对称门禁判定 |
+
+**TemplateDataParams / ChannelInfo**
+
+| 字段 | 含义 | 用途 |
+| --- | --- | --- |
+| `TemplateDataParams.allRankDispls` | 各 rank 在 output 中的偏移 | rank i 写各 rank 的 `displs[i]` 区间 |
+| `TemplateDataParams.allRankSliceSize` | 各 rank 本轮处理的字节数 | 构造 per-rank 的 tx/rx slice |
+| `buffInfo.outputPtr` | 本端 `recvBuf` 基址 | 对称路径的本端落点 |
+| `buffInfo.outputSize` | 本端窗口大小 | 对称落点越界校验 |
+| `buffInfo.outBuffBaseOff` | 本轮 output 偏移 | 多轮 loop 时叠加 |
+| `TemplateDataParams.enableRemoteMemAccess` | 是否使用对端 user buffer | 决定 tx/rx 地址走 userOut 还是 CCL |
+| `ChannelInfo.remoteOutputGraphMode.addr` | 对端 userOut 地址 | 跨卡直写目标 |
+| `ChannelInfo.remoteCclMem.addr` | 对端 CCL 地址 | 非对称回退目标 |
+
+**recvBuf 与 displs 布局**
 
 **表 2-2：recvBuf 布局示例（counts={2,3,1}、displs={0,5,8}、FP32）**
 
@@ -177,7 +196,15 @@ recvBuf:  │ r0│ r0│   │   │   │ r1│ r1│ r1│ r2│
 - rank i 把自己的数据写到每个 rank 的 `recvBuf` 的 `displs[i]` 区间；非空区间不能重叠。
 - `outputSize = max(displs[i] + counts[i]) * typeSize`，本例为 `9 × 4B = 36B`，不是 `sum(counts)=6 × 4B`。
 
-对称窗口注册与地址换算由既有公共层/HCOMM 提供：业务或测试侧先调用 `HcclCommSymWinRegister` 把 user buffer 注册为窗口；HCCL 通过 `HcclCommSymWinGet` 反查本端窗口与 offset；再通过 `GetSymWinRemoteMem`（优先 `HcclSymWinGetRemoteAddr`，9.1 回退 `HcclSymWinGetPeerPointer`）按 peer rank 换算出对端 userOut 地址。注册只建立窗口、不搬数据；本需求不修改注册与地址换算实现，只新增 AllGatherV/Reduce 的探测策略和直接读写消费路径；注册/查询失败时回退 CCL。
+**对称窗口地址**
+
+业务或测试侧先调用 `HcclCommSymWinRegister` 把 user buffer 注册为窗口；HCCL 通过 `HcclCommSymWinGet` 反查本端窗口与 offset；再通过 `GetSymWinRemoteMem`（优先 `HcclSymWinGetRemoteAddr`，9.1 回退 `HcclSymWinGetPeerPointer`）按 peer rank 换算出对端 userOut 地址。注册只建立窗口、不搬数据；本需求不修改注册与地址换算实现，只新增探测策略和直接读写消费路径；注册/查询失败时回退 CCL。
+
+**数据行为变化**
+
+1. `outputSize` 从 `sum(recvCounts)` 改为 `max(recvDispls[i] + recvCounts[i])`，覆盖 displs 空洞，避免探测尺寸偏小。
+2. 跨卡落点从对端 CCL 改为对端 userOut；模板跳过接收侧 `PostLocalCopy`，但保留自贡献本地拷贝。
+3. 对称时 executor 设置 `loopTimes=1`、`scratchMultiple=0`，并把 `maxCountPerLoop` 放大到本次最大 `recvCounts`，摆脱 CCL scratch/256MB 单轮限制。
 
 ## 2.4 依赖性描述
 
