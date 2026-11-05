@@ -185,20 +185,25 @@ sequenceDiagram
     participant R1 as rank1
     participant H as HCCL
     participant HCOMM as HCOMM
+    Note over R0,R1: ① 业务/测试侧注册：把 user buffer 纳入对称窗口<br/>契约：全 rank 全部注册或全不注册
     R0->>H: HcclCommSymWinRegister(comm, ptr, size, flag=1)
     R1->>H: HcclCommSymWinRegister(comm, ptr, size, flag=1)
     H->>HCOMM: 记录窗口与 offset
-    Note over R0,R1: 全 rank 全部注册或全不注册
+    Note over R0,H: ② HCCL 反查本端窗口：ptr/size 属于哪个窗口、offset 是多少
     rect rgb(255, 243, 205)
     R0->>H: HcclCommSymWinGet(comm, ptr, size)
     H-->>R0: winHandle + offset
+    end
+    Note over R0,H: ③ 按 peer rank 做地址换算：本端 offset → 对端 userOut 地址
+    rect rgb(255, 243, 205)
     R0->>H: GetSymWinRemoteMem(winHandle, offset, peer=1)
     H-->>R0: peer1 的 user buffer 地址
     end
+    Note over R0,R1: ④ 地址就绪后，数据面直接写/读对端 userOut
     rect rgb(232, 245, 233)
     R0->>R1: 直接写/读 peer1 的 userOut
     end
-    Note over R0,R1: 任一 rank 查询失败 → 本 rank 回退 CCL
+    Note over R0,R1: 注册/查询失败 → 本 rank 回退 CCL；注册只建窗口，不搬数据
 ```
 
 ## 2.4 依赖性描述
