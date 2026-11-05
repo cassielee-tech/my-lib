@@ -79,26 +79,30 @@
 
 ```mermaid
 flowchart LR
-    A["HcclAllGatherV"] --> B["AllGatherVOutPlace<br/>修正 outputSize"]
-    B --> C["Selector<br/>AicpuAllGatherVSoleMesh"]
-    C --> D["HcclExecOp<br/>RefreshSymmetricMemory"]
-    D --> E{"hcomm≥9.1.0 / OPBASE / AICPU_TS<br/>MESH_1D / algName 匹配?"}
-    E -- 否 --> X["CCL 原路径"]
-    E -- 是 --> F["CheckAndSetSymmetricMemory<br/>input+output 双侧"]
-    F --> G{"双侧窗口有效?"}
-    G -- 否 --> X
-    G -- 是 --> H["supportSymmetricMemory=true"]
-    H --> I["InsV2AllGatherVSoleExecutor<br/>loopTimes=1，scratch=0"]
-    I --> J["InsTempAllGatherVMesh1D<br/>自贡献 LocalCopy<br/>直写对端 userOut<br/>跳过 PostLocalCopy"]
-    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
+    A["HcclAllGatherV"] --> B["Selector<br/>AicpuAllGatherVSoleMesh"]
+    B --> C["HcclExecOp<br/>RefreshSymmetricMemory"]
+    C --> D["对称路径"]
+    C --> E["CCL 回退"]
     classDef existing fill:#f5f5f5,stroke:#999,color:#333;
-    classDef fallback fill:#fdecea,stroke:#c62828,color:#000;
+    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
     classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
-    class A,B,C existing;
-    class D,E,F,G,H changed;
-    class X fallback;
-    class I,J direct;
+    classDef fallback fill:#fdecea,stroke:#c62828,color:#000;
+    class A,B existing;
+    class C changed;
+    class D direct;
+    class E fallback;
 ```
+
+**表 2-1：AllGatherV 对称门禁矩阵**
+
+| 阶段 | 检查项 | AGV 条件 | 不满足 |
+| --- | --- | --- | --- |
+| 1 基础门禁 | 版本 / 模式 / 引擎 / 一级拓扑 | hcomm≥9.1.0、OPBASE、AICPU_TS、level0 MESH_1D | CCL 回退 |
+| 2 算法门禁 | 选路 | `AicpuAllGatherVSoleMesh` | CCL 回退 |
+| 3 窗口门禁 | 双侧注册 | input + output 窗口均有效 | CCL 回退 |
+| 4 执行 | 全部通过 | `supportSymmetricMemory=true`；`loopTimes=1`、scratch=0；直写对端 userOut | CCL 回退 |
+
+> 门禁顺序：基础 → 算法 → 窗口；任一层失败即本 rank 回退 CCL，不做跨 rank 协商。
 
 **图 2-2：AllGatherV 普通路径与对称路径数据流**
 
@@ -326,27 +330,33 @@ sequenceDiagram
 **图 4-1：Reduce 对称门禁流程**
 
 ```mermaid
-flowchart TD
-    A["HcclReduce"] --> B["ReduceOutPlaceCommon<br/>Selector 选白名单算法"]
+flowchart LR
+    A["HcclReduce"] --> B["Selector<br/>白名单算法"]
     B --> C["HcclExecOp<br/>RefreshSymmetricMemory"]
-    C --> D{"hcomm≥9.1.0 / OPBASE / AICPU_TS<br/>MESH_1D / topoLevelNums>1<br/>algName 白名单 / 非 in-place / 非 64bit/PROD?"}
-    D -- 否 --> X["CCL 原路径"]
-    D -- 是 --> E["CheckAndSetSymmetricMemory<br/>仅 output 侧"]
-    E --> F{"output 窗口有效?"}
-    F -- 否 --> X
-    F -- 是 --> G["supportSymmetricMemory=true"]
-    G --> H{"算法分支"}
-    H -- SoleNHR --> I["ReduceSoleExecutor + ReduceNHR<br/>root 工作区=userOut<br/>root 跳过 PostCopy"]
-    H -- Parallel --> J["ReduceParallelExecutor<br/>最终 AG 阶段 root 落点=userOut<br/>RS 阶段 B 守卫回退 CCL<br/>移除 root 终局 LocalCopy"]
-    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
+    C --> D["对称路径<br/>root 侧 / 最终 AG"]
+    C --> E["CCL 回退"]
     classDef existing fill:#f5f5f5,stroke:#999,color:#333;
-    classDef fallback fill:#fdecea,stroke:#c62828,color:#000;
+    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
     classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
+    classDef fallback fill:#fdecea,stroke:#c62828,color:#000;
     class A,B existing;
-    class C,D,E,F,G,H changed;
-    class X fallback;
-    class I,J direct;
+    class C changed;
+    class D direct;
+    class E fallback;
 ```
+
+**表 4-1：Reduce 对称门禁矩阵**
+
+| 阶段 | 检查项 | Reduce 条件 | 不满足 |
+| --- | --- | --- | --- |
+| 1 基础门禁 | 版本 / 模式 / 引擎 / 一级拓扑 | hcomm≥9.1.0、OPBASE、AICPU_TS、level0 MESH_1D | CCL 回退 |
+| 2 拓扑门禁 | 多级 | `topoLevelNums > 1`；单级直接排除 | CCL 回退 |
+| 3 类型/调用门禁 | 数据类型 / 规约 / in-place | 非 INT64/UINT64/FP64/PROD；`inputPtr != outputPtr` | CCL 回退 |
+| 4 算法门禁 | 白名单 | `SoleNHR` / `ParallelMeshNHR` / `ParallelNHRNHR` | CCL 回退 |
+| 5 窗口门禁 | 单边注册 | 仅 output 窗口有效 | CCL 回退 |
+| 6 执行 | 全部通过 | `supportSymmetricMemory=true`；root 工作区/终局落 userOut；非 root 仍 CCL | CCL 回退 |
+
+> 门禁顺序：基础 → 拓扑 → 类型/调用 → 算法 → 窗口；任一层失败即本 rank 回退 CCL，不做跨 rank 协商。
 
 > 现状说明：`ReduceParallelExecutor` 当前未启用 `enableRemoteMemAccess`，Parallel 的最终 AG 仍走 CCL 回退；图中 root 直写为设计路径，待 AG 偏移修复后启用。
 
