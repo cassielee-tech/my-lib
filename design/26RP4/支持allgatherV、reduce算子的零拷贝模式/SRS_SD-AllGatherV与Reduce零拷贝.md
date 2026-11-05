@@ -358,6 +358,8 @@ recvBuf:  │ r0│ r0│   │   │   │ r1│ r1│ r1│ r2│
 
 一次 `HcclReduce` 调用经过 6 个阶段，本需求改动位于阶段 3（门禁/窗口探测）、阶段 5（SoleNHR root 工作区）和阶段 6（Parallel 最终 AG）。
 
+**图 4-1：Reduce 对称门禁与执行流程**
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -403,9 +405,31 @@ sequenceDiagram
 
 > 门禁顺序：基础 → 拓扑 → 类型/调用 → 算法 → 窗口；任一层失败即本 rank 回退 CCL，不做跨 rank 协商。
 
+**图 4-2：Reduce 算法支持范围决策树**
+
+```mermaid
+flowchart TD
+    A["HcclReduce"] --> B{"topoLevelNums == 1?"}
+    B -- 是 --> C["SoleMesh / SoleMeshTwoShot<br/>需要 N×D 或 D 槽位<br/>无合法 userOut → 不开"]
+    B -- 否 --> D{"INT64/UINT64/FP64/PROD?<br/>in-place?"}
+    D -- 是 --> E["CCL 回退"]
+    D -- 否 --> F{"algName 白名单?"}
+    F -- 否 --> E
+    F -- 是 --> G["SoleNHR / ParallelMeshNHR / ParallelNHRNHR<br/>root 侧部分零拷贝"]
+    C --> H["CCL 回退 / 无收益"]
+    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
+    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
+    classDef fallback fill:#fdecea,stroke:#c62828,color:#000;
+    classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
+    class A existing;
+    class B,D,F changed;
+    class G direct;
+    class C,E,H fallback;
+```
+
 **改动点 2——SoleNHR**
 
-**图 4-2：SoleNHR 的 root 工作区与固定成对归约**
+**图 4-3：SoleNHR 的 root 工作区与固定成对归约**
 
 ```mermaid
 flowchart TD
@@ -429,7 +453,7 @@ SoleNHR 只把 root 的 PreCopy 目的、工作区和终局落点改到 userOut�
 
 **改动点 3——Parallel**
 
-**图 4-3：ParallelMeshNHR 的两级流水**
+**图 4-4：ParallelMeshNHR 的两级流水**
 
 ```mermaid
 flowchart LR
@@ -480,7 +504,7 @@ RS 阶段保持 CCL：模板只在 input 窗口非空时走对称，否则回退
 
 **root 输出与空间下界**
 
-**图 4-4：Reduce 的空间下界——N×D 输入 vs root 1×D 输出**
+**图 4-5：Reduce 的空间下界——N×D 输入 vs root 1×D 输出**
 
 ```mermaid
 flowchart LR
@@ -568,28 +592,6 @@ flowchart LR
 - 全 rank `recvBuf` 全部注册或全不注册；非 root `recvBuf` 必须非空并注册（窗口锚点）。
 - RS 阶段仅 output 注册时由 input 窗口判断回退 CCL，不污染输入。
 - 多轮 loop 下直写/原位归约地址必须叠加 `outBuffBaseOff`，notify 握手不得省略。
-
-**图 4-5：Reduce 算法支持范围决策树**
-
-```mermaid
-flowchart TD
-    A["HcclReduce"] --> B{"topoLevelNums == 1?"}
-    B -- 是 --> C["SoleMesh / SoleMeshTwoShot<br/>需要 N×D 或 D 槽位<br/>无合法 userOut → 不开"]
-    B -- 否 --> D{"INT64/UINT64/FP64/PROD?<br/>in-place?"}
-    D -- 是 --> E["CCL 回退"]
-    D -- 否 --> F{"algName 白名单?"}
-    F -- 否 --> E
-    F -- 是 --> G["SoleNHR / ParallelMeshNHR / ParallelNHRNHR<br/>root 侧部分零拷贝"]
-    C --> H["CCL 回退 / 无收益"]
-    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
-    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
-    classDef fallback fill:#fdecea,stroke:#c62828,color:#000;
-    classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
-    class A existing;
-    class B,D,F changed;
-    class G direct;
-    class C,E,H fallback;
-```
 
 ## 4.7 DFX设计
 
