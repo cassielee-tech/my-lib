@@ -453,13 +453,32 @@ RS 阶段保持 CCL：模板只在 input 窗口非空时走对称，否则回退
 
 ## 4.3 数据描述
 
-| 数据 | 说明 |
-|------|------|
-| `param.root` | 结果落地 rank；模板 `root_` 由 `InsAlgTemplateBase` 构造时取 `param.root` |
-| `param.inputOffset` / `outputOffset` | 仅 output offset 参与 Reduce 对称路径 |
-| `ChannelInfo.remoteOutputGraphMode.addr` | 指向对端 userOut；Reduce 只在“对端为 root”时使用 |
-| `TemplateDataParams.buffInfo.outBuffType` | root 终局阶段需为 `OUTPUT` |
-| `TemplateDataParams.buffInfo.outBuffBaseOff` | 多轮 loop 时叠加到直写地址 |
+本需求不修改 Reduce 的数据面结构（`OpParam` / `TemplateDataParams` / `ChannelInfo` 均复用既有字段）。数据面变化集中在 root 工作区与 `outBuffType`、多轮 loop 偏移、对称窗口地址消费，以及 RS 阶段 input 窗口判断。本节按“输入字段 → 模板/通道字段 → 空间与 loop → 行为变化”组织。
+
+**OpParam 关键字段**
+
+| 字段 | 含义 | 与本需求的关系 |
+| --- | --- | --- |
+| `root` | 结果落地 rank | 只有 root 的 output 有语义；非 root output 仅作窗口锚点 |
+| `DataDes.dataType/count` | 元素类型/个数 | 决定 `outputSize` 与类型门禁；64bit/FP64/PROD 回退 |
+| `inputPtr/inputSize` | 本端 `sendBuf` | 不探测 input 窗口；RS 阶段不能依赖 `inputSymWindow` |
+| `outputPtr/outputSize` | `recvBuf` 及字节数 | root output 窗口探测依据；Reduce 采用仅 output 侧探测 |
+| `reduceType` | SUM/PROD/MAX/MIN | PROD 回退 |
+| `opType` | `HCCL_CMD_REDUCE` | 门禁与算法白名单判定 |
+
+**TemplateDataParams / ChannelInfo**
+
+| 字段 | 含义 | 用途 |
+| --- | --- | --- |
+| `buffInfo.outBuffType` | root 终局为 `OUTPUT`，其余为 `HCCL_BUFFER` | 决定落点走 userOut 还是 CCL |
+| `buffInfo.outputPtr` | root 终局为 userOut 加 loop 偏移，否则为 CCL | 模板写目标 |
+| `buffInfo.outputSize` | root 终局为本轮剩余 output 大小 | 落点越界校验 |
+| `buffInfo.outBuffBaseOff` | 本轮/dataSlice 的输出偏移 | 多轮 loop 时叠加 |
+| `TemplateDataParams.enableRemoteMemAccess` | 是否启用对端 user buffer 访问 | 当前 Parallel 为 false，AG 仍走 CCL |
+| `ChannelInfo.remoteOutputGraphMode.addr` | 对端 userOut 地址 | 只在对端为 root 时使用 |
+| `ChannelInfo.remoteCclMem.addr` | 对端 CCL 地址 | 非对称路径与 RS 阶段的回退目标 |
+
+**root 输出与空间下界**
 
 **图 4-4：Reduce 的空间下界——N×D 输入 vs root 1×D 输出**
 
@@ -485,29 +504,26 @@ flowchart LR
     class N,S fallback;
 ```
 
-**图 4-5：对称窗口注册与地址换算**
+- Reduce 是 N 份全量 D 汇总到 root 一份 D；确定性 + fullmesh 需要 N×D 中间落点。
+- 非 root output 语义无效，userIn 只读，因此只有 root 的 userOut 可以作为合法累加/最终落点。
+- 所以 SoleNHR / Parallel 只能做 root 侧部分零拷贝；非 root 工作区和 RS 交换槽保留 CCL。
 
-```mermaid
-sequenceDiagram
-    participant R0 as rank0
-    participant R1 as rank1
-    participant H as HCCL
-    participant HCOMM as HCOMM
-    R0->>H: HcclCommSymWinRegister(comm, ptr, size, flag=1)
-    R1->>H: HcclCommSymWinRegister(comm, ptr, size, flag=1)
-    H->>HCOMM: 记录窗口与 offset
-    Note over R0,R1: 全 rank 全部注册或全不注册
-    rect rgb(255, 243, 205)
-    R0->>H: HcclCommSymWinGet(comm, ptr, size)
-    H-->>R0: winHandle + offset
-    R0->>H: GetSymWinRemoteMem(winHandle, offset, peer=1)
-    H-->>R0: peer1 的 user buffer 地址
-    end
-    rect rgb(232, 245, 233)
-    R0->>R1: 直接写/读 peer1 的 userOut
-    end
-    Note over R0,R1: 任一 rank 查询失败 → 本 rank 回退 CCL
-```
+**多轮 loop 偏移**
+
+- `outputLoopBaseOff_ = processedCount * dataTypeSize_`：root 在当前 loop 的 userOut 基址偏移。
+- root 终局的 `outputPtr` 叠加该偏移，`outputSize` 使用 `param.outputSize - outputLoopBaseOff_`，避免把整块 userOut 当成单轮可写区间。
+- `outBuffBaseOff` 继续叠加 dataSlice 偏移；直写/原位归约地址必须包含这两个偏移，否则多轮数据会互踩。
+- 跳过的是本地拷贝，不是跨轮 notify 握手；RS/AG 的同步不能随 `PostLocalCopy` 一起省略。
+
+**对称窗口地址**
+
+业务或测试侧先调用 `HcclCommSymWinRegister` 把 user buffer 注册为窗口；HCCL 通过 `HcclCommSymWinGet` 反查本端窗口与 offset；再通过 `GetSymWinRemoteMem`（优先 `HcclSymWinGetRemoteAddr`，9.1 回退 `HcclSymWinGetPeerPointer`）按 peer rank 换算出对端 userOut 地址。注册只建立窗口、不搬数据；本需求不修改注册与地址换算实现，只新增探测策略和直接读写消费路径；注册/查询失败时回退 CCL。
+
+**数据行为变化**
+
+1. **SoleNHR**：root 的 PreCopy 目的、工作区和终局落点改到 userOut，root 跳过 PostCopy；非 root 工作区/交换槽保持 CCL。
+2. **Parallel**：最终 AG 阶段 root 落点改 userOut；RS 阶段仅在 `inputSymWindow != nullptr` 时走对称，Reduce 仅注册 output 时自动回退 CCL，避免空 input 地址和输入污染。
+3. **现状**：`enableRemoteMemAccess=false`，Parallel 的 AG 仍走 CCL 回退；因此 Parallel 当前只验证正确性与回退，不按零拷贝收益评估。
 
 ## 4.4 依赖性描述
 
@@ -553,7 +569,7 @@ sequenceDiagram
 - RS 阶段仅 output 注册时由 input 窗口判断回退 CCL，不污染输入。
 - 多轮 loop 下直写/原位归约地址必须叠加 `outBuffBaseOff`，notify 握手不得省略。
 
-**图 4-6：Reduce 算法支持范围决策树**
+**图 4-5：Reduce 算法支持范围决策树**
 
 ```mermaid
 flowchart TD
