@@ -308,7 +308,7 @@ recvBuf:  │ r0│ r0│   │   │   │ r1│ r1│ r1│ r2│
 1. `Selector` 选出 Reduce 白名单算法；`HcclExecOp → RefreshSymmetricMemory` 完成版本/引擎/拓扑/算法/类型/in-place 门禁与 output 单边探测。
 2. 对称生效时，执行器把 `supportSymmetricMemory` 与窗口信息传给模板。
 3. `SoleNHR`：root 的 PreCopy 目的、工作区和终局落点改 userOut，root 跳过 PostCopy；非 root 工作区/交换槽保持 CCL。
-4. `ParallelMeshNHR / ParallelNHRNHR`：RS 阶段保持 CCL（B 守卫），最终 AG 阶段 root 落点改 userOut，并移除 root 终局 LocalCopy。
+4. `ParallelMeshNHR / ParallelNHRNHR`：RS 阶段保持 CCL，仅当 `inputSymWindow` 非空时才走对称，否则回退 CCL；最终 AG 阶段 root 落点改 userOut，并移除 root 终局 LocalCopy。
 
 ## 3.4 输出
 
@@ -345,7 +345,7 @@ recvBuf:  │ r0│ r0│   │   │   │ r1│ r1│ r1│ r2│
 
 - **SoleNHR**：root 的本地工作区从 CCL 改为自身 userOut；PreCopy 目的、halving/doubling 的原位归约介质、终局落点都指向 userOut；root 跳过 PostCopy。归约顺序与交换模式不变。
 - **ParallelMeshNHR / ParallelNHRNHR**：最终 AG 阶段 root 侧工作区/最终落点改 userOut，移除 root 终局 LocalCopy。
-- **B 方案守卫**：`InsTempReduceScatterMesh1D` / `InsTempReduceScatterNHR` 的 `supportSymmetricMemAccess_` 改为 `param.supportSymmetricMemory && param.inputSymWindow != nullptr`。Reduce 仅注册 output 时，RS 阶段自动回退 CCL，避免空地址与输入污染。
+- **RS 阶段 input 窗口判断**：`InsTempReduceScatterMesh1D` / `InsTempReduceScatterNHR` 与 AR/RS 共用。Reduce 只注册 `recvBuf`（output），`sendBuf` 不注册，因此 `inputSymWindow` 为空；模板不能只凭 `supportSymmetricMemory` 走对称，还必须满足 `param.inputSymWindow != nullptr`。条件不满足时 RS 阶段自动回退 CCL，避免空 input 地址和污染 user input；最终 AG 阶段仍可使用 root 的 output 窗口。
 
 关键决策：
 
@@ -437,7 +437,7 @@ flowchart LR
     B --> C["NHR / 中间结果<br/>非 root CCL"]
     C --> D["最终 AG 阶段<br/>root 落点 = userOut"]
     D --> E["rootOutputWritten_<br/>跳过终局 LocalCopy"]
-    B -.-> G["B 守卫：inputSymWindow == nullptr → RS 回退 CCL"]
+    B -.-> G["RS 阶段：inputSymWindow 为空 → 回退 CCL"]
     F["当前实现：enableRemoteMemAccess = false<br/>Parallel 的 AG 仍走 CCL 回退"] -.-> D
     classDef existing fill:#f5f5f5,stroke:#999,color:#333;
     classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
@@ -449,7 +449,7 @@ flowchart LR
     class F fallback;
 ```
 
-RS 阶段保持 CCL，B 守卫在仅 output 注册时回退；最终 AG 阶段的 root 落点设计为 userOut。当前 `enableRemoteMemAccess=false`，Parallel 实际仍走 CCL 回退。
+RS 阶段保持 CCL：模板只在 input 窗口非空时走对称，否则回退 CCL；最终 AG 阶段的 root 落点设计为 userOut。当前 `enableRemoteMemAccess=false`，Parallel 实际仍走 CCL 回退。
 
 ## 4.3 数据描述
 
@@ -515,7 +515,7 @@ sequenceDiagram
 |------|------|
 | `ReduceNHR` | SoleNHR 模板；PreCopy/RunReduce/RunGather/PostCopy 按 root 选择地址 |
 | `ReduceParallelExecutor` | RS Mesh/NHR + AG Mesh/NHR 组合；最终 AG root 落点处理 |
-| `InsTempReduceScatterMesh1D/NHR` | B 守卫改动；与 AR/RS 共享，需回归 |
+| `InsTempReduceScatterMesh1D/NHR` | RS 阶段 input 窗口判断改动；与 AR/RS 共享，需回归 |
 | `InsTempAllGatherMesh1D/NHR` | 使用 `enableRemoteMemAccess` 与 `remoteOutputGraphMode` |
 | `FillChannelSymWinPeerAddrs` | 只填地址，不填 size；越界校验使用本地 size |
 | 公共层 | `RefreshSymmetricMemory`、`CheckAndSetSymmetricMemory`、`IsSymMemWindowValid`、`IsReduceAlgSymMemDeterministic` |
@@ -550,7 +550,7 @@ sequenceDiagram
 
 - 单级 MESH_1D 选到 SoleMesh/TwoShot，不在白名单；强制单级 SoleNHR 也被 `topoLevelNums == 1` 排除。
 - 全 rank `recvBuf` 全部注册或全不注册；非 root `recvBuf` 必须非空并注册（窗口锚点）。
-- RS 阶段仅 output 注册时由 B 守卫回退 CCL，不污染输入。
+- RS 阶段仅 output 注册时由 input 窗口判断回退 CCL，不污染输入。
 - 多轮 loop 下直写/原位归约地址必须叠加 `outBuffBaseOff`，notify 握手不得省略。
 
 **图 4-6：Reduce 算法支持范围决策树**
