@@ -6,24 +6,6 @@
 
 本需求在 OPBASE 下打通 AllGatherV 的对称内存路径：各 rank 通过对称窗口直接读写对端 userOut，仅保留一次自贡献本地拷贝，从而消除接收侧 CCL→userOut 拷贝，并去掉 256MB/scratch 的单轮限制。
 
-**图 1-1：普通路径与对称路径的高层对比**
-
-```mermaid
-flowchart LR
-    subgraph NORMAL["普通路径"]
-        N1["user buffer"] --> N2["CCL 中转"] --> N3["user buffer"]
-    end
-    subgraph SYM["对称路径"]
-        S1["user buffer"] --> S2["对端 userOut"]
-    end
-    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
-    classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
-    class N1,N2,N3 existing;
-    class S1,S2 direct;
-```
-
-普通路径需要经过 CCL 中转；对称路径直接写对端 userOut（绿色为对称路径，灰色为普通路径）。具体数据面差异见 2.2 图 2-2。
-
 ## 1.2 输入
 
 **API 入参**（与现状一致，无新增）：
