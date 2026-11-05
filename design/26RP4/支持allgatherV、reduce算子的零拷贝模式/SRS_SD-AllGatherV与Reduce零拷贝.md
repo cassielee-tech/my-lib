@@ -61,7 +61,29 @@ RSV 维持 default 拒绝；Scatter 由他人负责。
 
 Reduce 对称路径只写 root 的 output 窗口，不应额外要求注册 sendBuf，因此 Reduce 采用"仅 output 侧"探测；AGV 采用"input + output 双侧"探测（与 AllGather 一致）。
 
-现有 `CheckAndSetSymmetricMemory`（`src/ops/op_common/op_common.cc:4660`）无条件探测双侧，需要按 `opType` 决定所需侧。**同时必须适配 `IsSymMemWindowValid`（`:4612-4617`）**：若 Reduce 只探测 output，`inputSize > 0 && inputSymWindow == nullptr` 会让该函数返回 false，`RefreshSymmetricMemory` 随即将 `supportSymmetricMemory` 清零。这是 SE 设计文档未显式覆盖、但实现必须补充的点。
+原公共层 `CheckAndSetSymmetricMemory`（`src/ops/op_common/op_common.cc:4660`）无条件探测双侧；本需求按 `opType` 决定所需侧。**同时必须适配 `IsSymMemWindowValid`（`:4612-4617`）**：若 Reduce 只探测 output，`inputSize > 0 && inputSymWindow == nullptr` 会让该函数返回 false，`RefreshSymmetricMemory` 随即将 `supportSymmetricMemory` 清零。这是 SE 设计文档未显式覆盖、但实现必须补充的点。
+
+**图 0-3：对称窗口注册与地址换算**
+
+```mermaid
+sequenceDiagram
+    participant R0 as rank0
+    participant R1 as rank1
+    participant H as HCCL
+    participant HCOMM as HCOMM
+    R0->>H: HcclCommSymWinRegister(comm, ptr, size, flag=1)
+    R1->>H: HcclCommSymWinRegister(comm, ptr, size, flag=1)
+    H->>HCOMM: 记录窗口与 offset
+    Note over R0,R1: 全 rank 全部注册或全不注册
+    R0->>H: HcclCommSymWinGet(comm, ptr, size)
+    H-->>R0: winHandle + offset
+    R0->>H: GetSymWinRemoteMem(winHandle, offset, peer=1)
+    H-->>R0: peer1 的 user buffer 地址
+    R0->>R1: 直接写/读 peer1 的 userOut
+    Note over R0,R1: 任一 rank 查询失败 → 本 rank 回退 CCL
+```
+
+> 串讲要点：`HcclCommSymWinRegister` 是业务/测试侧注册；`HcclCommSymWinGet` 是 HCCL 反查本端窗口；`GetSymWinRemoteMem` 才算出对端地址。三者缺一不可。
 
 ### 0.3.3 Reduce 专用确定性函数与多级策略
 
@@ -72,6 +94,10 @@ Reduce 对称路径只写 root 的 output 窗口，不应额外要求注册 send
 ```cpp
 bool IsReduceAlgSymMemDeterministic(const std::string& algName, const TopoInfoWithNetLayerDetails* topoInfo)
 {
+    // 单级 MESH_1D 选到 SoleMesh/TwoShot，无合法 userOut 槽位，显式排除
+    if (topoInfo == nullptr || topoInfo->topoLevelNums == TOPO_LEVEL_NUM_1) {
+        return false;
+    }
     return algName == "AicpuReduceSoleNHR"
         || algName == "AicpuReduceParallelMeshNHR"
         || algName == "AicpuReduceParallelNHRNHR";
@@ -84,11 +110,35 @@ bool IsReduceAlgSymMemDeterministic(const std::string& algName, const TopoInfoWi
 - 各算法自身 attrs 已限定拓扑：`SoleNHR` 支持多级、`ParallelMeshNHR` ≤2 级、`ParallelNHRNHR` 仅 3 级（`src/ops/reduce/algorithm/executor/reduce_sole_executor.cc:332-343`、`reduce_parallel_executor.cc:986-1014`）。
 - AR/RS 多级仍保持 `IsReduceOpSymMemDeterministic` 的 false 结论，避免把多级 PipeLineMeshNHR 误放进来（`all_reduce_auto_selector.cc:429`、`reduce_scatter_auto_selector.cc:431`）。
 
-### 0.3.4 入口探测与回退
+### 0.3.4 门禁、探测与回退
 
-- 两个算子在 `Selector` 之后（algName 就绪）、`HcclExecOp` 之前加门禁条件块并调用探测；若入口已探测，`symMemChecked` 防止重复查询。
-- `HcclExecOp` 内 `RefreshSymmetricMemory`（`op_common.cc:1050`）按最终 `algName/engine` 复核；CCU→AICPU 回退时补探。
-- 探测失败或门禁不满足时，本 rank 回退原 CCL 路径；框架暂无跨 rank 对称标志协商（沿用公共层既有缺口）。
+- AGV / Reduce 算子入口不再单独探测；`Selector` 后直接进入 `HcclExecOp`。
+- `HcclExecOp` 填入最终 `algName` / `hcclComm` 后调用 `RefreshSymmetricMemory`；版本/模式/引擎/拓扑、算子白名单、算法确定性、窗口探测统一在单点完成。
+- `symMemChecked` 防止重复查询；AGV 双侧、Reduce 仅 output 侧；探测失败或门禁不满足时 `supportSymmetricMemory=false`，本 rank 回退原 CCL 路径。
+- 框架暂无跨 rank 对称标志协商，依赖“全 rank 注册或全不注册”契约。
+
+**图 0-4：对称门禁与回退决策树**
+
+```mermaid
+flowchart TD
+    A["HcclExecOp<br/>填 param.algName / param.hcclComm"] --> B["RefreshSymmetricMemory"]
+    B --> C{"hcomm≥9.1.0<br/>OPBASE / AICPU_TS / level0 MESH_1D?"}
+    C -- 否 --> X["supportSymmetricMemory=false<br/>原 CCL 路径"]
+    C -- 是 --> D{"opType"}
+    D -- AllGatherV --> E{"algName == AicpuAllGatherVSoleMesh<br/>input + output 双侧窗口有效?"}
+    D -- Reduce --> F{"inputPtr != outputPtr<br/>非 INT64/UINT64/FP64/PROD<br/>algName 白名单<br/>topoLevelNums > 1?"}
+    D -- 其他 --> X
+    E -- 否 --> X
+    E -- 是 --> G["supportSymmetricMemory=true"]
+    F -- 否 --> X
+    F -- 是 --> H{"output 窗口有效?"}
+    H -- 否 --> X
+    H -- 是 --> G
+    G --> I["executor / template 对称分支"]
+    X --> J["executor / template CCL 回退"]
+```
+
+> 串讲要点：AGV/Reduce 入口不再单独探测；`HcclExecOp → RefreshSymmetricMemory` 是唯一门禁。AGV 需要双侧窗口，Reduce 只需要 output；Reduce 单级 `topoLevelNums==1` 直接被白名单函数排除。
 
 ### 0.3.5 版本、缓存与预热
 
@@ -133,6 +183,18 @@ bool IsReduceAlgSymMemDeterministic(const std::string& algName, const TopoInfoWi
 
 本需求目标：打通单算子（OPBASE）对称链路，跨卡数据全程直落对端 userOut，仅保留一次自贡献本地拷贝。
 
+**图 1-1：AGV 的 recvBuf / displs 布局**
+
+```mermaid
+flowchart LR
+    A["rank0 区间<br/>displs[0] + counts[0]"] --- G["空洞"] --- B["rank1 区间<br/>displs[1] + counts[1]"] --- C["rank2 区间<br/>displs[2] + counts[2]"]
+    O["outputSize = max(displs[i] + counts[i])"] --- A
+    N["rank i 写各 rank 的 displs[i] 区间<br/>非空区间不得重叠"] --- B
+    T["所有 rank 使用同一 recvCounts/recvDispls 布局"] --- C
+```
+
+> 串讲要点：displs 允许空洞，但所有 rank 的布局必须一致；`outputSize` 取最大落点；rank i 只写各 rank 的 `displs[i]` 区间，因此并发写彼此不重叠。
+
 ## 1.2 输入
 
 **API 入参**（与现状一致，无新增）：
@@ -162,8 +224,7 @@ bool IsReduceAlgSymMemDeterministic(const std::string& algName, const TopoInfoWi
 入口 AllGatherVOutPlace
   → 修正 outputSize 口径（max(displs+counts)）
   → Selector 选 AicpuAllGatherVSoleMesh
-  → 门禁条件块 + CheckAndSetSymmetricMemory（双侧）
-  → HcclExecOp → RefreshSymmetricMemory 复核
+  → HcclExecOp → 填 algName/hcclComm → RefreshSymmetricMemory（单点门禁 + 双侧探测）
   → InsV2AllGatherVSoleExecutor
        supportSymmetricMemory_ / SetSymmetricMemoryInfo
        enableRemoteMemAccess = true
@@ -187,7 +248,7 @@ bool IsReduceAlgSymMemDeterministic(const std::string& algName, const TopoInfoWi
 | 模式 | 单算子 OPBASE；图模式 OFFLOAD 已具备直写能力，仅回归 |
 | 拓扑 | `level0Topo == MESH_1D`；其他拓扑回退 |
 | in-place | 禁止：`sendBuf == recvBuf` 返回 `HCCL_E_PARA`（`all_gather_v.cc:166`） |
-| 数组契约 | `recvCounts/recvDispls` 全 rank 一致；displs 单调不减、末段 ≤ outputSize |
+| 数组契约 | `recvCounts/recvDispls` 全 rank 一致；displs 单调不减、非空区间不得重叠、末段 ≤ outputSize |
 | 注册契约 | 全 rank 双侧全部注册或全不注册；探测失败本 rank 回退 |
 | 数据量 | 对称路径无 256MB/scratch 约束，`loopTimes=1` |
 
@@ -205,15 +266,34 @@ bool IsReduceAlgSymMemDeterministic(const std::string& algName, const TopoInfoWi
 flowchart TD
     A["HcclAllGatherV"] --> B["AllGatherVOutPlace<br/>修正 outputSize"]
     B --> C["Selector<br/>AicpuAllGatherVSoleMesh"]
-    C --> D{"门禁: hcomm≥9.1.0<br/>OPBASE / AICPU_TS / MESH_1D<br/>algName 匹配?"}
-    D -- 否 --> X["supportSymmetricMemory=false<br/>原 CCL 路径"]
-    D -- 是 --> E["CheckAndSetSymmetricMemory<br/>input+output 双侧"]
-    E --> F{"双侧窗口有效?"}
-    F -- 否 --> X
-    F -- 是 --> G["supportSymmetricMemory=true"]
-    G --> H["InsV2AllGatherVSoleExecutor<br/>SetSymmetricMemoryInfo<br/>enableRemoteMemAccess=true<br/>loopTimes=1, maxCountPerLoop=maxSendDataCount"]
-    H --> I["InsTempAllGatherVMesh1D<br/>LocalDataCopy 自贡献<br/>跨卡直写对端 userOut<br/>跳过 PostLocalCopy"]
+    C --> D["HcclExecOp<br/>RefreshSymmetricMemory<br/>单点门禁"]
+    D --> E{"hcomm≥9.1.0 / OPBASE / AICPU_TS<br/>MESH_1D / algName 匹配?"}
+    E -- 否 --> X["supportSymmetricMemory=false<br/>原 CCL 路径"]
+    E -- 是 --> F["CheckAndSetSymmetricMemory<br/>input+output 双侧"]
+    F --> G{"双侧窗口有效?"}
+    G -- 否 --> X
+    G -- 是 --> H["supportSymmetricMemory=true"]
+    H --> I["InsV2AllGatherVSoleExecutor<br/>SetSymmetricMemoryInfo<br/>enableRemoteMemAccess=true<br/>loopTimes=1, maxCountPerLoop=maxSendDataCount"]
+    I --> J["InsTempAllGatherVMesh1D<br/>LocalDataCopy 自贡献<br/>跨卡直写对端 userOut<br/>跳过 PostLocalCopy"]
 ```
+
+**图 1-2：AGV 普通路径与对称路径的数据流**
+
+```mermaid
+flowchart TD
+    subgraph NORMAL["普通 CCL 路径"]
+        N0["rank0 sendBuf"] -->|LocalCopy 自贡献| N1["rank0 userOut[displs0]"]
+        N0 -->|N-1 线程并发写| N2["对端 CCL 槽[0]"]
+        N2 -->|对端 PostLocalCopy| N3["对端 userOut[displs0]"]
+    end
+    subgraph SYM["对称路径"]
+        S0["rank0 sendBuf"] -->|LocalCopy 自贡献| S1["rank0 userOut[displs0]"]
+        S0 -->|N-1 线程并发直写| S2["对端 userOut[displs0]"]
+    end
+    N3 -.->|消除接收侧 CCL→userOut 拷贝| S2
+```
+
+> 串讲要点：两种路径都保留一次自贡献本地拷贝；差异只在跨卡落点——普通路径先写对端 CCL 再 PostLocalCopy，对称路径直接写对端 userOut。每对端一线程，不能串行化。
 
 ## 2.3 数据描述
 
@@ -242,7 +322,7 @@ flowchart TD
 
 ## 2.7 DFX 设计
 
-- 日志：入口打印对称开关与窗口探测结果；模板打印对端地址与落点偏移。
+- 日志：`HcclExecOp` 打印对称开关与窗口探测结果；模板打印对端地址与落点偏移。
 - 回退：任一侧探测失败即回退，不打印 ERROR。
 - 错误码：对端地址为空返回 `HCCL_E_INTERNAL`；displs 非法返回 `HCCL_E_PARA`。
 - 可测性：`supportSymmetricMemory` 可在日志中观测。
@@ -262,7 +342,7 @@ flowchart TD
 
 | 文件 | 位置 | 改动 |
 |------|------|------|
-| `src/ops/all_gather_v/all_gather_v.cc` | `AllGatherVOutPlace` | `outputSize` 口径修复；displs 校验；Selector 后加门禁与探测 |
+| `src/ops/all_gather_v/all_gather_v.cc` | `AllGatherVOutPlace` | `outputSize` 口径修复；displs 校验；Selector 后由 `HcclExecOp` 单点门禁/探测 |
 | `src/ops/op_common/op_common.cc` | `RefreshSymmetricMemory` | 新增 `HCCL_CMD_ALLGATHER_V` case |
 | `src/ops/all_gather_v/algorithm/executor/ins_v2_all_gather_v_sole_executor.cc` | `Orchestrate/OrchestrateLoop` | `supportSymmetricMemory_` + `SetSymmetricMemoryInfo`；`enableRemoteMemAccess=true`；`loopTimes=1` 且 `maxCountPerLoop=maxSendDataCount`；填充 `count` |
 | `src/ops/all_gather_v/algorithm/template/aicpu/ins_temp_all_gather_v_mesh_1D.cc` | `CalcScratchMultiple` / `RunAllGatherVMesh` | 对称时 scratch=0；修复 rx 偏移交叉赋值；对端地址判空与越界防御 |
@@ -274,13 +354,34 @@ flowchart TD
 
 ## 3.1 介绍
 
-`HcclReduce` 将所有 rank 的同形状数据逐元素归约，结果仅落在 root。当前入口 `ReduceOutPlaceCommon`（`src/ops/reduce/reduce.cc:219`）不接入对称内存探测，`supportSymmetricMemory` 恒 false。
+`HcclReduce` 将所有 rank 的同形状数据逐元素归约，结果仅落在 root。原入口 `ReduceOutPlaceCommon`（`src/ops/reduce/reduce.cc:219`）不接入对称内存探测；本需求由 `HcclExecOp → RefreshSymmetricMemory` 单点接入。
 
 Reduce 是"N 份全量 D → root 一份 D"的向心归约。确定性 + fullmesh 并发要求 N×D 落地槽位（或分布于非 root 的中间累加区），而合法介质只有 root 的 1×D，因此只有 root 侧环节可直访 user buffer。
 
 本需求目标：对 `AicpuReduceSoleNHR`、`AicpuReduceParallelMeshNHR`、`AicpuReduceParallelNHRNHR` 做部分零拷贝——仅 root 侧工作区/终局汇集改 userOut；非 root 与交换槽保留 CCL。
 
-**范围声明：单级 `MESH_1D` 无零拷贝收益。** 单级选到的是 `SoleMesh` / `SoleMeshTwoShot`（`reduce_auto_selector.cc:324-326`），SE 判定为不支持；本需求不覆盖单级 Reduce。
+**范围声明：单级 `MESH_1D` 无零拷贝收益。单级 MESH_1D 的 Reduce 选到 SoleMesh/TwoShot：要确定性 + fullmesh，就需要 N×D 的中间槽位；root 只有 1×D 的 userOut，非 root output 无定义、input 只读，所以没有合法 user buffer 可替换；能省的那一步已经直写，或者只能串行化，而串行化违反 fullmesh。SoleNHR/Parallel 的 root 侧收益只在多级拓扑出现，单级被设计门禁直接排除。
+
+
+**图 3-1：Reduce 的空间下界——N×D 输入 vs root 1×D 输出**
+
+```mermaid
+flowchart LR
+    subgraph IN["N 个 rank 输入（每份 D）"]
+        I0["rank0: D"]
+        I1["rank1: D"]
+        I2["rank2: D"]
+    end
+    I0 --> C["CCL 每源一槽<br/>N×D"]
+    I1 --> C
+    I2 --> C
+    C --> F["固定序折叠"]
+    F --> O["root userOut<br/>1×D"]
+    N["非 root userOut<br/>语义无效"] -.->|不能作累加介质| C
+    S["userIn 只读"] -.->|不能作累加介质| C
+```
+
+> 串讲要点：确定性 + fullmesh 要求 N 份源数据都有落点；root 只有 1×D 的合法输出，非 root output 语义无效、input 只读，所以只有 root 侧环节能换 user buffer。
 
 ## 3.2 输入
 
@@ -302,6 +403,7 @@ Reduce 是"N 份全量 D → root 一份 D"的向心归约。确定性 + fullmes
 - `opMode == OPBASE`；
 - `engine == AICPU_TS`；
 - `topoInfo->level0Topo == MESH_1D`；
+- `topoInfo->topoLevelNums > 1`（单级 MESH_1D 不开启）；
 - `algName ∈ {AicpuReduceSoleNHR, AicpuReduceParallelMeshNHR, AicpuReduceParallelNHRNHR}`；
 - `param.inputPtr != param.outputPtr`（禁 in-place）；
 - output 侧注册对称内存（单边探测成功）。
@@ -311,8 +413,7 @@ Reduce 是"N 份全量 D → root 一份 D"的向心归约。确定性 + fullmes
 ```
 入口 ReduceOutPlaceCommon
   → Selector 选 Reduce 白名单算法
-  → 门禁条件块 + CheckAndSetSymmetricMemory（仅 output）
-  → HcclExecOp → RefreshSymmetricMemory 复核
+  → HcclExecOp → 填 algName/hcclComm → RefreshSymmetricMemory（单点门禁 + 仅 output 探测）
   → ReduceSoleExecutor / ReduceParallelExecutor
        supportSymmetricMemory_ + SetSymmetricMemoryInfo
   → 模板 root 侧改造
@@ -344,6 +445,22 @@ Reduce 是"N 份全量 D → root 一份 D"的向心归约。确定性 + fullmes
 | 输入污染 | 本需求不污染输入；非 root output 不写 |
 | 重执行 | 沿用"零拷贝场景不支持重执行"（`docs/zh/user_guide/hccl_env/HCCL_OP_RETRY_ENABLE.md:59`） |
 
+**图 3-2：Reduce 算法支持范围决策树**
+
+```mermaid
+flowchart TD
+    A["HcclReduce"] --> B{"topoLevelNums == 1?"}
+    B -- 是 --> C["SoleMesh / SoleMeshTwoShot<br/>需要 N×D 或 D 槽位<br/>无合法 userOut → 不开"]
+    B -- 否 --> D{"INT64/UINT64/FP64/PROD?<br/>in-place?"}
+    D -- 是 --> E["CCL 回退"]
+    D -- 否 --> F{"algName 白名单?"}
+    F -- 否 --> E
+    F -- 是 --> G["SoleNHR / ParallelMeshNHR / ParallelNHRNHR<br/>root 侧部分零拷贝"]
+    C --> H["CCL 回退 / 无收益"]
+```
+
+> 串讲要点：单级 MESH_1D 选到 SoleMesh/TwoShot，不是 SoleNHR/Parallel；即使强制单级 SoleNHR，也会被 `topoLevelNums == 1` 门禁拒绝。Reduce 零拷贝必须多级拓扑。
+
 ---
 
 # 4 AR20261029517134 Reduce（SD）
@@ -359,16 +476,48 @@ Reduce 是"N 份全量 D → root 一份 D"的向心归约。确定性 + fullmes
 ```mermaid
 flowchart TD
     A["HcclReduce"] --> B["ReduceOutPlaceCommon<br/>Selector 选白名单算法"]
-    B --> C{"门禁: hcomm≥9.1.0 / OPBASE<br/>AICPU_TS / MESH_1D<br/>algName 白名单 / 非 in-place?"}
-    C -- 否 --> X["supportSymmetricMemory=false<br/>原 CCL 路径"]
-    C -- 是 --> D["CheckAndSetSymmetricMemory<br/>仅 output 侧"]
-    D --> E{"output 窗口有效?"}
-    E -- 否 --> X
-    E -- 是 --> F["supportSymmetricMemory=true"]
-    F --> G{"算法分支"}
-    G -- SoleNHR --> H["ReduceSoleExecutor + ReduceNHR<br/>root 工作区=userOut<br/>root 跳过 PostCopy"]
-    G -- Parallel --> I["ReduceParallelExecutor<br/>最终 AG 阶段 root 落点=userOut<br/>RS 阶段 B 守卫回退 CCL<br/>移除 root 终局 LocalCopy"]
+    B --> C["HcclExecOp<br/>RefreshSymmetricMemory<br/>单点门禁"]
+    C --> D{"hcomm≥9.1.0 / OPBASE / AICPU_TS<br/>MESH_1D / topoLevelNums>1<br/>algName 白名单 / 非 in-place / 非 64bit/PROD?"}
+    D -- 否 --> X["supportSymmetricMemory=false<br/>原 CCL 路径"]
+    D -- 是 --> E["CheckAndSetSymmetricMemory<br/>仅 output 侧"]
+    E --> F{"output 窗口有效?"}
+    F -- 否 --> X
+    F -- 是 --> G["supportSymmetricMemory=true"]
+    G --> H{"算法分支"}
+    H -- SoleNHR --> I["ReduceSoleExecutor + ReduceNHR<br/>root 工作区=userOut<br/>root 跳过 PostCopy"]
+    H -- Parallel --> J["ReduceParallelExecutor<br/>最终 AG 阶段 root 落点=userOut<br/>RS 阶段 B 守卫回退 CCL<br/>移除 root 终局 LocalCopy"]
 ```
+> 现状说明：`ReduceParallelExecutor` 当前未启用 `enableRemoteMemAccess`，Parallel 的最终 AG 仍走 CCL 回退；图中 root 直写为设计路径，待 AG 偏移修复后启用。
+
+**图 4-1：SoleNHR 的 root 工作区与固定成对归约**
+
+```mermaid
+flowchart TD
+    A["各 rank 输入 D<br/>sendBuf 只读"] --> B{"rank == root?"}
+    B -- 是 --> C["PreCopy：input → userOut<br/>输入已在 userOut 时跳过"]
+    C --> D["halving/doubling<br/>root 工作区 = userOut<br/>原位累加"]
+    D --> E["root 终局结果已在 userOut<br/>跳过 PostCopy"]
+    B -- 否 --> F["非 root 工作区 / 交换槽 = CCL"]
+    F --> G["非 root 按固定成对顺序参与归约<br/>输出语义无效"]
+    D -.->|固定成对 / 固定序| G
+    H["归约顺序与交换模式不变"] --- D
+```
+
+> 串讲要点：SoleNHR 只把 root 的工作区换成 userOut；非 root 仍用 CCL。halving/doubling 的成对顺序不变，所以结果确定性不变。
+
+**图 4-2：ParallelMeshNHR 的两级流水**
+
+```mermaid
+flowchart LR
+    A["输入 D"] --> B["RS 阶段<br/>slot = CCL"]
+    B --> C["NHR / 中间结果<br/>非 root CCL"]
+    C --> D["最终 AG 阶段<br/>root 落点 = userOut"]
+    D --> E["rootOutputWritten_<br/>跳过终局 LocalCopy"]
+    B -.-> G["B 守卫：inputSymWindow == nullptr → RS 回退 CCL"]
+    F["当前实现：enableRemoteMemAccess = false<br/>Parallel 的 AG 仍走 CCL 回退"] -.-> D
+```
+
+> 串讲要点：设计目标是 RS 阶段保 CCL、最终 AG 的 root 落点换 userOut。现状 `enableRemoteMemAccess` 未启用，Parallel 仍是 CCL 回退；图中 root 直写是待启用路径。
 
 ## 4.3 数据描述
 
@@ -406,7 +555,7 @@ flowchart TD
 
 ## 4.7 DFX 设计
 
-- 日志：入口打印 algName、对称开关、root、窗口探测结果；模板打印 root 工作区地址与阶段。
+- 日志：`HcclExecOp` 打印 algName、对称开关、root、窗口探测结果；模板打印 root 工作区地址与阶段。
 - 回退：探测失败或门禁不满足即回退，不打印 ERROR。
 - 错误码：对端地址为空 `HCCL_E_INTERNAL`；in-place `HCCL_E_PARA`；类型不支持按既有门禁。
 - 可测性：`supportSymmetricMemory`、`enableRemoteMemAccess` 可观测。
@@ -429,7 +578,7 @@ flowchart TD
 | `src/ops/op_common/op_common.h` / `op_common.cc` | 新增函数 | `IsReduceAlgSymMemDeterministic` |
 | `src/ops/op_common/op_common.cc` | `RefreshSymmetricMemory` | 新增 `HCCL_CMD_REDUCE` case |
 | `src/ops/op_common/op_common.cc` | `IsSymMemWindowValid` / `CheckAndSetSymmetricMemory` | 按 opType 支持单边探测 |
-| `src/ops/reduce/reduce.cc` | `ReduceOutPlaceCommon` | Selector 后加门禁与探测；显式初始化 `supportSymmetricMemory=false` |
+| `src/ops/reduce/reduce.cc` | `ReduceOutPlaceCommon` | Selector 后由 `HcclExecOp` 单点门禁/探测；显式初始化 `supportSymmetricMemory=false` |
 | `src/ops/reduce/algorithm/executor/reduce_sole_executor.cc` | `Orchestrate` | `supportSymmetricMemory_` + `SetSymmetricMemoryInfo`（`RestoreChannelMap` 前） |
 | `src/ops/reduce/algorithm/template/aicpu/reduce_nhr.cc` | PreCopy/RunReduce/RunGather/PostCopy | root 工作区改 userOut；按 root 选择本地/远端地址；root 跳过 PostCopy |
 | `src/ops/reduce/algorithm/executor/reduce_parallel_executor.cc` | `Orchestrate` / `GenDataParamsTempAlg` / 终局 LocalCopy | 接线 sym；最终 AG 阶段 `outBuffType=OUTPUT`、`enableRemoteMemAccess=true`；移除 root LocalCopy |
