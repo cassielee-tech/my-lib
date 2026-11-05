@@ -153,19 +153,29 @@ flowchart TD
 | `ChannelInfo.remoteOutputGraphMode.addr` | 对端 userOut 地址，由 `FillChannelSymWinPeerAddrs` 填充 |
 | `TemplateDataParams.buffInfo.outputSize` | 本端窗口大小，用于对称落点越界校验 |
 
-**图 2-3：AllGatherV 的 recvBuf / displs 布局**
+**表 2-2：recvBuf 布局示例（counts={2,3,1}、displs={0,5,8}、FP32）**
 
-```mermaid
-flowchart LR
-    A["rank0 区间<br/>displs[0] + counts[0]"] --- G["空洞"] --- B["rank1 区间<br/>displs[1] + counts[1]"] --- C["rank2 区间<br/>displs[2] + counts[2]"]
-    O["outputSize = max(displs[i] + counts[i])"] --- A
-    N["rank i 写各 rank 的 displs[i] 区间<br/>非空区间不得重叠"] --- B
-    T["所有 rank 使用同一 recvCounts/recvDispls 布局"] --- C
-    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
-    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
-    class O,N changed;
-    class A,G,B,C,T existing;
+| 源 rank | counts | displs | recvBuf 元素区间 | FP32 字节区间 |
+| --- | ---: | ---: | --- | --- |
+| rank0 | 2 | 0 | `[0, 2)` | `[0, 8)` |
+| 空洞 | — | — | `[2, 5)` | `[8, 20)` |
+| rank1 | 3 | 5 | `[5, 8)` | `[20, 32)` |
+| rank2 | 1 | 8 | `[8, 9)` | `[32, 36)` |
+
+**图 2-3：recvBuf / displs 元素下标视角**
+
+```text
+元素下标:  0   1   2   3   4   5   6   7   8
+          ┌───┬───┬───┬───┬───┬───┬───┬───┬───┐
+recvBuf:  │ r0│ r0│   │   │   │ r1│ r1│ r1│ r2│
+          └───┴───┴───┴───┴───┴───┴───┴───┴───┘
+区间:      [0,2)      [2,5)      [5,8)   [8,9)
+                         空洞
 ```
+
+- 所有 rank 使用同一套 `recvCounts/recvDispls` 布局。
+- rank i 把自己的数据写到每个 rank 的 `recvBuf` 的 `displs[i]` 区间；非空区间不能重叠。
+- `outputSize = max(displs[i] + counts[i]) * typeSize`，本例为 `9 × 4B = 36B`，不是 `sum(counts)=6 × 4B`。
 
 **图 2-4：对称窗口注册与地址换算**
 
