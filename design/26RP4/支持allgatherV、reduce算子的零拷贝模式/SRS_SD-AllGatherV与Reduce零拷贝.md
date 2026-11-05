@@ -177,34 +177,7 @@ recvBuf:  │ r0│ r0│   │   │   │ r1│ r1│ r1│ r2│
 - rank i 把自己的数据写到每个 rank 的 `recvBuf` 的 `displs[i]` 区间；非空区间不能重叠。
 - `outputSize = max(displs[i] + counts[i]) * typeSize`，本例为 `9 × 4B = 36B`，不是 `sum(counts)=6 × 4B`。
 
-**图 2-4：对称窗口注册与地址换算**
-
-```mermaid
-sequenceDiagram
-    participant R0 as rank0
-    participant R1 as rank1
-    participant H as HCCL
-    participant HCOMM as HCOMM
-    Note over R0,R1: ① 业务/测试侧注册：把 user buffer 纳入对称窗口<br/>契约：全 rank 全部注册或全不注册
-    R0->>H: HcclCommSymWinRegister(comm, ptr, size, flag=1)
-    R1->>H: HcclCommSymWinRegister(comm, ptr, size, flag=1)
-    H->>HCOMM: 记录窗口与 offset
-    Note over R0,H: ② HCCL 反查本端窗口：ptr/size 属于哪个窗口、offset 是多少
-    rect rgb(255, 243, 205)
-    R0->>H: HcclCommSymWinGet(comm, ptr, size)
-    H-->>R0: winHandle + offset
-    end
-    Note over R0,H: ③ 按 peer rank 做地址换算：本端 offset → 对端 userOut 地址
-    rect rgb(255, 243, 205)
-    R0->>H: GetSymWinRemoteMem(winHandle, offset, peer=1)
-    H-->>R0: peer1 的 user buffer 地址
-    end
-    Note over R0,R1: ④ 地址就绪后，数据面直接写/读对端 userOut
-    rect rgb(232, 245, 233)
-    R0->>R1: 直接写/读 peer1 的 userOut
-    end
-    Note over R0,R1: 注册/查询失败 → 本 rank 回退 CCL；注册只建窗口，不搬数据
-```
+对称窗口注册与地址换算由既有公共层/HCOMM 提供：业务或测试侧先调用 `HcclCommSymWinRegister` 把 user buffer 注册为窗口；HCCL 通过 `HcclCommSymWinGet` 反查本端窗口与 offset；再通过 `GetSymWinRemoteMem`（优先 `HcclSymWinGetRemoteAddr`，9.1 回退 `HcclSymWinGetPeerPointer`）按 peer rank 换算出对端 userOut 地址。注册只建立窗口、不搬数据；本需求不修改注册与地址换算实现，只新增 AllGatherV/Reduce 的探测策略和直接读写消费路径；注册/查询失败时回退 CCL。
 
 ## 2.4 依赖性描述
 
