@@ -118,6 +118,8 @@ sequenceDiagram
 
 > 门禁顺序：基础 → 算法 → 窗口；任一层失败即本 rank 回退 CCL，不做跨 rank 协商。
 
+这段代码负责 AllGatherV 的算法级门禁：只有选中 `AicpuAllGatherVSoleMesh` 时才允许继续走对称路径，其他算法保持 CCL。
+
 > 文件：`src/ops/op_common/op_common.cc:4784`
 
 ```cpp
@@ -149,6 +151,8 @@ flowchart TD
     class S0,S1,S2 direct;
 ```
 
+这段代码负责对称路径的单轮数据量控制：不再按 CCL/UB 的 `maxDataSizePerLoop` 切片，直接把单轮 count 放大到最大 `recvCounts`，并把 `loopTimes` 固定为 1；非对称路径仍走原公式。
+
 > 文件：`src/ops/all_gather_v/algorithm/executor/ins_v2_all_gather_v_sole_executor.cc:147`
 
 ```cpp
@@ -161,6 +165,8 @@ if (param.supportSymmetricMemory) {
     loopTimes = (maxSendDataCount == 0) ? 0 : 1;
 }
 ```
+
+这段代码负责模板侧的地址切换：`enableRemoteMemAccess_` 为 true 时，发送/接收对端地址使用 `remoteOutputGraphMode.addr`，本地落点使用 `outputPtr`；为 false 时仍使用 CCL 地址。
 
 > 文件：`src/ops/all_gather_v/algorithm/template/aicpu/ins_temp_all_gather_v_mesh_1D.cc:190`
 
@@ -184,6 +190,8 @@ void* rxDstPtr = (!enableRemoteMemAccess_)
 | `TemplateDataParams.allRankSliceSize` | 各 rank 本轮处理的字节数 |
 | `ChannelInfo.remoteOutputGraphMode.addr` | 对端 userOut 地址，由 `FillChannelSymWinPeerAddrs` 填充 |
 | `TemplateDataParams.buffInfo.outputSize` | 本端窗口大小，用于对称落点越界校验 |
+
+这段代码负责入口的 `outputSize` 计算与 displs 校验：按 `max(displs+counts)` 计算真实最大落点，并把非法 rank/原因带回日志；校验失败直接返回，避免后续按错误尺寸探测或写入。
 
 > 文件：`src/ops/all_gather_v/all_gather_v.cc:216`
 
@@ -434,6 +442,8 @@ sequenceDiagram
 
 > 门禁顺序：基础 → 拓扑 → 类型/调用 → 算法 → 窗口；任一层失败即本 rank 回退 CCL，不做跨 rank 协商。
 
+这段代码负责 Reduce 专用确定性门禁：单级 `MESH_1D` 直接拒绝；多级仅放行 `SoleNHR` / `ParallelMeshNHR` / `ParallelNHRNHR`，防止非确定性归约算法进入对称路径。
+
 > 文件：`src/ops/op_common/op_common.cc:4753`
 
 ```cpp
@@ -448,6 +458,8 @@ bool IsReduceAlgSymMemDeterministic(
         || algName == "AicpuReduceParallelNHRNHR";
 }
 ```
+
+这段代码负责把 Reduce 的类型、规约、in-place 和算法白名单组合成一个门禁：任一条件不满足即 `symMemAllowed=false`，本 rank 回退 CCL。
 
 > 文件：`src/ops/op_common/op_common.cc:4800`
 
@@ -482,6 +494,8 @@ flowchart TD
 ```
 
 SoleNHR 只把 root 的 PreCopy 目的、工作区和终局落点改到 userOut；非 root 工作区/交换槽仍使用 CCL，halving/doubling 的成对顺序不变。
+
+这段代码负责 SoleNHR 的 root 工作区切换：root 的本地工作区从 CCL 改为 `userOut`；输入不在 `userOut` 时先做一次 `userIn→userOut` 拷贝，已在 `userOut` 时跳过 PreCopy；PostCopy 对 root 直接返回。非 root 仍使用 CCL。
 
 > 文件：`src/ops/reduce/algorithm/template/aicpu/reduce_nhr.cc:64`、`:236`、`:425`
 
@@ -536,6 +550,8 @@ flowchart LR
 ```
 
 RS 阶段保持 CCL，B 守卫在仅 output 注册时回退；最终 AG 阶段的 root 落点设计为 userOut。当前 `enableRemoteMemAccess=false`，Parallel 实际仍走 CCL 回退。
+
+这段代码负责 Parallel 的 root 终局落点和 RS 守卫：最终 AG 阶段把 `outBuffType` 切到 `OUTPUT`，`outputPtr/outputSize` 叠加本 loop 的偏移，模板成功返回后置 `rootOutputWritten_`；RS 模板仅在本 rank 存在 input 窗口时启用对称，否则回退 CCL。
 
 > 文件：`src/ops/reduce/algorithm/executor/reduce_parallel_executor.cc:545`、`:577`、`:813`；`src/ops/reduce_scatter/algorithm/template/aicpu/ins_temp_reduce_scatter_mesh_1D.cc:124`
 
