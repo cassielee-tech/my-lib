@@ -468,27 +468,57 @@ root 的 userOut 是唯一合法替换介质：`userIn` 只读，非 root 的 ou
 
 **改动点 3——Parallel**
 
-**图 4-4：ParallelMeshNHR 的两级流水**
+**图 4-4：ParallelMeshNHR 的 RS → AG 两级流水**
+
+横向为时间，纵向为两个数据片；同一列的两个任务并行执行。
 
 ```mermaid
 flowchart LR
-    A["输入 D"] --> B["RS 阶段<br/>slot = CCL"]
-    B --> C["NHR / 中间结果<br/>非 root CCL"]
-    C --> D["最终 AG 阶段<br/>root 落点 = userOut"]
-    D --> E["rootOutputWritten_<br/>跳过终局 LocalCopy"]
-    B -.-> G["RS 阶段：inputSymWindow 为空 → 回退 CCL"]
-    F["当前实现：enableRemoteMemAccess = false<br/>Parallel 的 AG 仍走 CCL 回退"] -.-> D
-    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
-    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
-    classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
-    classDef fallback fill:#fdecea,stroke:#c62828,color:#000;
-    class A,B,C existing;
-    class G changed;
-    class D,E direct;
-    class F fallback;
+    subgraph P0["stage0/step0：ReduceScatter"]
+        direction TB
+        A0["slice0<br/>intra Mesh RS"]
+        A1["slice1<br/>inter NHR RS"]
+    end
+    subgraph P1["stage0/step1：ReduceScatter"]
+        direction TB
+        B0["slice0<br/>inter NHR RS"]
+        B1["slice1<br/>intra Mesh RS"]
+    end
+    subgraph P2["stage1/step0：AllGather"]
+        direction TB
+        C0["slice0<br/>inter NHR AG"]
+        C1["slice1<br/>intra Mesh AG"]
+    end
+    subgraph P3["stage1/step1：AllGather"]
+        direction TB
+        D0["slice0<br/>intra Mesh AG"]
+        D1["slice1<br/>inter NHR AG"]
+    end
+    A0 --> B0
+    A1 --> B1
+    B0 --> C0
+    B1 --> C1
+    C0 --> D0
+    C1 --> D1
+    D0 --> OUT["root userOut<br/>两个 slice 都落位<br/>跳过终局 LocalCopy"]
+    D1 --> OUT
+    A1 -.-> N1["RS：inputSymWindow 为空<br/>两个数据片都走 CCL"]
+    C1 -.-> N2["AG：enableRemoteMemAccess=false<br/>对端读取走 CCL，root 输出仍写 userOut"]
+    classDef rs fill:#e3f2fd,stroke:#1565c0,color:#000;
+    classDef ag fill:#e8f5e9,stroke:#2e7d32,color:#000;
+    classDef out fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#000;
+    classDef note fill:#fff3cd,stroke:#d39e00,color:#000;
+    class A0,A1,B0,B1 rs;
+    class C0,C1,D0,D1 ag;
+    class OUT out;
+    class N1,N2 note;
 ```
 
-RS 阶段保持 CCL：模板只在 input 窗口非空时走对称，否则回退 CCL；最终 AG 阶段的 root 落点设计为 userOut。当前 `enableRemoteMemAccess=false`，Parallel 实际仍走 CCL 回退。
+Parallel 的“两级”指 stage0 ReduceScatter 与 stage1 AllGather；每个 stage 再分两个 step，两个数据片在同一 step 并行执行。stage0 只做 RS，stage1 只做 AG，每步 intra/inter 互换，使两条链路在同一 step 都有任务。
+
+- RS：Reduce 只注册 output，`inputSymWindow` 为空，两个数据片都走 CCL。
+- AG：当前 `enableRemoteMemAccess=false`，对端读取仍走 CCL；`stage1/step1` 的两个 AG 分别把 slice0/slice1 写到 root userOut，`rootOutputWritten_` 置位后跳过终局 LocalCopy。
+- 因此当前 Parallel 的收益是省掉 root 终局 LocalCopy，不是远端 userOut 直读；收益评估需等 `enableRemoteMemAccess` 打开并闭合偏移。
 
 ## 4.3 数据描述
 
@@ -513,7 +543,7 @@ RS 阶段保持 CCL：模板只在 input 窗口非空时走对称，否则回退
 | `buffInfo.outputPtr` | root 终局为 userOut 加 loop 偏移，否则为 CCL | 模板写目标 |
 | `buffInfo.outputSize` | root 终局为本轮剩余 output 大小 | 落点越界校验 |
 | `buffInfo.outBuffBaseOff` | 本轮/dataSlice 的输出偏移 | 多轮 loop 时叠加 |
-| `TemplateDataParams.enableRemoteMemAccess` | 是否启用对端 user buffer 访问 | 当前 Parallel 为 false，AG 仍走 CCL |
+| `TemplateDataParams.enableRemoteMemAccess` | 是否启用对端 user buffer 访问 | 当前 Parallel 为 false，AG 对端读取走 CCL；root 输出仍直写 userOut |
 | `ChannelInfo.remoteOutputGraphMode.addr` | 对端 userOut 地址 | 只在对端为 root 时使用 |
 | `ChannelInfo.remoteCclMem.addr` | 对端 CCL 地址 | 非对称路径与 RS 阶段的回退目标 |
 
@@ -562,7 +592,7 @@ flowchart LR
 
 1. **SoleNHR**：root 的 PreCopy 目的、工作区和终局落点改到 userOut，root 跳过 PostCopy；非 root 工作区/交换槽保持 CCL。
 2. **Parallel**：最终 AG 阶段 root 落点改 userOut；RS 阶段仅在 `inputSymWindow != nullptr` 时走对称，Reduce 仅注册 output 时自动回退 CCL，避免空 input 地址和输入污染。
-3. **现状**：`enableRemoteMemAccess=false`，Parallel 的 AG 仍走 CCL 回退；因此 Parallel 当前只验证正确性与回退，不按零拷贝收益评估。
+3. **现状**：`enableRemoteMemAccess=false`，AG 对端读取仍走 CCL；`stage1/step1` 已把 root 输出直写 userOut，但当前只验证正确性与回退，不按零拷贝收益评估。
 
 ## 4.4 依赖性描述
 
@@ -627,6 +657,6 @@ flowchart LR
 
 - 正确性：Reduce 默认 ST 22/22 通过；root 输出与非对称路径逐 bit 一致，重复执行逐 bit 一致。
 - 单级 MESH_1D 实测：`symMem[0]`，base/sym 512MB 均约 3606us/148.8GB/s，符合“单级无收益”设计。
-- 多级 SoleNHR 为 root 侧收益场景，需 2 Server 拓扑验证；Parallel 当前 `enableRemoteMemAccess=false`，仍是 CCL 回退。
+- 多级 SoleNHR 为 root 侧收益场景，需 2 Server 拓扑验证；Parallel 当前 `enableRemoteMemAccess=false`，AG 对端读取仍走 CCL，仅省 root 终局 LocalCopy。
 - 对称 ST 当前未纳入默认 CI，仅保留手工/临时验证；后续按专项 issue 接入。
 - 边界质量：非 root output 不写、输入不污染、多轮偏移与对端空地址有防御。
