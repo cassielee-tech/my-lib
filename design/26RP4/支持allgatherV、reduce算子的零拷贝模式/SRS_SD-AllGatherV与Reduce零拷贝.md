@@ -73,27 +73,39 @@
 
 ## 2.2 流程描述
 
-> 颜色图例：黄色=本次修改/新增；绿色=对称直写；灰色=既有 CCL；红色=回退/不支持。
-
-**阅读顺序**：图 2-1 回答“是否进入对称路径”，表 2-1 给出逐层门禁条件；门禁通过后，图 2-2 对比普通路径与对称路径的数据流。图 2-3/2-4 在 2.3 节继续解释 recvBuf/displs 布局与对端地址换算。整体链路为：入口修正 `outputSize` → `Selector` → `HcclExecOp/RefreshSymmetricMemory` 门禁 → 对称 executor/template → 直写对端 userOut。
-
-**图 2-1：AllGatherV 对称门禁流程**
+一次 `HcclAllGatherV` 调用经过 5 个阶段，本需求改动位于阶段 3（门禁/窗口探测）和阶段 5（模板直写）。
 
 ```mermaid
-flowchart LR
-    A["HcclAllGatherV"] --> B["Selector<br/>AicpuAllGatherVSoleMesh"]
-    B --> C["HcclExecOp<br/>RefreshSymmetricMemory"]
-    C --> D["对称路径"]
-    C --> E["CCL 回退"]
-    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
-    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
-    classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
-    classDef fallback fill:#fdecea,stroke:#c62828,color:#000;
-    class A,B existing;
-    class C changed;
-    class D direct;
-    class E fallback;
+sequenceDiagram
+    autonumber
+    participant U as 调用方
+    participant API as HcclAllGatherV
+    participant SEL as Selector
+    participant EXE as Executor
+    participant TPL as InsTempAllGatherVMesh1D
+    participant HC as HCOMM
+    U->>API: HcclAllGatherV(...)
+    API->>API: 输入检查 + outputSize=max(displs+counts)
+    rect rgb(255,243,205)
+    API->>SEL: OpParam + TopoInfo
+    SEL-->>API: AicpuAllGatherVSoleMesh
+    end
+    API->>EXE: HcclExecOp → RefreshSymmetricMemory
+    rect rgb(255,243,205)
+    EXE->>HC: HcclCommSymWinGet(input/output)
+    HC-->>EXE: 窗口 + offset
+    EXE->>EXE: supportSymmetricMemory=true
+    end
+    EXE->>TPL: loopTimes=1，scratch=0
+    rect rgb(232,245,233)
+    TPL->>HC: GetSymWinRemoteMem(peer)
+    TPL->>TPL: 自贡献 LocalCopy + N-1 线程直写对端 userOut
+    end
 ```
+
+> 黄色为门禁/窗口探测改动，绿色为数据面直写改动。
+
+**改动点 1——对称门禁与窗口探测**
 
 **表 2-1：AllGatherV 对称门禁矩阵**
 
@@ -105,6 +117,8 @@ flowchart LR
 | 4 执行 | 全部通过 | `supportSymmetricMemory=true`；`loopTimes=1`、scratch=0；直写对端 userOut | CCL 回退 |
 
 > 门禁顺序：基础 → 算法 → 窗口；任一层失败即本 rank 回退 CCL，不做跨 rank 协商。
+
+**改动点 2——数据面直写**
 
 **图 2-2：AllGatherV 普通路径与对称路径数据流**
 
@@ -126,9 +140,7 @@ flowchart TD
     class S0,S1,S2 direct;
 ```
 
-> 讲解要点：两种路径都保留自贡献本地拷贝；差异只在跨卡落点——普通路径先写对端 CCL 再 `PostLocalCopy`，对称路径直接写对端 userOut。每对端一线程，不能串行化。
-
-> 串联理解：图 2-1 + 表 2-1 决定“走不走对称路径”；图 2-2 决定“走对称路径时数据怎么走”；2.3 的图 2-3/2-4 再说明“数据落在哪里、对端地址怎么算”。
+普通路径先写对端 CCL，再由对端 `PostLocalCopy` 到 userOut；对称路径保留一次自贡献本地拷贝，N-1 个对端线程并发直写对端 `userOut`，不再执行接收侧 `PostLocalCopy`。
 
 ## 2.3 数据描述
 
@@ -329,25 +341,39 @@ sequenceDiagram
 
 ## 4.2 流程描述
 
-> 颜色图例：黄色=本次修改/新增；绿色=对称直写；灰色=既有 CCL；红色=回退/不支持。
-
-**图 4-1：Reduce 对称门禁流程**
+一次 `HcclReduce` 调用经过 6 个阶段，本需求改动位于阶段 3（门禁/窗口探测）、阶段 5（SoleNHR root 工作区）和阶段 6（Parallel 最终 AG）。
 
 ```mermaid
-flowchart LR
-    A["HcclReduce"] --> B["Selector<br/>白名单算法"]
-    B --> C["HcclExecOp<br/>RefreshSymmetricMemory"]
-    C --> D["对称路径<br/>root 侧 / 最终 AG"]
-    C --> E["CCL 回退"]
-    classDef existing fill:#f5f5f5,stroke:#999,color:#333;
-    classDef changed fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#000;
-    classDef direct fill:#e8f5e9,stroke:#2e7d32,color:#000;
-    classDef fallback fill:#fdecea,stroke:#c62828,color:#000;
-    class A,B existing;
-    class C changed;
-    class D direct;
-    class E fallback;
+sequenceDiagram
+    autonumber
+    participant U as 调用方
+    participant API as HcclReduce
+    participant SEL as Selector
+    participant EXE as Executor
+    participant TPL as ReduceNHR / Parallel
+    participant HC as HCOMM
+    U->>API: HcclReduce(...)
+    API->>API: 输入检查 + OpParam 构造
+    rect rgb(255,243,205)
+    API->>SEL: OpParam + TopoInfo
+    SEL-->>API: 白名单算法
+    end
+    API->>EXE: HcclExecOp → RefreshSymmetricMemory
+    rect rgb(255,243,205)
+    EXE->>HC: HcclCommSymWinGet(output)
+    HC-->>EXE: 窗口 + offset
+    EXE->>EXE: supportSymmetricMemory=true
+    end
+    EXE->>TPL: SoleNHR / Parallel 编排
+    rect rgb(232,245,233)
+    TPL->>TPL: root 工作区/终局落 userOut；非 root 仍 CCL
+    end
+    TPL-->>U: root recvBuf
 ```
+
+> 黄色为门禁/窗口探测改动，绿色为 root 侧数据面改动。
+
+**改动点 1——门禁与算法选择**
 
 **表 4-1：Reduce 对称门禁矩阵**
 
@@ -362,7 +388,7 @@ flowchart LR
 
 > 门禁顺序：基础 → 拓扑 → 类型/调用 → 算法 → 窗口；任一层失败即本 rank 回退 CCL，不做跨 rank 协商。
 
-> 现状说明：`ReduceParallelExecutor` 当前未启用 `enableRemoteMemAccess`，Parallel 的最终 AG 仍走 CCL 回退；图中 root 直写为设计路径，待 AG 偏移修复后启用。
+**改动点 2——SoleNHR**
 
 **图 4-2：SoleNHR 的 root 工作区与固定成对归约**
 
@@ -384,6 +410,10 @@ flowchart TD
     class C,D,E direct;
 ```
 
+SoleNHR 只把 root 的 PreCopy 目的、工作区和终局落点改到 userOut；非 root 工作区/交换槽仍使用 CCL，halving/doubling 的成对顺序不变。
+
+**改动点 3——Parallel**
+
 **图 4-3：ParallelMeshNHR 的两级流水**
 
 ```mermaid
@@ -404,7 +434,7 @@ flowchart LR
     class F fallback;
 ```
 
-> 讲解要点：设计目标是 RS 阶段保 CCL、最终 AG 的 root 落点换 userOut。现状 `enableRemoteMemAccess` 未启用，Parallel 仍是 CCL 回退。
+RS 阶段保持 CCL，B 守卫在仅 output 注册时回退；最终 AG 阶段的 root 落点设计为 userOut。当前 `enableRemoteMemAccess=false`，Parallel 实际仍走 CCL 回退。
 
 ## 4.3 数据描述
 
