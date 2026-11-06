@@ -308,7 +308,7 @@ recvBuf:  │ r0│ r0│   │   │   │ r1│ r1│ r1│ r2│
 1. `Selector` 选出 Reduce 白名单算法；`HcclExecOp → RefreshSymmetricMemory` 完成版本/引擎/拓扑/算法/类型/in-place 门禁与 output 单边探测。
 2. 对称生效时，执行器把 `supportSymmetricMemory` 与窗口信息传给模板。
 3. `SoleNHR`：root 的 PreCopy 目的、工作区和终局落点改 userOut，root 跳过 PostCopy；非 root 工作区/交换槽保持 CCL。
-4. `ParallelMeshNHR / ParallelNHRNHR`：RS 阶段保持 CCL，仅当 `inputSymWindow` 非空时才走对称，否则回退 CCL；最终 AG 阶段 root 落点改 userOut，并移除 root 终局 LocalCopy。
+4. `ParallelMeshNHR / ParallelNHRNHR`：RS 阶段保持 CCL；最终 AG 阶段 root 的工作区/终局落点改 userOut，发往 root 的传输走 `remoteOutputGraphMode`；非 root 本地工作区与其余传输保持 CCL；移除 root 终局 LocalCopy。
 
 ## 3.4 输出
 
@@ -344,7 +344,7 @@ recvBuf:  │ r0│ r0│   │   │   │ r1│ r1│ r1│ r2│
 ## 4.1 功能描述
 
 - **SoleNHR**：root 的本地工作区从 CCL 改为自身 userOut；PreCopy 目的、NHR 的 ReduceScatter/AllGather 原位归约介质、终局落点都指向 userOut；root 跳过 PostCopy。NHR 步序与交换模式不变。
-- **ParallelMeshNHR / ParallelNHRNHR**：最终 AG 阶段 root 侧工作区/最终落点改 userOut，移除 root 终局 LocalCopy。
+- **ParallelMeshNHR / ParallelNHRNHR**：最终 AG 阶段 root 的工作区/最终落点改 userOut；发往 root 的传输使用 `remoteOutputGraphMode`，非 root 本地工作区与 AG 中间步保持 CCL；移除 root 终局 LocalCopy。
 - **RS 阶段 input 窗口判断**：`InsTempReduceScatterMesh1D` / `InsTempReduceScatterNHR` 与 AR/RS 共用。Reduce 只注册 `recvBuf`（output），`sendBuf` 不注册，因此 `inputSymWindow` 为空；模板不能只凭 `supportSymmetricMemory` 走对称，还必须满足 `param.inputSymWindow != nullptr`。条件不满足时 RS 阶段自动回退 CCL，避免空 input 地址和污染 user input；最终 AG 阶段仍可使用 root 的 output 窗口。
 
 关键决策：
@@ -353,6 +353,7 @@ recvBuf:  │ r0│ r0│   │   │   │ r1│ r1│ r1│ r2│
 - Reduce 白名单仅 `SoleNHR`、`ParallelMeshNHR`、`ParallelNHRNHR`，不含 MultiJetty。
 - 单级 MESH_1D 显式无收益；依赖多级拓扑。
 - 无跨 rank 对称标志协商，采用“全 rank 注册或全不注册”契约。
+- Parallel 的 `enableRemoteMemAccess` 只对最终 root AG 的 root-bound 传输打开，不是全局开关；RS、AG 中间步与非 root 保持 CCL。
 
 ## 4.2 流程描述
 
@@ -468,7 +469,7 @@ root 的 userOut 是唯一合法替换介质：`userIn` 只读，非 root 的 ou
 
 **改动点 3——Parallel**
 
-**图 4-4：ParallelMeshNHR 的 RS → AG 两级流水**
+**图 4-4：ParallelMeshNHR 的 RS → AG 两级流水（设计目标）**
 
 横向为时间，纵向为两个数据片；同一列的两个任务并行执行。
 
@@ -503,7 +504,7 @@ flowchart LR
     D0 --> OUT["root userOut<br/>两个 slice 都落位<br/>跳过终局 LocalCopy"]
     D1 --> OUT
     A1 -.-> N1["RS：inputSymWindow 为空<br/>两个数据片都走 CCL"]
-    C1 -.-> N2["AG：enableRemoteMemAccess=false<br/>对端读取走 CCL，root 输出仍写 userOut"]
+    C1 -.-> N2["AG 设计目标：stage1/step1 发往 root 的传输<br/>走 remoteOutputGraphMode；非 root 本地 CCL"]
     classDef rs fill:#e3f2fd,stroke:#1565c0,color:#000;
     classDef ag fill:#e8f5e9,stroke:#2e7d32,color:#000;
     classDef out fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#000;
@@ -517,8 +518,20 @@ flowchart LR
 Parallel 的“两级”指 stage0 ReduceScatter 与 stage1 AllGather；每个 stage 再分两个 step，两个数据片在同一 step 并行执行。stage0 只做 RS，stage1 只做 AG，每步 intra/inter 互换，使两条链路在同一 step 都有任务。
 
 - RS：Reduce 只注册 output，`inputSymWindow` 为空，两个数据片都走 CCL。
-- AG：当前 `enableRemoteMemAccess=false`，对端读取仍走 CCL；`stage1/step1` 的两个 AG 分别把 slice0/slice1 写到 root userOut，`rootOutputWritten_` 置位后跳过终局 LocalCopy。
-- 因此当前 Parallel 的收益是省掉 root 终局 LocalCopy，不是远端 userOut 直读；收益评估需等 `enableRemoteMemAccess` 打开并闭合偏移。
+- AG：`stage1/step1` 的两个 AG 分别把 slice0/slice1 落到 root userOut；发往 root 的传输走 `remoteOutputGraphMode`，非 root 本地工作区和其余传输保持 CCL；`rootOutputWritten_` 置位后跳过终局 LocalCopy。
+- 因此设计目标是 root 省 1×D 全量本地拷贝及 CCL 往返；非 root 不变。
+
+**表 4-2：Parallel 最终设计的远端访问范围**
+
+| 传输 | `enableRemoteMemAccess` | 落点 |
+| --- | --- | --- |
+| `stage0/step0`、`stage0/step1`（RS） | 关 | CCL；Reduce 未注册 input 窗口 |
+| `stage1/step0`（AG 中间步） | 关 | CCL |
+| `stage1/step1`（最终 AG），接收方为 root | **开** | root userOut |
+| `stage1/step1`（最终 AG），接收方为非 root | 关 | CCL |
+| 非 root 本地 output | 关 | CCL，且不写非 root userOut |
+
+> 结论：`enableRemoteMemAccess` 不是整个 Parallel 模板的全局开关；只在最终 root AG 的 root-bound 传输上打开。
 
 ## 4.3 数据描述
 
@@ -543,8 +556,8 @@ Parallel 的“两级”指 stage0 ReduceScatter 与 stage1 AllGather；每个 s
 | `buffInfo.outputPtr` | root 终局为 userOut 加 loop 偏移，否则为 CCL | 模板写目标 |
 | `buffInfo.outputSize` | root 终局为本轮剩余 output 大小 | 落点越界校验 |
 | `buffInfo.outBuffBaseOff` | 本轮/dataSlice 的输出偏移 | 多轮 loop 时叠加 |
-| `TemplateDataParams.enableRemoteMemAccess` | 是否启用对端 user buffer 访问 | 当前 Parallel 为 false，AG 对端读取走 CCL；root 输出仍直写 userOut |
-| `ChannelInfo.remoteOutputGraphMode.addr` | 对端 userOut 地址 | 只在对端为 root 时使用 |
+| `TemplateDataParams.enableRemoteMemAccess` | 是否启用对端 user buffer 访问 | 仅最终 root AG 的 root-bound 传输为 true；其余为 false |
+| `ChannelInfo.remoteOutputGraphMode.addr` | 对端 userOut 地址 | 仅接收方为 root 的最终输出使用 |
 | `ChannelInfo.remoteCclMem.addr` | 对端 CCL 地址 | 非对称路径与 RS 阶段的回退目标 |
 
 **root 输出与空间下界**
@@ -591,8 +604,7 @@ flowchart LR
 **数据行为变化**
 
 1. **SoleNHR**：root 的 PreCopy 目的、工作区和终局落点改到 userOut，root 跳过 PostCopy；非 root 工作区/交换槽保持 CCL。
-2. **Parallel**：最终 AG 阶段 root 落点改 userOut；RS 阶段仅在 `inputSymWindow != nullptr` 时走对称，Reduce 仅注册 output 时自动回退 CCL，避免空 input 地址和输入污染。
-3. **现状**：`enableRemoteMemAccess=false`，AG 对端读取仍走 CCL；`stage1/step1` 已把 root 输出直写 userOut，但当前只验证正确性与回退，不按零拷贝收益评估。
+2. **Parallel**：RS 阶段保持 CCL；最终 AG 中发往 root 的传输走 `remoteOutputGraphMode`，root 输出直落 userOut；非 root 本地工作区与 AG 中间步保持 CCL；root 终局 LocalCopy 移除。
 
 ## 4.4 依赖性描述
 
@@ -601,7 +613,7 @@ flowchart LR
 | `ReduceNHR` | SoleNHR 模板；PreCopy/RunReduce/RunGather/PostCopy 按 root 选择地址 |
 | `ReduceParallelExecutor` | RS Mesh/NHR + AG Mesh/NHR 组合；最终 AG root 落点处理 |
 | `InsTempReduceScatterMesh1D/NHR` | RS 阶段 input 窗口判断改动；与 AR/RS 共享，需回归 |
-| `InsTempAllGatherMesh1D/NHR` | 使用 `enableRemoteMemAccess` 与 `remoteOutputGraphMode` |
+| `InsTempAllGatherMesh1D/NHR` | 最终 root AG 按接收方选择 `remoteOutputGraphMode` / `remoteCclMem`；root-bound 偏移叠加 loop/slice |
 | `FillChannelSymWinPeerAddrs` | 只填地址，不填 size；越界校验使用本地 size |
 | 公共层 | `RefreshSymmetricMemory`、`CheckAndSetSymmetricMemory`、`IsSymMemWindowValid`、`IsReduceAlgSymMemDeterministic` |
 | HCOMM | `HcclCommSymWinRegister`、`HcclCommSymWinGet`、`GetSymWinRemoteMem` |
@@ -657,6 +669,7 @@ flowchart LR
 
 - 正确性：Reduce 默认 ST 22/22 通过；root 输出与非对称路径逐 bit 一致，重复执行逐 bit 一致。
 - 单级 MESH_1D 实测：`symMem[0]`，base/sym 512MB 均约 3606us/148.8GB/s，符合“单级无收益”设计。
-- 多级 SoleNHR 为 root 侧收益场景，需 2 Server 拓扑验证；Parallel 当前 `enableRemoteMemAccess=false`，AG 对端读取仍走 CCL，仅省 root 终局 LocalCopy。
+- 多级 SoleNHR 为 root 侧收益场景，需 2 Server 拓扑验证；Parallel 设计目标为 root 终局输出直落 userOut，root 省 1×D 及 CCL 往返，需 2 Server、多 loop、双 slice 验证。
+- 验收标准：root 输出与非对称路径逐 bit 一致；非 root output 不被写入；输入不被污染；root-bound 远端地址包含 loop/slice 偏移且不越界。
 - 对称 ST 当前未纳入默认 CI，仅保留手工/临时验证；后续按专项 issue 接入。
 - 边界质量：非 root output 不写、输入不污染、多轮偏移与对端空地址有防御。
