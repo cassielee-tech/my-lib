@@ -349,7 +349,7 @@ recvBuf:  │ r0│ r0│   │   │   │ r1│ r1│ r1│ r2│
 
 关键决策：
 
-- 新增 Reduce 专用 `IsReduceAlgSymMemDeterministic`，不改动 AR/RS 既有函数；AR/RS 多级仍保持 false。
+- 复用 `IsReduceOpSymMemDeterministic`，新增 `opType` 参数；AR/RS 语义不变，Reduce 白名单按 `opType` 分派，不再新增专用门禁函数。
 - Reduce 白名单仅 `SoleNHR`、`ParallelMeshNHR`、`ParallelNHRNHR`，不含 MultiJetty。
 - 单级 MESH_1D 显式无收益；依赖多级拓扑。
 - 无跨 rank 对称标志协商，采用“全 rank 注册或全不注册”契约。
@@ -615,7 +615,7 @@ flowchart LR
 | `InsTempReduceScatterMesh1D/NHR` | RS 阶段 input 窗口判断改动；与 AR/RS 共享，需回归 |
 | `InsTempAllGatherMesh1D/NHR` | 最终 root AG 按接收方选择 `remoteOutputGraphMode` / `remoteCclMem`；root-bound 偏移叠加 loop/slice |
 | `FillChannelSymWinPeerAddrs` | 只填地址，不填 size；越界校验使用本地 size |
-| 公共层 | `RefreshSymmetricMemory`、`CheckAndSetSymmetricMemory`、`IsSymMemWindowValid`、`IsReduceAlgSymMemDeterministic` |
+| 公共层 | `RefreshSymmetricMemory`、`CheckAndSetSymmetricMemory`、`IsSymMemWindowValid`、`IsReduceOpSymMemDeterministic(opType)` |
 | HCOMM | `HcclCommSymWinRegister`、`HcclCommSymWinGet`、`GetSymWinRemoteMem` |
 
 ## 4.5 接口描述
