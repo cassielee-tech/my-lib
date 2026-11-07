@@ -122,29 +122,77 @@ unset HCCL_ALGO
 fi
 
 # ============================== Reduce ParallelMeshNHR：16p（2 节点×8） ==============================
-# 注意：当前 Parallel 零拷贝未启用（enableRemoteMemAccess=false），预期 CCL 回退；
-# 本组只验证正确性，不按零拷贝收益评估。
+# 当前实现（be9e8957）：多级 + ParallelMeshNHR 过门禁，对称路径激活；
+# RS 阶段回退 CCL（Reduce 仅注册 output，inputSymWindow 为空）；
+# 最终 AG 在 root 直落 userOut 并跳过终局 LocalCopy（部分零拷贝）；
+# 远端直写未启用（enableRemoteMemAccess=false），最终 AG 传输仍走 CCL 读回。
+# 本组验证正确性 + 终局拷贝消除；16m 档收益小属预期，512m 档更能体现，均不代表完整零拷贝收益。
+# 16p（2 节点×8）环境各组默认启用；回退 8p 单机环境时注释掉本节各段。
 
-# 8p 环境默认注释；16p（2 节点×8）时取消下面两段的注释。
 # NPU_RED_SYM_001_parallel_base_16r_16m | 基线
-# if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_parallel_base_16r_16m "* ]]; then
-# export HCCL_ALGO="reduce:parallel{mesh,nhr}"
-# mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_16m
-# export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_16m
-# echo "NPU_RED_SYM_001_parallel_base_16r_16m"
-# mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o max -r 0 -m 0 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_16m/stdout.log
-# unset HCCL_ALGO
-# fi
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_parallel_base_16r_16m "* ]]; then
+export HCCL_ALGO="reduce:parallel{mesh,nhr}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_16m
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_16m
+echo "NPU_RED_SYM_001_parallel_base_16r_16m"
+mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o max -r 0 -m 0 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_16m/stdout.log
+unset HCCL_ALGO
+fi
 
 # NPU_RED_SYM_001_parallel_sym_16r_16m | 对称内存
-# if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_parallel_sym_16r_16m "* ]]; then
-# export HCCL_ALGO="reduce:parallel{mesh,nhr}"
-# mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_16m
-# export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_16m
-# echo "NPU_RED_SYM_001_parallel_sym_16r_16m"
-# mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o max -r 0 -m 1 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_16m/stdout.log
-# unset HCCL_ALGO
-# fi
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_parallel_sym_16r_16m "* ]]; then
+export HCCL_ALGO="reduce:parallel{mesh,nhr}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_16m
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_16m
+echo "NPU_RED_SYM_001_parallel_sym_16r_16m"
+mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o max -r 0 -m 1 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_16m/stdout.log
+unset HCCL_ALGO
+fi
+
+# NPU_RED_SYM_001_parallel_base_16r_512m | 512m 基线（多轮 loop，验证 outputLoopBaseOff 偏移）
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_parallel_base_16r_512m "* ]]; then
+export HCCL_ALGO="reduce:parallel{mesh,nhr}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_512m
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_512m
+echo "NPU_RED_SYM_001_parallel_base_16r_512m"
+mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 512m -e 512m -f 2 -d fp32 -o max -r 0 -m 0 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_parallel_base_16r_512m/stdout.log
+unset HCCL_ALGO
+fi
+
+# NPU_RED_SYM_001_parallel_sym_16r_512m | 512m 对称内存（终局拷贝消除收益）
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_parallel_sym_16r_512m "* ]]; then
+export HCCL_ALGO="reduce:parallel{mesh,nhr}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_512m
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_512m
+echo "NPU_RED_SYM_001_parallel_sym_16r_512m"
+mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 512m -e 512m -f 2 -d fp32 -o max -r 0 -m 1 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_512m/stdout.log
+unset HCCL_ALGO
+fi
+
+# ============================== Reduce SoleNHR：16p（2 节点×8）多级完整零拷贝 ==============================
+# 多级下 SoleNHR 过门禁，走完整零拷贝：root 工作区=userOut、PreCopy 直拷 userIn→userOut、
+# PostCopy 跳过，非 root 经 SendRecvBatchWriteReduce 直写 root userOut（remoteOutputGraphMode）。
+# 本组为 SoleNHR 零拷贝首次真机验证，闭环「2 Server 多级 SoleNHR」待办。
+
+# NPU_RED_SYM_001_sole_base_16r_16m | 基线
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_sole_base_16r_16m "* ]]; then
+export HCCL_ALGO="reduce:sole{nhr}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_sole_base_16r_16m
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_sole_base_16r_16m
+echo "NPU_RED_SYM_001_sole_base_16r_16m"
+mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o sum -r 0 -m 0 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_sole_base_16r_16m/stdout.log
+unset HCCL_ALGO
+fi
+
+# NPU_RED_SYM_001_sole_sym_16r_16m | 对称内存（多级完整零拷贝）
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_sole_sym_16r_16m "* ]]; then
+export HCCL_ALGO="reduce:sole{nhr}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_sole_sym_16r_16m
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_sole_sym_16r_16m
+echo "NPU_RED_SYM_001_sole_sym_16r_16m"
+mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o sum -r 0 -m 1 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_sole_sym_16r_16m/stdout.log
+unset HCCL_ALGO
+fi
 
 # ============================== 大包多轮 / 确定性 ==============================
 
