@@ -9,7 +9,6 @@
     "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
-    "my-lib": "^2.1.0",
     "vue": "^3.3.0"
   },
   "devDependencies": {

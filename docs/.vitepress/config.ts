@@ -7,6 +7,10 @@ export default withMermaid(defineConfig({
   description: '记录 HCCL 开发主线课程、后端、效率工具与个人思考',
   base: '/my-lib/',
   cleanUrls: true,
+  lastUpdated: true,
+  sitemap: {
+    hostname: 'https://cassielee-tech.github.io/my-lib/'
+  },
   markdown: {
     math: true
   },
@@ -20,6 +24,9 @@ export default withMermaid(defineConfig({
   },
 
   head: [
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/my-lib/favicon.svg' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: 'Cassie’s Stack' }],
     [
       'script',
       {},
