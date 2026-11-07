@@ -349,7 +349,8 @@ recvBuf:  │ r0│ r0│   │   │   │ r1│ r1│ r1│ r2│
 
 关键决策：
 
-- 复用 `IsReduceOpSymMemDeterministic`，新增 `opType` 参数；AR/RS 语义不变，Reduce 白名单按 `opType` 分派，不再新增专用门禁函数。
+- 复用 `IsReduceOpSymMemDeterministic`，新增 `opType` 参数；Reduce 白名单按 `opType` 分派，不再新增专用门禁函数。
+- AR/RS 分支沿用上游 MR !3629（`adaptive symm`）已放宽的白名单：`SoleNHR` 多级放行，单级放行 `PipeLineMeshNHR`、`SoleMeshChunkTwoShot`、`SoleMeshChunk`；本需求不改变其语义。
 - Reduce 白名单仅 `SoleNHR`、`ParallelMeshNHR`、`ParallelNHRNHR`，不含 MultiJetty。
 - 单级 MESH_1D 显式无收益；依赖多级拓扑。
 - 无跨 rank 对称标志协商，采用“全 rank 注册或全不注册”契约。
