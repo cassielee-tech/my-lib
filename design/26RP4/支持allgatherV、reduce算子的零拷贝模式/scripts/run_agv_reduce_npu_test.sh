@@ -122,11 +122,13 @@ unset HCCL_ALGO
 fi
 
 # ============================== Reduce ParallelMeshNHR：16p（2 节点×8） ==============================
-# 当前实现（be9e8957）：多级 + ParallelMeshNHR 过门禁，对称路径激活；
+# 当前实现（b7440772）：多级 + ParallelMeshNHR 过门禁，对称路径激活；
 # RS 阶段回退 CCL（Reduce 仅注册 output，inputSymWindow 为空）；
-# 最终 AG 在 root 直落 userOut 并跳过终局 LocalCopy（部分零拷贝）；
-# 远端直写未启用（enableRemoteMemAccess=false），最终 AG 传输仍走 CCL 读回。
-# 本组验证正确性 + 终局拷贝消除；16m 档收益小属预期，512m 档更能体现，均不代表完整零拷贝收益。
+# (1,1) inter AG NHR 子步全 rank 启用远端直访（root-only push 直写）：
+#   非 root 对端经 remoteOutputGraphMode 直写 root userOut、root 每步直收 userOut，
+#   root 侧不再经 CCL 中转（旁路 LAST_STEP_READ 与并行 PostLocalCopy），跳过终局 LocalCopy。
+# 日志判据：各 rank 出现 "reduce root-only direct write enabled"，root 另有 "symmetric root skips final LocalCopy"。
+# 本组验证正确性 + root 侧 CCL 中转/终局拷贝消除；512m 档验证多轮 loop 下直写偏移叠加不互踩。
 # 16p（2 节点×8）环境各组默认启用；回退 8p 单机环境时注释掉本节各段。
 
 # NPU_RED_SYM_001_parallel_base_16r_16m | 基线
@@ -166,6 +168,26 @@ mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_512m
 export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_512m
 echo "NPU_RED_SYM_001_parallel_sym_16r_512m"
 mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 512m -e 512m -f 2 -d fp32 -o max -r 0 -m 1 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_512m/stdout.log
+unset HCCL_ALGO
+fi
+
+# NPU_RED_SYM_001_parallel_sym_16r_root8 | 对称内存 + 中间 root（root-only 直写对 root 位置敏感）
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_parallel_sym_16r_root8 "* ]]; then
+export HCCL_ALGO="reduce:parallel{mesh,nhr}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_root8
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_root8
+echo "NPU_RED_SYM_001_parallel_sym_16r_root8"
+mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o max -r 8 -m 1 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_root8/stdout.log
+unset HCCL_ALGO
+fi
+
+# NPU_RED_SYM_001_parallel_sym_16r_root15 | 对称内存 + 尾 root（root 位置矩阵 {0,8,15} 完整覆盖）
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_parallel_sym_16r_root15 "* ]]; then
+export HCCL_ALGO="reduce:parallel{mesh,nhr}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_root15
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_root15
+echo "NPU_RED_SYM_001_parallel_sym_16r_root15"
+mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o max -r 15 -m 1 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_parallel_sym_16r_root15/stdout.log
 unset HCCL_ALGO
 fi
 
@@ -216,10 +238,15 @@ mpirun -f ${HOSTFILE} -n 4 ./bin/reduce_test -b 512m -e 512m -f 2 -d fp32 -o sum
 unset HCCL_ALGO
 fi
 
-# 3 级 32rank：hostfile 支持 32 进程时再放开
-# export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_002_sym_32r_1m_max
-# echo "NPU_RED_SYM_002_sym_32r_1m_max"
-# mpirun -f ${HOSTFILE} -n 32 ./bin/reduce_test -b 1m -e 1m -f 2 -d fp32 -o max -r 0 -m 1 -a aicpu_ts -p 8 -c 1 -n 5
+# NPU_RED_SYM_002_parallel_nhrnhr_sym_32r_16m | 3 级 ParallelNHRNHR（对称白名单算法；
+# 需 4 节点×8 或 2 节点×16 的 UBOe + level0/level1 对称拓扑）。hostfile 支持 32 进程时解开本段。
+# 判据：各 rank 出现 "reduce root-only direct write enabled"（同时确认 3 级选路下 (1,1) 末步假设成立）。
+# export HCCL_ALGO="reduce:parallel{nhr,nhr}"
+# mkdir -p ${LOG_ROOT}/NPU_RED_SYM_002_parallel_nhrnhr_sym_32r_16m
+# export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_002_parallel_nhrnhr_sym_32r_16m
+# echo "NPU_RED_SYM_002_parallel_nhrnhr_sym_32r_16m"
+# mpirun -f ${HOSTFILE} -n 32 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o max -r 0 -m 1 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_002_parallel_nhrnhr_sym_32r_16m/stdout.log
+# unset HCCL_ALGO
 
 # ============================== 回退/负向 ==============================
 
@@ -245,6 +272,36 @@ mkdir -p ${LOG_ROOT}/NPU_RED_SYM_004_fp32_prod
 export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_004_fp32_prod
 echo "NPU_RED_SYM_004_fp32_prod"
 mpirun -f ${HOSTFILE} -n 4 ./bin/reduce_test -b 1m -e 1m -f 2 -d fp32 -o prod -r 0 -m 1 -a aicpu_ts -p 4 -c 1 -n 3 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_004_fp32_prod/stdout.log
+fi
+
+# NPU_RED_SYM_004_solemesh_sym_4r_1m | 非白名单算法 SoleMesh：对称应恒 false 回退（日志 supportSymmetricMemory[0]），结果正确
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_004_solemesh_sym_4r_1m "* ]]; then
+export HCCL_ALGO="reduce:sole{mesh}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_004_solemesh_sym_4r_1m
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_004_solemesh_sym_4r_1m
+echo "NPU_RED_SYM_004_solemesh_sym_4r_1m"
+mpirun -f ${HOSTFILE} -n 4 ./bin/reduce_test -b 1m -e 1m -f 2 -d fp32 -o sum -r 0 -m 1 -a aicpu_ts -p 4 -c 1 -n 3 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_004_solemesh_sym_4r_1m/stdout.log
+unset HCCL_ALGO
+fi
+
+# NPU_RED_SYM_004_twoshot_base_4r_16m | TwoShot 基线（b7440772 死代码清理的直接回归对象）
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_004_twoshot_base_4r_16m "* ]]; then
+export HCCL_ALGO="reduce:sole{meshtwoshot}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_004_twoshot_base_4r_16m
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_004_twoshot_base_4r_16m
+echo "NPU_RED_SYM_004_twoshot_base_4r_16m"
+mpirun -f ${HOSTFILE} -n 4 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o sum -r 0 -m 0 -a aicpu_ts -p 4 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_004_twoshot_base_4r_16m/stdout.log
+unset HCCL_ALGO
+fi
+
+# NPU_RED_SYM_004_twoshot_sym_4r_16m | TwoShot 非白名单：对称应恒 false 回退（清理后行为不变）
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_004_twoshot_sym_4r_16m "* ]]; then
+export HCCL_ALGO="reduce:sole{meshtwoshot}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_004_twoshot_sym_4r_16m
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_004_twoshot_sym_4r_16m
+echo "NPU_RED_SYM_004_twoshot_sym_4r_16m"
+mpirun -f ${HOSTFILE} -n 4 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o sum -r 0 -m 1 -a aicpu_ts -p 4 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_004_twoshot_sym_4r_16m/stdout.log
+unset HCCL_ALGO
 fi
 
 # ============================== 日志汇总（第一轮） ==============================
@@ -276,6 +333,7 @@ for dir in $(find "${LOG_ROOT}" -mindepth 1 -maxdepth 1 -type d -name 'NPU_*' | 
     symcache=$(grep -rhoIE 'supportSymmetricMemory\[[01]\]' "${dir}" 2>/dev/null | sort -u | head -3 | paste -sd, - || true)
     symlog=$(grep -rhoIE 'HcclCommSymWinRegister|HcclCommSymWinGet|remoteOutputGraphMode|symmetric|RefreshSymmetricMemory' "${dir}" 2>/dev/null | sort -u | head -3 | paste -sd, - || true)
     symroot=$(grep -rhoIE 'symmetric root [a-z ]+' "${dir}" 2>/dev/null | sort -u | head -2 | paste -sd, - || true)
+    directwrite=$(grep -rhoIE 'reduce root-only direct write enabled' "${dir}" 2>/dev/null | sort -u | head -2 | paste -sd, - || true)
     err_count=$(grep -rhIcE '\[ERROR\]|HCCL_E_[A-Z_]+|check result failed' "${dir}" 2>/dev/null | awk '{s+=$1} END{print s+0}')
     err_samples=$(grep -rhIE '\[ERROR\]|HCCL_E_[A-Z_]+|check result failed' "${dir}" 2>/dev/null | sed 's/^[[:space:]]*//' | sort -u | head -3 || true)
     echo "=== ${case_name} ==="
@@ -289,6 +347,9 @@ for dir in $(find "${LOG_ROOT}" -mindepth 1 -maxdepth 1 -type d -name 'NPU_*' | 
         echo "  symlog : ${symlog}"
     fi
     echo "  root   : ${symroot:-<none>}"
+    if [ -n "${directwrite}" ]; then
+        echo "  directwrite: ${directwrite}"
+    fi
     echo "  errors : ${err_count}"
     if [ -n "${err_samples}" ]; then
         echo "${err_samples}" | sed 's/^/           /'
