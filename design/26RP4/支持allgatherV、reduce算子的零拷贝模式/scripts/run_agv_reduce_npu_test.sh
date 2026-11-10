@@ -216,6 +216,27 @@ mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 16m -e 16m -f 2 -d fp32 -o sum 
 unset HCCL_ALGO
 fi
 
+# NPU_RED_SYM_001_sole_base_16r_512m | 512m 多轮基线（root 工作区=userOut 的多轮偏移对照组）
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_sole_base_16r_512m "* ]]; then
+export HCCL_ALGO="reduce:sole{nhr}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_sole_base_16r_512m
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_sole_base_16r_512m
+echo "NPU_RED_SYM_001_sole_base_16r_512m"
+mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 512m -e 512m -f 2 -d fp32 -o sum -r 0 -m 0 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_sole_base_16r_512m/stdout.log
+unset HCCL_ALGO
+fi
+
+# NPU_RED_SYM_001_sole_sym_16r_512m | 512m 多轮对称（闭环审查 M3：多轮 loop 下 root 工作区=userOut，
+# 每轮 PreCopy 以 inBuffBaseOff 推进打底、halving/doubling 原位归约不互踩）
+if [[ -z "${CASES}" || " ${CASES} " == *" NPU_RED_SYM_001_sole_sym_16r_512m "* ]]; then
+export HCCL_ALGO="reduce:sole{nhr}"
+mkdir -p ${LOG_ROOT}/NPU_RED_SYM_001_sole_sym_16r_512m
+export ASCEND_PROCESS_LOG_PATH=${LOG_ROOT}/NPU_RED_SYM_001_sole_sym_16r_512m
+echo "NPU_RED_SYM_001_sole_sym_16r_512m"
+mpirun -f ${HOSTFILE} -n 16 ./bin/reduce_test -b 512m -e 512m -f 2 -d fp32 -o sum -r 0 -m 1 -a aicpu_ts -p 8 -c 1 -n 5 2>&1 | tee ${LOG_ROOT}/NPU_RED_SYM_001_sole_sym_16r_512m/stdout.log
+unset HCCL_ALGO
+fi
+
 # ============================== 大包多轮 / 确定性 ==============================
 
 # NPU_RED_SYM_002_base_4r_512m_sum | 512m 多轮基线
