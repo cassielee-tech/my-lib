@@ -11,6 +11,9 @@ hero:
     - theme: alt
       text: 直达源码课程
       link: /ascend/hccl-hcomm
+    - theme: alt
+      text: Now · 近期动态
+      link: /now
 
 features:
   - icon: 🧠
@@ -42,6 +45,11 @@ features:
     title: 昇腾与 HCCL
     details: 平台机制、调用链与源码落地 —— 三类：昇腾 / HCCL 与 HCOMM / 实践总结，含双仓源码课程与真实需求复盘。
     link: /ascend/
+    linkText: 进入专栏
+  - icon: 🧪
+    title: 实战复盘
+    details: 真实需求从 Issue 到合入的完整复盘 —— 问题定位、方案演进、分层验证与检视闭环，沉淀可平移的工程方法论。
+    link: /ascend/practice/
     linkText: 进入专栏
   - icon: 🧱
     title: 后端知识

@@ -10,6 +10,8 @@
 - `docs/parallel`：并行策略（专栏四）
 - `docs/collective`：集合通信·岗位核心（专栏五）
 - `docs/ascend`：昇腾与 HCCL（专栏六，含 HCCL 与 HCOMM 源码专题）
+- `docs/ascend/practice`：实战复盘（独立侧边栏专栏，含写作模板）
+- `docs/now.md`：Now 页面（当前在做什么）
 - `docs/index.md`：首页（含课程总览与六专栏导航）
 - `docs/backend`：后端知识
 - `docs/tools-productivity`：工具与效率

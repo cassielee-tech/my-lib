@@ -174,14 +174,19 @@ export default withMermaid(defineConfig({
                 { text: '课程总结｜源码阅读地图', link: '/ascend/hccl-hcomm/summary' }
               ]
             },
-            {
-              text: '实践总结', collapsed: true,
-              items: [
-                { text: '专栏目录', link: '/ascend/practice/' },
-                { text: '1｜UBOE/UB_RTP 建链端口注入实战', link: '/ascend/practice/01-uboe-ubrtp-port-injection' },
-                { text: '2｜Reduce 64bit 特殊规约分级算法', link: '/ascend/practice/02-reduce-64bit-hierarchical-algorithm' }
-              ]
-            }
+            { text: '实践总结（独立专栏）→', link: '/ascend/practice/' }
+          ]
+        }
+      ],
+      '/ascend/practice/': [
+        {
+          text: '实践总结',
+          items: [
+            { text: '专栏目录', link: '/ascend/practice/' },
+            { text: '← 返回首页', link: '/' },
+            { text: '写作模板｜复盘手记', link: '/ascend/practice/template' },
+            { text: '1｜UBOE/UB_RTP 建链端口注入实战', link: '/ascend/practice/01-uboe-ubrtp-port-injection' },
+            { text: '2｜Reduce 64bit 特殊规约分级算法', link: '/ascend/practice/02-reduce-64bit-hierarchical-algorithm' }
           ]
         }
       ],
