@@ -63,7 +63,7 @@ features:
 | [模型与系统](model-systems/index.md) | 模型在算什么？训练怎样运转？ | 上篇·模型全景（1-6 章）＋ 下篇·训练与推理系统（1-6 章） | [第 1 章｜从模型到集合通信](model-systems/01-landscape.md) |
 | [执行与并行](execution-parallel/index.md) | 算子怎样在单卡上跑得快？并行为什么产生通信？ | 上篇·单卡执行系统（1-8 章＋专题）＋ 下篇·并行策略（1-9 章） | [第 1 章｜全景与性能分析](execution-parallel/01-landscape-performance.md) |
 | [通信与昇腾](comm-ascend/index.md) | 通信算法与代价模型；昇腾平台与源码落地 | 上篇·集合通信（1-5 章，岗位核心）＋ 下篇·昇腾与 HCCL（含双仓源码课程） | [第 1 章｜Collective 语义与代价模型](comm-ascend/01-collective-semantics-cost.md) |
-| [实战复盘](practice/index.md) | 真实需求从 Issue 到合入 | 2 篇实战 ＋ 写作模板，持续更新 | [第 1 篇｜UBOE/UB_RTP 建链端口注入](practice/01-uboe-ubrtp-port-injection.md) |
+| [实战复盘](practice/index.md) | 真实需求从 Issue 到合入 | 3 篇实战 ＋ 写作模板，持续更新 | [第 1 篇｜UBOE/UB_RTP 建链端口注入](practice/01-uboe-ubrtp-port-injection.md) |
 
 ## 学习路线
 

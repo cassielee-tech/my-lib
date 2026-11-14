@@ -13,6 +13,7 @@ title: Now · 我在做什么
 - **近期产出**：
   - [UBOE/UB_RTP 建链端口注入：从 Issue 到合入](/practice/01-uboe-ubrtp-port-injection.md)
   - [Reduce 64bit/特殊规约分级算法](/practice/02-reduce-64bit-hierarchical-algorithm.md)
+  - [AllGatherV/Reduce 零拷贝（对称内存）：从门禁到数据面](/practice/03-allgatherv-reduce-zerocopy.md)
 
 ## 📚 在读
 

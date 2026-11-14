@@ -203,7 +203,8 @@ export default withMermaid(defineConfig({
             { text: '← 返回首页', link: '/' },
             { text: '写作模板｜复盘手记', link: '/practice/template' },
             { text: '1｜UBOE/UB_RTP 建链端口注入实战', link: '/practice/01-uboe-ubrtp-port-injection' },
-            { text: '2｜Reduce 64bit 特殊规约分级算法', link: '/practice/02-reduce-64bit-hierarchical-algorithm' }
+            { text: '2｜Reduce 64bit 特殊规约分级算法', link: '/practice/02-reduce-64bit-hierarchical-algorithm' },
+            { text: '3｜AllGatherV/Reduce 零拷贝实战', link: '/practice/03-allgatherv-reduce-zerocopy' }
           ]
         }
       ],

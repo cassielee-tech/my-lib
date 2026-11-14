@@ -93,6 +93,12 @@ ReduceScatter: [S]@each      → [S/N]@each（归约+切分）
 AlltoAll:    [N 块]@each     → [N 块]@each（按目标重排，总量不变）
 ```
 
+**全景图：从 6 个核心原语到 HCCL 的 15 个算子。** 真实通信库在这 6 个核心原语之上，还有变长版本（V 类：AllGatherV / ReduceScatterV / AlltoAllV / AlltoAllVC，数据量由 counts/displs 显式描述）、点对点 Send/Recv 与 Barrier 同步等，共 15 个原语——它们的数据流都可以归并为 9 类原型面板：
+
+![HCCL 通信算子数据流语义图：9 类数据流原型覆盖 15 个原语](/images/cann/hccl/hccl-ops-dataflow.svg)
+
+> 图注：AllGatherV / ReduceScatterV / AlltoAllV / AlltoAllVC 复用对应基础面板，差异在数据量描述；BatchSendRecv 复用 Send/Recv 面板。第 4 章的 AlltoAll 语义、以及[实战复盘](/practice/)里的 AllGatherV 零拷贝改造，都建立在这张图的语义之上。
+
 #### 3.2 一条黄金恒等式
 
 **AllReduce 有两种等价分解**：

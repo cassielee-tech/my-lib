@@ -12,10 +12,11 @@
 | ---: | --- | --- | --- |
 | 1 | [UBOE/UB_RTP 建链端口注入：从 Issue 到合入](01-uboe-ubrtp-port-injection.md) | channel 建链知识链路（RA socket 模型 / 状态机 / hccpTag wire 契约）+ 影响面矩阵、分层验证、检视闭环方法论 | ✅ |
 | 2 | [Reduce 64bit/特殊规约分级算法：集合通信与 HCCL 基础理论](02-reduce-64bit-hierarchical-algorithm.md) | Reduce 语义与 RS+AG 分级账本、selector/attrs/cost 选路链、64bit/PROD 执行分流 + 死锁排除法、计价同口径教训 | ✅ |
+| 3 | [AllGatherV/Reduce 零拷贝（对称内存）：从门禁到数据面](03-allgatherv-reduce-zerocopy.md) | 对称内存窗口与注册契约、五步接入链路与四层门禁、数据面四环节可替换性判定 + 局部子域/多轮编址/checker 契约三则排障、六条工程教训 | ✅ |
 
 ## 阅读提示
 
-- **先读课程再读复盘**：两篇都以[HCCL 与 HCOMM 源码课程](/comm-ascend/hccl-hcomm.md)的分层、注册与建链流程为底，跨不过去时先补[单元 1](/comm-ascend/hccl-hcomm/01-architecture-layering.md)、[单元 2](/comm-ascend/hccl-hcomm/02-control-plane.md)；
+- **先读课程再读复盘**：各篇都以[HCCL 与 HCOMM 源码课程](/comm-ascend/hccl-hcomm.md)的分层、注册与建链流程为底，跨不过去时先补[单元 1](/comm-ascend/hccl-hcomm/01-architecture-layering.md)、[单元 2](/comm-ascend/hccl-hcomm/02-control-plane.md)；
 - **按"结论 → 全景 → 细节"读**：每篇开头都有先记住的结论清单，赶时间只读结论 + 方法论清单；
 - **方法论可平移**：影响面矩阵、参考实现三问、wire 契约意识、对照实验、rebase 三同步、"计价必须与执行分流同口径"，换一个需求照样能用。
 
