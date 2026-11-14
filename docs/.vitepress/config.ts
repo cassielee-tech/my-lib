@@ -37,156 +37,173 @@ export default withMermaid(defineConfig({
   themeConfig: {
     nav: [
       { text: '首页', link: '/' },
-      { text: '模型全景', link: '/model/' },
-      { text: '训练与推理系统', link: '/systems/' },
-      { text: '单卡执行系统', link: '/device/' },
-      { text: '并行策略', link: '/parallel/' },
-      { text: '集合通信', link: '/collective/' },
-      { text: '昇腾与 HCCL', link: '/ascend/' },
+      {
+        text: '模型与系统',
+        items: [
+          { text: '专栏目录', link: '/model-systems/' },
+          { text: '⚡ 速通版｜上篇·模型全景', link: '/model-systems/00-速通-上篇' },
+          { text: '⚡ 速通版｜下篇·训练与推理', link: '/model-systems/00-速通-下篇' },
+          { text: '下一专栏 → 执行与并行', link: '/execution-parallel/' }
+        ]
+      },
+      {
+        text: '执行与并行',
+        items: [
+          { text: '专栏目录', link: '/execution-parallel/' },
+          { text: '⚡ 速通版｜上篇·单卡执行', link: '/execution-parallel/00-速通-上篇' },
+          { text: '⚡ 速通版｜下篇·并行策略', link: '/execution-parallel/00-速通-下篇' },
+          { text: '下一专栏 → 通信与昇腾', link: '/comm-ascend/' }
+        ]
+      },
+      {
+        text: '通信与昇腾',
+        items: [
+          { text: '专栏目录', link: '/comm-ascend/' },
+          { text: '⚡ 速通版｜集合通信', link: '/comm-ascend/00-速通' },
+          { text: 'HCCL 与 HCOMM 源码课程', link: '/comm-ascend/hccl-hcomm' },
+          { text: '下一专栏 → 实战复盘', link: '/practice/' }
+        ]
+      },
+      { text: '实战复盘', link: '/practice/' },
       { text: '后端知识', link: '/backend/' },
       { text: '工具与效率', link: '/tools-productivity/' },
       { text: '个人杂谈', link: '/essays/' }
     ],
 
     sidebar: {
-      '/model/': [
+      '/model-systems/': [
         {
-          text: '模型全景',
+          text: '模型与系统',
           items: [
-            { text: '专栏目录', link: '/model/' },
-            { text: '⚡ 速通版｜整专栏速览', link: '/model/00-速通' },
-            { text: '← 返回首页', link: '/' },
-            { text: '第 1 章｜从模型到集合通信', link: '/model/01-landscape' },
-            { text: '第 2 章｜张量、计算图与反向传播', link: '/model/02-tensor-autograd' },
-            { text: '第 3 章｜模型输入', link: '/model/03-tokenization-embedding' },
-            { text: '第 4 章｜Self-Attention', link: '/model/04-self-attention' },
-            { text: '第 5 章｜完整 Decoder Block', link: '/model/05-decoder-block' },
-            { text: '第 6 章｜RoPE 与长上下文（选修）', link: '/model/06-rope-long-context' },
-            { text: '下一专栏 → 训练与推理系统', link: '/systems/' }
-          ]
-        }
-      ],
-      '/systems/': [
-        {
-          text: '训练与推理系统',
-          items: [
-            { text: '专栏目录', link: '/systems/' },
-            { text: '⚡ 速通版｜整专栏速览', link: '/systems/00-速通' },
-            { text: '← 返回首页', link: '/' },
-            { text: '第 1 章｜训练循环', link: '/systems/01-training-loop' },
-            { text: '第 2 章｜训练显存与计算优化', link: '/systems/02-training-memory-compute' },
-            { text: '第 3 章｜推理与 KV Cache（选修）', link: '/systems/03-inference-kv-cache' },
-            { text: '第 4 章｜后训练与对齐（选修）', link: '/systems/04-post-training-alignment' },
-            { text: '第 5 章｜推理引擎与 KV Cache（选修）', link: '/systems/05-inference-engine' },
-            { text: '第 6 章｜PD 调度与推理指标（选修）', link: '/systems/06-pd-scheduling' },
-            { text: '下一专栏 → 单卡执行系统', link: '/device/' }
-          ]
-        }
-      ],
-      '/device/': [
-        {
-          text: '单卡执行系统',
-          items: [
-            { text: '专栏目录', link: '/device/' },
-            { text: '⚡ 速通版｜整专栏速览', link: '/device/00-速通' },
-            { text: '← 返回首页', link: '/' },
-            { text: '第 1 章｜全景与性能分析', link: '/device/01-landscape-performance' },
-            { text: '第 2 章｜GPU/NPU 执行模型', link: '/device/02-execution-model' },
-            { text: '第 3 章｜存储层次与数据搬运', link: '/device/03-memory-hierarchy' },
-            { text: '第 4 章｜Kernel、Tiling 与流水线', link: '/device/04-kernel-tiling-pipeline' },
-            { text: '第 5 章｜FLOPs、带宽与 Roofline', link: '/device/05-flops-bandwidth-roofline' },
-            { text: '第 6 章｜Eager、计算图与图编译', link: '/device/06-eager-graph-compilation' },
-            { text: '第 7 章｜Stream、Event 与异步执行', link: '/device/07-stream-event-async' },
-            { text: '第 8 章｜数据类型、布局与融合', link: '/device/08-dtype-layout-fusion' },
-            { text: '专题｜主流 AI 加速卡全景', link: '/device/accelerator-cards-2026' },
-            { text: '下一专栏 → 并行策略', link: '/parallel/' }
-          ]
-        }
-      ],
-      '/parallel/': [
-        {
-          text: '并行策略',
-          items: [
-            { text: '专栏目录', link: '/parallel/' },
-            { text: '⚡ 速通版｜整专栏速览', link: '/parallel/00-速通' },
-            { text: '← 返回首页', link: '/' },
-            { text: '第 1 章｜MoE 与 Expert Parallel', link: '/parallel/01-moe-expert-parallel' },
-            { text: '第 2 章｜效率设计（选修）', link: '/parallel/02-efficient-llm-design' },
-            { text: '第 3 章｜系统分析', link: '/parallel/03-llm-systems-analysis' },
-            { text: '第 4 章｜分布式基础', link: '/parallel/04-distributed-basics' },
-            { text: '第 5 章｜数据并行与 DDP', link: '/parallel/05-ddp' },
-            { text: '第 6 章｜Tensor Parallel', link: '/parallel/06-tensor-parallel' },
-            { text: '第 7 章｜Pipeline Parallel', link: '/parallel/07-pipeline-parallel' },
-            { text: '第 8 章｜Context Parallel', link: '/parallel/08-context-parallel' },
-            { text: '第 9 章｜ZeRO、FSDP 与混合并行', link: '/parallel/09-zero-fsdp' },
-            { text: '下一专栏 → 集合通信', link: '/collective/' }
-          ]
-        }
-      ],
-      '/collective/': [
-        {
-          text: '集合通信',
-          items: [
-            { text: '专栏目录', link: '/collective/' },
-            { text: '⚡ 速通版｜整专栏速览', link: '/collective/00-速通' },
-            { text: '← 返回首页', link: '/' },
-            { text: '第 1 章｜Collective 语义与代价模型', link: '/collective/01-collective-semantics-cost' },
-            { text: '第 2 章｜Ring AllReduce 推导', link: '/collective/02-ring-allreduce' },
-            { text: '第 3 章｜Tree、RD 与算法选择', link: '/collective/03-tree-algorithms-selection' },
-            { text: '第 4 章｜AG、RS 与 AlltoAll', link: '/collective/04-gather-scatter-alltoall' },
-            { text: '第 5 章｜拓扑、分层与重叠', link: '/collective/05-topology-hierarchical-overlap' },
-            { text: '下一专栏 → 昇腾与 HCCL', link: '/ascend/' }
-          ]
-        }
-      ],
-      '/ascend/': [
-        {
-          text: '昇腾与 HCCL',
-          items: [
-            { text: '专栏目录', link: '/ascend/' },
+            { text: '专栏目录', link: '/model-systems/' },
+            { text: '⚡ 速通版｜上篇·模型全景', link: '/model-systems/00-速通-上篇' },
+            { text: '⚡ 速通版｜下篇·训练与推理', link: '/model-systems/00-速通-下篇' },
             { text: '← 返回首页', link: '/' },
             {
-              text: '昇腾', collapsed: true,
+              text: '上篇｜模型全景（第 1-6 章）', collapsed: false,
               items: [
-                { text: '第 0 章｜认识昇腾与 CANN', link: '/ascend/00-ascend-cann' },
-                { text: '第 1 章｜Runtime 与任务执行', link: '/ascend/01-runtime-task-execution' },
-                { text: '第 2 章｜从 PyTorch 走向 HCCL', link: '/ascend/02-pytorch-to-hccl' },
-                { text: '速查｜CANN 常用命令', link: '/ascend/cann常用命令' },
-                { text: '笔记｜CANN Learning Hub', link: '/ascend/cann-learning-hub' }
+                { text: '第 1 章｜从模型到集合通信', link: '/model-systems/01-landscape' },
+                { text: '第 2 章｜张量、计算图与反向传播', link: '/model-systems/02-tensor-autograd' },
+                { text: '第 3 章｜模型输入', link: '/model-systems/03-tokenization-embedding' },
+                { text: '第 4 章｜Self-Attention', link: '/model-systems/04-self-attention' },
+                { text: '第 5 章｜完整 Decoder Block', link: '/model-systems/05-decoder-block' },
+                { text: '第 6 章｜RoPE 与长上下文（选修）', link: '/model-systems/06-rope-long-context' }
               ]
             },
             {
-              text: 'HCCL 与 HCOMM', collapsed: true,
+              text: '下篇｜训练与推理系统（第 1-6 章）', collapsed: false,
               items: [
-                { text: '课程导学｜HCCL 与 HCOMM 源码学习', link: '/ascend/hccl-hcomm' },
-                { text: '0｜双仓全景与调用链旅程', link: '/ascend/hccl-hcomm/00-repo-map' },
-                { text: '1｜软件架构与六族 API', link: '/ascend/hccl-hcomm/01-architecture-layering' },
-                { text: '2｜控制面：通信域的一生', link: '/ascend/hccl-hcomm/02-control-plane' },
-                { text: '3｜数据面：原语与资源', link: '/ascend/hccl-hcomm/03-data-plane' },
-                { text: '4｜通信引擎与三引擎编排', link: '/ascend/hccl-hcomm/04-comm-engines' },
-                { text: '5｜算法与 selector', link: '/ascend/hccl-hcomm/05-coll-algorithms' },
-                { text: '6｜AllReduce 调用链走读', link: '/ascend/hccl-hcomm/06-allreduce-call-chain' },
-                { text: '7｜executor 与 template', link: '/ascend/hccl-hcomm/07-executor-template' },
-                { text: '8｜资源地基与 dlsym', link: '/ascend/hccl-hcomm/08-resources-dlsym' },
-                { text: '9｜自定义算子七步流程', link: '/ascend/hccl-hcomm/09-custom-op-dev' },
-                { text: '10｜MC2 框架与官方样例', link: '/ascend/hccl-hcomm/10-mc2-custom-ops' },
-                { text: '11｜实战与第一个算子', link: '/ascend/hccl-hcomm/11-examples-first-op' },
-                { text: '课程总结｜源码阅读地图', link: '/ascend/hccl-hcomm/summary' }
+                { text: '第 1 章｜训练循环', link: '/model-systems/01-training-loop' },
+                { text: '第 2 章｜训练显存与计算优化', link: '/model-systems/02-training-memory-compute' },
+                { text: '第 3 章｜推理与 KV Cache（选修）', link: '/model-systems/03-inference-kv-cache' },
+                { text: '第 4 章｜后训练与对齐（选修）', link: '/model-systems/04-post-training-alignment' },
+                { text: '第 5 章｜推理引擎与 KV Cache（选修）', link: '/model-systems/05-inference-engine' },
+                { text: '第 6 章｜PD 调度与推理指标（选修）', link: '/model-systems/06-pd-scheduling' }
               ]
             },
-            { text: '实践总结（独立专栏）→', link: '/ascend/practice/' }
+            { text: '下一专栏 → 执行与并行', link: '/execution-parallel/' }
           ]
         }
       ],
-      '/ascend/practice/': [
+      '/execution-parallel/': [
         {
-          text: '实践总结',
+          text: '执行与并行',
           items: [
-            { text: '专栏目录', link: '/ascend/practice/' },
+            { text: '专栏目录', link: '/execution-parallel/' },
+            { text: '⚡ 速通版｜上篇·单卡执行', link: '/execution-parallel/00-速通-上篇' },
+            { text: '⚡ 速通版｜下篇·并行策略', link: '/execution-parallel/00-速通-下篇' },
             { text: '← 返回首页', link: '/' },
-            { text: '写作模板｜复盘手记', link: '/ascend/practice/template' },
-            { text: '1｜UBOE/UB_RTP 建链端口注入实战', link: '/ascend/practice/01-uboe-ubrtp-port-injection' },
-            { text: '2｜Reduce 64bit 特殊规约分级算法', link: '/ascend/practice/02-reduce-64bit-hierarchical-algorithm' }
+            {
+              text: '上篇｜单卡执行系统（第 1-8 章）', collapsed: false,
+              items: [
+                { text: '第 1 章｜全景与性能分析', link: '/execution-parallel/01-landscape-performance' },
+                { text: '第 2 章｜GPU/NPU 执行模型', link: '/execution-parallel/02-execution-model' },
+                { text: '第 3 章｜存储层次与数据搬运', link: '/execution-parallel/03-memory-hierarchy' },
+                { text: '第 4 章｜Kernel、Tiling 与流水线', link: '/execution-parallel/04-kernel-tiling-pipeline' },
+                { text: '第 5 章｜FLOPs、带宽与 Roofline', link: '/execution-parallel/05-flops-bandwidth-roofline' },
+                { text: '第 6 章｜Eager、计算图与图编译', link: '/execution-parallel/06-eager-graph-compilation' },
+                { text: '第 7 章｜Stream、Event 与异步执行', link: '/execution-parallel/07-stream-event-async' },
+                { text: '第 8 章｜数据类型、布局与融合', link: '/execution-parallel/08-dtype-layout-fusion' },
+                { text: '专题｜主流 AI 加速卡全景', link: '/execution-parallel/accelerator-cards-2026' }
+              ]
+            },
+            {
+              text: '下篇｜并行策略（第 1-9 章）', collapsed: false,
+              items: [
+                { text: '第 1 章｜MoE 与 Expert Parallel', link: '/execution-parallel/01-moe-expert-parallel' },
+                { text: '第 2 章｜效率设计（选修）', link: '/execution-parallel/02-efficient-llm-design' },
+                { text: '第 3 章｜系统分析', link: '/execution-parallel/03-llm-systems-analysis' },
+                { text: '第 4 章｜分布式基础', link: '/execution-parallel/04-distributed-basics' },
+                { text: '第 5 章｜数据并行与 DDP', link: '/execution-parallel/05-ddp' },
+                { text: '第 6 章｜Tensor Parallel', link: '/execution-parallel/06-tensor-parallel' },
+                { text: '第 7 章｜Pipeline Parallel', link: '/execution-parallel/07-pipeline-parallel' },
+                { text: '第 8 章｜Context Parallel', link: '/execution-parallel/08-context-parallel' },
+                { text: '第 9 章｜ZeRO、FSDP 与混合并行', link: '/execution-parallel/09-zero-fsdp' }
+              ]
+            },
+            { text: '下一专栏 → 通信与昇腾', link: '/comm-ascend/' }
+          ]
+        }
+      ],
+      '/comm-ascend/': [
+        {
+          text: '通信与昇腾',
+          items: [
+            { text: '专栏目录', link: '/comm-ascend/' },
+            { text: '⚡ 速通版｜集合通信', link: '/comm-ascend/00-速通' },
+            { text: '← 返回首页', link: '/' },
+            {
+              text: '上篇｜集合通信（岗位核心）', collapsed: false,
+              items: [
+                { text: '第 1 章｜Collective 语义与代价模型', link: '/comm-ascend/01-collective-semantics-cost' },
+                { text: '第 2 章｜Ring AllReduce 推导', link: '/comm-ascend/02-ring-allreduce' },
+                { text: '第 3 章｜Tree、RD 与算法选择', link: '/comm-ascend/03-tree-algorithms-selection' },
+                { text: '第 4 章｜AG、RS 与 AlltoAll', link: '/comm-ascend/04-gather-scatter-alltoall' },
+                { text: '第 5 章｜拓扑、分层与重叠', link: '/comm-ascend/05-topology-hierarchical-overlap' }
+              ]
+            },
+            {
+              text: '下篇｜昇腾平台', collapsed: false,
+              items: [
+                { text: '第 0 章｜认识昇腾与 CANN', link: '/comm-ascend/00-ascend-cann' },
+                { text: '第 1 章｜Runtime 与任务执行', link: '/comm-ascend/01-runtime-task-execution' },
+                { text: '第 2 章｜从 PyTorch 走向 HCCL', link: '/comm-ascend/02-pytorch-to-hccl' },
+                { text: '速查｜CANN 常用命令', link: '/comm-ascend/cann常用命令' },
+                { text: '笔记｜CANN Learning Hub', link: '/comm-ascend/cann-learning-hub' }
+              ]
+            },
+            {
+              text: '源码课程｜HCCL 与 HCOMM', collapsed: true,
+              items: [
+                { text: '课程导学｜HCCL 与 HCOMM 源码学习', link: '/comm-ascend/hccl-hcomm' },
+                { text: '0｜双仓全景与调用链旅程', link: '/comm-ascend/hccl-hcomm/00-repo-map' },
+                { text: '1｜软件架构与六族 API', link: '/comm-ascend/hccl-hcomm/01-architecture-layering' },
+                { text: '2｜控制面：通信域的一生', link: '/comm-ascend/hccl-hcomm/02-control-plane' },
+                { text: '3｜数据面：原语与资源', link: '/comm-ascend/hccl-hcomm/03-data-plane' },
+                { text: '4｜通信引擎与三引擎编排', link: '/comm-ascend/hccl-hcomm/04-comm-engines' },
+                { text: '5｜算法与 selector', link: '/comm-ascend/hccl-hcomm/05-coll-algorithms' },
+                { text: '6｜AllReduce 调用链走读', link: '/comm-ascend/hccl-hcomm/06-allreduce-call-chain' },
+                { text: '7｜executor 与 template', link: '/comm-ascend/hccl-hcomm/07-executor-template' },
+                { text: '8｜资源地基与 dlsym', link: '/comm-ascend/hccl-hcomm/08-resources-dlsym' },
+                { text: '9｜自定义算子七步流程', link: '/comm-ascend/hccl-hcomm/09-custom-op-dev' },
+                { text: '10｜MC2 框架与官方样例', link: '/comm-ascend/hccl-hcomm/10-mc2-custom-ops' },
+                { text: '11｜实战与第一个算子', link: '/comm-ascend/hccl-hcomm/11-examples-first-op' },
+                { text: '课程总结｜源码阅读地图', link: '/comm-ascend/hccl-hcomm/summary' }
+              ]
+            },
+            { text: '下一专栏 → 实战复盘', link: '/practice/' }
+          ]
+        }
+      ],
+      '/practice/': [
+        {
+          text: '实战复盘',
+          items: [
+            { text: '专栏目录', link: '/practice/' },
+            { text: '← 返回首页', link: '/' },
+            { text: '写作模板｜复盘手记', link: '/practice/template' },
+            { text: '1｜UBOE/UB_RTP 建链端口注入实战', link: '/practice/01-uboe-ubrtp-port-injection' },
+            { text: '2｜Reduce 64bit 特殊规约分级算法', link: '/practice/02-reduce-64bit-hierarchical-algorithm' }
           ]
         }
       ],

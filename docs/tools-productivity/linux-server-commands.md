@@ -2,7 +2,7 @@
 
 ::: tip 本篇定位
 远程 Linux 服务器的日常运维与排障命令，按场景组织，每条命令给"最常用形态 + 一句话说明"。
-NPU / CANN 侧命令（npu-smi、CANN 环境、分布式排障）见姊妹篇：[CANN 常用命令速查](../ascend/cann常用命令.md)。
+NPU / CANN 侧命令（npu-smi、CANN 环境、分布式排障）见姊妹篇：[CANN 常用命令速查](/comm-ascend/cann常用命令.md)。
 :::
 
 ## 1. 使用原则
@@ -319,7 +319,7 @@ find / -xdev -type f -size +500M 2>/dev/null            # 文件维度（-xdev �
 
 ## 7. 参考资料
 
-- 姊妹篇：[CANN 常用命令速查](../ascend/cann常用命令.md)——NPU 状态、CANN 环境、分布式排障
+- 姊妹篇：[CANN 常用命令速查](/comm-ascend/cann常用命令.md)——NPU 状态、CANN 环境、分布式排障
 - 远程工作流：[VS Code + Remote SSH + Jupyter](vscode-remote-ssh-jupyter.md)——SSH 配置、隧道与远程实验
 - [man7.org Linux man-pages](https://man7.org/linux/man-pages/)：权威手册在线版
 - [tldr pages](https://tldr.sh/)：社区维护的命令示例集

@@ -7,49 +7,34 @@ hero:
   actions:
     - theme: brand
       text: 开始第一课
-      link: /model/01-landscape
+      link: /model-systems/01-landscape
     - theme: alt
       text: 直达源码课程
-      link: /ascend/hccl-hcomm
+      link: /comm-ascend/hccl-hcomm
     - theme: alt
       text: Now · 近期动态
       link: /now
 
 features:
   - icon: 🧠
-    title: 模型全景
-    details: 模型在算什么？通信从哪来？—— Transformer 骨架、张量流动与并行的必然性（第 1-6 章）。
-    link: /model/
-    linkText: 进入专栏
-  - icon: 🏋️
-    title: 训练与推理系统
-    details: 训练怎样运转？显存花在哪？—— 训练循环、显存账本与梯度通信；推理与后训练为选修（第 1-6 章）。
-    link: /systems/
+    title: 模型与系统
+    details: 上篇·模型全景：模型在算什么？通信从哪来？（第 1-6 章）；下篇·训练与推理：训练循环、显存账本与梯度通信（第 1-6 章，推理为选修）。
+    link: /model-systems/
     linkText: 进入专栏
   - icon: 🔧
-    title: 单卡执行系统
-    details: 算子怎样在单卡上跑得快？—— 执行模型、存储层次、Roofline、Stream/Event 与图编译（第 1-8 章）。
-    link: /device/
-    linkText: 进入专栏
-  - icon: 🧩
-    title: 并行策略
-    details: 并行为什么产生通信？—— DP/TP/PP/CP/EP 与 ZeRO/FSDP 的张量切分与通信量推导（第 1-9 章）。
-    link: /parallel/
+    title: 执行与并行
+    details: 上篇·单卡执行系统：执行模型、存储层次、Roofline、Stream/Event 与图编译（第 1-8 章）；下篇·并行策略：DP/TP/PP/CP/EP 与 ZeRO/FSDP 的通信量推导（第 1-9 章）。
+    link: /execution-parallel/
     linkText: 进入专栏
   - icon: 📡
-    title: 集合通信（岗位核心）
-    details: 语义、算法、代价模型与工程 —— 六大原语、Ring/Tree 推导、拓扑分层与重叠（第 1-5 章）。
-    link: /collective/
-    linkText: 进入专栏
-  - icon: 🔷
-    title: 昇腾与 HCCL
-    details: 平台机制、调用链与源码落地 —— 三类：昇腾 / HCCL 与 HCOMM / 实践总结，含双仓源码课程与真实需求复盘。
-    link: /ascend/
+    title: 通信与昇腾
+    details: 上篇·集合通信（岗位核心）：六大原语、Ring/Tree 推导、拓扑分层与重叠（第 1-5 章）；下篇·昇腾与 HCCL：平台机制与双仓源码课程。
+    link: /comm-ascend/
     linkText: 进入专栏
   - icon: 🧪
     title: 实战复盘
     details: 真实需求从 Issue 到合入的完整复盘 —— 问题定位、方案演进、分层验证与检视闭环，沉淀可平移的工程方法论。
-    link: /ascend/practice/
+    link: /practice/
     linkText: 进入专栏
   - icon: 🧱
     title: 后端知识
@@ -71,31 +56,25 @@ features:
 
 ## 专栏总览
 
-> 目标岗位：**CANN 的 HCCL 集合通信算子开发**。这门课把大模型、AI Infra 与昇腾平台三块知识，按岗位需要的顺序组织成六大专栏——从"模型在算什么"一路走到"集合通信源码怎么实现"。
+> 目标岗位：**CANN 的 HCCL 集合通信算子开发**。这门课把大模型、AI Infra 与昇腾平台三块知识，按岗位需要的顺序组织成三大专栏（各含上下两篇，共原六站课程）——从"模型在算什么"一路走到"集合通信源码怎么实现"，实战复盘独立成篇。
 
-| 专栏 | 主题 | 章节 | 直达第一课 |
-| --- | --- | --- |  --- |
-| [模型全景](model/index.md) | 模型在算什么？通信从哪来？ | 第 1-6 章 | [第 1 章｜从模型到集合通信](model/01-landscape.md) |
-| [训练与推理系统](systems/index.md) | 训练怎样运转？显存花在哪？ | 第 1-6 章 | [第 1 章｜训练循环](systems/01-training-loop.md) |
-| [单卡执行系统](device/index.md) | 算子怎样在单卡上跑得快？ | 第 1-8 章 + 专题 |[第 1 章｜全景与性能分析](device/01-landscape-performance.md) |
-| [并行策略](parallel/index.md) | 并行为什么产生通信？ | 第 1-9 章 |  [第 4 章｜分布式基础](parallel/04-distributed-basics.md) |
-| [集合通信](collective/index.md) | 语义、算法、代价模型与工程（岗位核心） | 第 1-5 章 |  [第 1 章｜Collective 语义与代价模型](collective/01-collective-semantics-cost.md) |
-| [昇腾与 HCCL](ascend/index.md) | 平台机制、调用链与源码落地 | 三类：昇腾 / HCCL 与 HCOMM / 实践总结 |  [第 0 章｜认识昇腾与 CANN](ascend/00-ascend-cann.md) |
+| 专栏 | 主题 | 结构 | 直达第一课 |
+| --- | --- | --- | --- |
+| [模型与系统](model-systems/index.md) | 模型在算什么？训练怎样运转？ | 上篇·模型全景（1-6 章）＋ 下篇·训练与推理系统（1-6 章） | [第 1 章｜从模型到集合通信](model-systems/01-landscape.md) |
+| [执行与并行](execution-parallel/index.md) | 算子怎样在单卡上跑得快？并行为什么产生通信？ | 上篇·单卡执行系统（1-8 章＋专题）＋ 下篇·并行策略（1-9 章） | [第 1 章｜全景与性能分析](execution-parallel/01-landscape-performance.md) |
+| [通信与昇腾](comm-ascend/index.md) | 通信算法与代价模型；昇腾平台与源码落地 | 上篇·集合通信（1-5 章，岗位核心）＋ 下篇·昇腾与 HCCL（含双仓源码课程） | [第 1 章｜Collective 语义与代价模型](comm-ascend/01-collective-semantics-cost.md) |
+| [实战复盘](practice/index.md) | 真实需求从 Issue 到合入 | 2 篇实战 ＋ 写作模板，持续更新 | [第 1 篇｜UBOE/UB_RTP 建链端口注入](practice/01-uboe-ubrtp-port-injection.md) |
 
 ## 学习路线
 
 ```text
-模型全景            模型在算什么？通信从哪来？
+模型与系统            模型在算什么？训练怎样运转？
    ↓
-训练与推理系统      训练怎样运转？显存花在哪？
+执行与并行            单卡怎样跑得快？并行为什么产生通信？
    ↓
-单卡执行系统        算子怎样在单卡上跑得快？
+通信与昇腾            通信算法与代价模型（岗位核心）→ 昇腾平台与源码落地
    ↓
-并行策略            并行为什么产生通信？多少字节？
-   ↓
-集合通信            语义、算法、代价模型与工程（岗位核心）
-   ↓
-昇腾与 HCCL         平台机制、调用链与源码落地
+实战复盘              真实需求从 Issue 到合入
 ```
 
 三条问题贯穿全部课程：
@@ -108,8 +87,8 @@ features:
 
 按岗位价值排序的阅读路线：
 
-- **主线**：模型全景 1-5 → 训练与推理系统 1-2 → 单卡执行系统 1-8 → 并行策略 1-9 → 集合通信 1-5 → 昇腾与 HCCL（昇腾 0-2）→ [HCCL 与 HCOMM 源码学习](ascend/hccl-hcomm.md)；
-- **选修**：模型全景第 6 章（RoPE/长上下文）、训练与推理系统第 3-6 章（推理与后训练）、并行策略第 2 章（效率设计）。
+- **主线**：模型与系统（上篇 1-5、下篇 1-2）→ 执行与并行（上篇 1-8、下篇 1-9）→ 通信与昇腾（上篇 1-5、下篇 0-2）→ [HCCL 与 HCOMM 源码学习](comm-ascend/hccl-hcomm.md) → [实战复盘](practice/index.md)；
+- **选修**：模型与系统上篇第 6 章（RoPE/长上下文）、下篇第 3-6 章（推理与后训练）、执行与并行下篇第 2 章（效率设计）。
 
 
 ## 笔记习惯
