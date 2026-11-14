@@ -75,7 +75,6 @@ export default withMermaid(defineConfig({
             { text: '专栏目录', link: '/model-systems/' },
             { text: '⚡ 速通版｜上篇·模型全景', link: '/model-systems/00-速通-上篇' },
             { text: '⚡ 速通版｜下篇·训练与推理', link: '/model-systems/00-速通-下篇' },
-            { text: '← 返回首页', link: '/' },
             {
               text: '上篇｜模型全景（第 1-6 章）', collapsed: false,
               items: [
@@ -98,7 +97,6 @@ export default withMermaid(defineConfig({
                 { text: '第 6 章｜PD 调度与推理指标（选修）', link: '/model-systems/06-pd-scheduling' }
               ]
             },
-            { text: '下一专栏 → 执行与并行', link: '/execution-parallel/' }
           ]
         }
       ],
@@ -109,7 +107,6 @@ export default withMermaid(defineConfig({
             { text: '专栏目录', link: '/execution-parallel/' },
             { text: '⚡ 速通版｜上篇·单卡执行', link: '/execution-parallel/00-速通-上篇' },
             { text: '⚡ 速通版｜下篇·并行策略', link: '/execution-parallel/00-速通-下篇' },
-            { text: '← 返回首页', link: '/' },
             {
               text: '上篇｜单卡执行系统（第 1-8 章）', collapsed: false,
               items: [
@@ -138,7 +135,6 @@ export default withMermaid(defineConfig({
                 { text: '第 9 章｜ZeRO、FSDP 与混合并行', link: '/execution-parallel/09-zero-fsdp' }
               ]
             },
-            { text: '下一专栏 → 通信与昇腾', link: '/comm-ascend/' }
           ]
         }
       ],
@@ -148,7 +144,6 @@ export default withMermaid(defineConfig({
           items: [
             { text: '专栏目录', link: '/comm-ascend/' },
             { text: '⚡ 速通版｜集合通信', link: '/comm-ascend/00-速通' },
-            { text: '← 返回首页', link: '/' },
             {
               text: '上篇｜集合通信（岗位核心）', collapsed: false,
               items: [
@@ -188,7 +183,6 @@ export default withMermaid(defineConfig({
                 { text: '课程总结｜源码阅读地图', link: '/comm-ascend/hccl-hcomm/summary' }
               ]
             },
-            { text: '下一专栏 → 实战复盘', link: '/practice/' }
           ]
         }
       ],
@@ -197,7 +191,6 @@ export default withMermaid(defineConfig({
           text: '实战复盘',
           items: [
             { text: '专栏目录', link: '/practice/' },
-            { text: '← 返回首页', link: '/' },
             { text: '写作模板｜复盘手记', link: '/practice/template' },
             { text: '1｜UBOE/UB_RTP 建链端口注入实战', link: '/practice/01-uboe-ubrtp-port-injection' },
             { text: '2｜Reduce 64bit 特殊规约分级算法', link: '/practice/02-reduce-64bit-hierarchical-algorithm' },
@@ -227,7 +220,6 @@ export default withMermaid(defineConfig({
           text: '个人杂谈',
           items: [
             { text: '专栏目录', link: '/essays/' },
-            { text: '← 返回首页', link: '/' },
             {
               text: '读书笔记',
               collapsed: true,
