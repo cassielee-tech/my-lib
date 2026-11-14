@@ -41,27 +41,24 @@ export default withMermaid(defineConfig({
         text: '模型与系统',
         items: [
           { text: '专栏目录', link: '/model-systems/' },
-          { text: '⚡ 速通版｜上篇·模型全景', link: '/model-systems/00-速通-上篇' },
-          { text: '⚡ 速通版｜下篇·训练与推理', link: '/model-systems/00-速通-下篇' },
-          { text: '下一专栏 → 执行与并行', link: '/execution-parallel/' }
+          { text: '模型全景', link: '/model-systems/01-landscape' },
+          { text: '训练与推理系统', link: '/model-systems/01-training-loop' }
         ]
       },
       {
         text: '执行与并行',
         items: [
           { text: '专栏目录', link: '/execution-parallel/' },
-          { text: '⚡ 速通版｜上篇·单卡执行', link: '/execution-parallel/00-速通-上篇' },
-          { text: '⚡ 速通版｜下篇·并行策略', link: '/execution-parallel/00-速通-下篇' },
-          { text: '下一专栏 → 通信与昇腾', link: '/comm-ascend/' }
+          { text: '单卡执行系统', link: '/execution-parallel/01-landscape-performance' },
+          { text: '并行策略', link: '/execution-parallel/01-moe-expert-parallel' }
         ]
       },
       {
         text: '通信与昇腾',
         items: [
           { text: '专栏目录', link: '/comm-ascend/' },
-          { text: '⚡ 速通版｜集合通信', link: '/comm-ascend/00-速通' },
-          { text: 'HCCL 与 HCOMM 源码课程', link: '/comm-ascend/hccl-hcomm' },
-          { text: '下一专栏 → 实战复盘', link: '/practice/' }
+          { text: '集合通信', link: '/comm-ascend/01-collective-semantics-cost' },
+          { text: '昇腾与 HCCL', link: '/comm-ascend/00-ascend-cann' }
         ]
       },
       { text: '实战复盘', link: '/practice/' },
