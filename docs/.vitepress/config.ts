@@ -58,7 +58,8 @@ export default withMermaid(defineConfig({
         items: [
           { text: '专栏目录', link: '/comm-ascend/' },
           { text: '集合通信', link: '/comm-ascend/01-collective-semantics-cost' },
-          { text: '昇腾与 HCCL', link: '/comm-ascend/00-ascend-cann' }
+          { text: '昇腾与 HCCL', link: '/comm-ascend/00-ascend-cann' },
+          { text: '源码课程', link: '/comm-ascend/hccl-hcomm' }
         ]
       },
       { text: '实战复盘', link: '/practice/' },
@@ -165,7 +166,7 @@ export default withMermaid(defineConfig({
               ]
             },
             {
-              text: '源码课程｜HCCL 与 HCOMM', collapsed: true,
+              text: '源码课程｜HCCL 与 HCOMM', collapsed: false,
               items: [
                 { text: '课程导学｜HCCL 与 HCOMM 源码学习', link: '/comm-ascend/hccl-hcomm' },
                 { text: '0｜双仓全景与调用链旅程', link: '/comm-ascend/hccl-hcomm/00-repo-map' },
