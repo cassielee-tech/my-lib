@@ -44,26 +44,6 @@ my-cann/
 
 > 图注：AllGatherV / ReduceScatterV / AlltoAllV / AlltoAllVC 复用对应基础面板，差异在数据量描述；BatchSendRecv 复用 Send/Recv 面板。
 
-| 原语 | 类别 | 通信语义 | 数据量 | 归约 | root | 结果位置 | 关键特征 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| AllReduce | 集合·归约 | 全 rank 归约后广播 | 等长 count | sum/prod/max/min | 无 | 所有 rank | 支持 in-place（CCU/AIV） |
-| Reduce | 集合·归约 | 全 rank 归约到 root | 等长 count | sum/prod/max/min | 有 | 仅 root | 支持 in-place（CCU/AIV） |
-| ReduceScatter | 集合·归约 | 归约后按 rank 分片 | recvCount 等长 | sum/prod/max/min | 无 | 各 rank 分片 | 对称内存下 sendBuf 可能被污染 |
-| ReduceScatterV | 集合·归约 | 变长归约 + 分片 | sendCounts / sendDispls | sum/prod/max/min | 无 | 各 rank 分片 | 不同 rank 同编号数据量须一致 |
-| Broadcast | 集合·分发 | root 广播到所有 rank | 等长 count | 无 | 有 | 所有 rank | 单 buf，天然原地 |
-| AllGather | 集合·收集 | 全 rank 输入按 rank 拼接 | sendCount 等长 | 无 | 无 | 所有 rank | 各 rank 输出相同 |
-| AllGatherV | 集合·收集 | 变长收集 | recvCounts / recvDispls | 无 | 无 | 所有 rank | recvBuf≠sendBuf；displs 单调不重叠 |
-| Scatter | 集合·分发 | root 数据均分散布 | recvCount 等长 | 无 | 有 | 各 rank | sendBuf 仅 root 有效 |
-| AlltoAll | 集合·交换 | 等量全交换 | sendCount=recvCount | 无 | 无 | 所有 rank | 收发 buffer 不重叠 |
-| AlltoAllV | 集合·交换 | 变长全交换 | send/recvCounts + Displs | 无 | 无 | 所有 rank | 收发 buffer 不重叠 |
-| AlltoAllVC | 集合·交换 | 矩阵描述变长全交换 | sendCountMatrix | 无 | 无 | 所有 rank | 收发数据类型可不同 |
-| Barrier | 集合·同步 | 全 rank 同步屏障 | 无数据 | 无 | 无 | 无 | 内部/兼容接口 |
-| Send | P2P | 发往 destRank | count | 无 | — | 对端 | 与 Recv 配对、同步调用 |
-| Recv | P2P | 从 srcRank 接收 | count | 无 | — | 本 rank | 与 Send 配对 |
-| BatchSendRecv | P2P | 批量异步收发 | itemNum 项 | 无 | — | 各目标 | 一次下发多收发任务 |
-
-> 依据 `cann/hccl` @ `965b682f` 的 `include/hccl.h`、`src/ops/`、`docs/zh/api_ref/comm_op_interface/` 梳理；Barrier 为内部/兼容接口。
-
 ## design｜需求材料
 
 ### 26RP4｜01-Reduce-64bit与特殊规约分级算法（[目录](design/26RP4/01-Reduce-64bit与特殊规约分级算法/)）
