@@ -10,12 +10,6 @@
 3. **Stream 是两个世界的缝合线**：框架把当前流（或专用通信流）传给 HCCL，集合通信任务挂上流异步执行——"下发 ≠ 执行"与重叠编排都建立在这条线上。
 :::
 
-**学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**。本章是全课程主线的收官——把 [《并行策略》](/execution-parallel/index.md)的需求侧与 [HCCL 与 HCOMM 源码学习](hccl-hcomm.md)的供给侧缝成一条完整链路。
-
-- [ ] 我能画出 `y = a + b`（npu tensor）从 Python 到 aclnn 的路径
-- [ ] 我能说出 `init_process_group` 到 `HcclComm` 建立之间发生了什么
-- [ ] 我能独立追踪一次 `dist.all_reduce` 的完整旅程并指出每层的职责
-
 ## 本章单元
 
 - **0-0（约 15 分钟）**：[torch_npu：框架与 CANN 之间的桥](#_0-0-torch-npu-框架与-cann-之间的桥)
@@ -102,26 +96,6 @@ AI Core 执行
 | 通信库 | NCCL（ProcessGroupNCCL） | **HCCL（ProcessGroupHCCL）** |
 | 数据搬运 | cudaMemcpy | aclrtMemcpy |
 
-### 4. 自测题
-
-先用自己的话回答，再展开答案。
-
-1. `import torch_npu` 之后发生的三件注册分别是什么？
-2. dispatcher 在算子调用中起什么作用？为什么说"框架本体不需要知道昇腾"？
-3. 写出 `y = a + b`（npu tensor）的完整路径（六步）。
-4. op-plugin 适配层负责翻译什么？
-5. `torch.npu.is_available()` 为 `False` 时，按什么顺序排查？
-
-::: details 自测答案
-
-1. 注册 `npu` 设备后端；把 aten 算子映射到昇腾实现（适配层 + aclnn）；把 `torch.npu.Stream/Event` 对接到 CANN Runtime。
-2. 按设备键把算子调用路由到对应实现——`npu` 键的实现都在 torch_npu 里，PyTorch 本体无需修改。
-3. Python 调用 → dispatcher 路由到 aten::add 的 NPU 实现 → op-plugin 适配层 → aclnnAddGetWorkspaceSize（准备段）→ 申请 workspace → aclnnAdd 入队 → AI Core 执行。
-4. aten 的语义（shape 推导、广播、autograd 注册、布局处理）翻译成对 aclnn 两段式的调用。
-5. 驱动/固件 → CANN 环境 → torch/torch_npu 版本配套 → `npu-smi` 可见性（详见速查第 6 节的分层排障）。
-
-:::
-
 ### 本单元小结
 
 - torch_npu = 设备注册 + 算子映射 + 流/事件对接，三件套把桥搭起来；
@@ -196,26 +170,6 @@ HcclAllReduce(dst, src, count, dtype, op, comm, stream)   # HCCL 入口
 
 框架侧的职责到 `HcclAllReduce` 为止：**何时发（调用时机）、对谁发（comm）、在哪个流（stream）**；算法选择、任务编排、数据搬运全部下沉给 HCCL。这正是 [《并行策略》05-2](/execution-parallel/05-ddp.md#_05-2-从朴素-ddp-到生产级-ddp) 那句"框架侧何时发，通信库侧怎么跑"的分界线。
 
-### 4. 自测题
-
-先用自己的话回答，再展开答案。
-
-1. torch.distributed 的四层结构是什么？抽象层解决了什么问题？
-2. `backend="hccl"` 怎样变成 `ProcessGroupHCCL`？
-3. `init_process_group` 的三步是什么？第三步建立的对象在 HCCL 里叫什么？
-4. `new_group` 与通信域是什么关系？
-5. 框架侧与通信库侧的职责分界线在哪？
-
-::: details 自测答案
-
-1. Python API → c10d 前端 → ProcessGroup 抽象 → 后端实现；让同一份训练代码不感知具体后端（NCCL/HCCL/Gloo 可切换）。
-2. 经注册表（registry）解析——后端字符串映射到注册的实现类。
-3. Rendezvous 签到定 rank/world_size；创建 ProcessGroupHCCL；内部 HcclCommInitCluster 建立通信域（HcclCommunicator）。
-4. 一个子 PG 对应一个独立的 HCCL 通信域；`group=` 参数路由到对应 communicator。
-5. `HcclAllReduce` 入口：框架管"何时、对谁、在哪个流"；HCCL 管"怎么跑"（算法/编排/搬运）。
-
-:::
-
 ### 本单元小结
 
 - ProcessGroup = "成员 + 后端 + 操作"的框架侧类，注册表把字符串解析成实现；
@@ -280,26 +234,6 @@ DDP 的选择是后者：反向 hook 触发时把桶的 AllReduce 发到通信�
 ```
 
 外圈（Event）是框架看得见的编排；内圈（Notify）是 HCCL 在设备侧让 N 个 rank 步调一致的机制（[HCCL 源码 3](hccl-hcomm/03-data-plane.md)）——**外圈管"什么时候能开始"，内圈管"大家到齐没有"**。
-
-### 3. 自测题
-
-先用自己的话回答，再展开答案。
-
-1. `torch.npu.Stream` 与 `aclrtStream` 是什么关系？
-2. `HcclAllReduce` 的 stream 参数决定什么？传当前流与传独立流各有什么后果？
-3. DDP 的通信流在三层各对应什么对象？
-4. Event 与 Notify 分别编排什么？为什么说"层次不同"？
-5. 重叠闭环的三方各贡献什么？
-
-::: details 自测答案
-
-1. 同一条队列的两个身份：Python 封装 ↔ Runtime 句柄——torch.npu.Stream 底层就是 aclrtStream。
-2. 决定通信任务挂哪条队列：当前流 = 与计算保序但无重叠；独立通信流 = 可重叠但需 Event 编排依赖。
-3. torch.npu.Stream（Python）→ C++ 流封装 → aclrtStream（传给 HCCL）。
-4. Event 编排同设备内流间依赖（框架可见）；Notify 是 HCCL 跨设备 rank 间握手（库内部）——前者管开始时机，后者管参与方到齐。
-5. 框架分流、通信库把任务挂流不占计算单元、硬件链路与 AI Core 独立。
-
-:::
 
 ### 本单元小结
 
@@ -367,26 +301,6 @@ DDP 的选择是后者：反向 hook 触发时把桶的 AllReduce 发到通信�
 | 通信域与 RankGraph | [HCCL 源码 2](hccl-hcomm/02-control-plane.md) |
 | 引擎与执行 | [HCCL 源码 4](hccl-hcomm/04-comm-engines.md) |
 
-### 3. 自测题
-
-先用自己的话回答，再展开答案。
-
-1. 写出六站时序，并指出每站的"数据从哪来、交给谁"。
-2. 第 ③ 站的 ProcessGroupHCCL 做哪两件事？
-3. 追踪调用链时每站要问的三个问题是什么？
-4. 框架侧与库内侧的分界线在哪？两侧的源码分别住在哪两个仓库？
-5. 第 ⑥ 站之后，框架怎样知道通信完成了？
-
-::: details 自测答案
-
-1. ① hook 触发（梯度桶就绪）→ ② dist.all_reduce → ③ PGHCCL（检查、取流）→ ④ HcclAllReduce 入口 → ⑤ HCCL 内部（选算法/编排/传输/引擎）→ ⑥ 挂流异步返回。
-2. 合法性检查（dtype/contiguous/设备一致）；确定流（当前流或通信流）。
-3. 数据从哪来（参数）、交给谁（下一站）、挂在哪条时间线上（流）。
-4. 分界线在 HcclAllReduce 入口：之前是 torch_npu 仓库，之后是 HCCL 仓库（HCCL 源码 6）。
-5. Event 同步（通信流 record，消费流 wait）或 stream sync 兜底——第 1 章的双时间线收口。
-
-:::
-
 ### 本单元小结
 
 - 六站时序 = 框架五站 + 库内一站（黑盒预览）；
@@ -441,14 +355,8 @@ DDP 的选择是后者：反向 hook 触发时把桶的 AllReduce 发到通信�
 
 ### 章节自检清单
 
-- [ ] 我能画出 `y = a + b` 从 Python 到 aclnn 的路径（03-1）
-- [ ] 我能说出 init_process_group 三步与通信域的关系（03-2）
-- [ ] 我能解释传"当前流"与"通信流"的后果差异（03-3）
-- [ ] 我能独立复述 AllReduce 六站时序并指出分界线（03-4）
-
 实操向追加：
 
-- [ ] 我能在源码里找到 ProcessGroupHCCL 的 allreduce 实现（torch_npu 仓库）
 - [ ] 我知道排障时哪一层看什么日志（torch_npu 日志 vs HCCL 日志，见[常用命令速查](cann常用命令.md)第 8 节）
 
 ### 与主线的接口

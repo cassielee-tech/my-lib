@@ -10,16 +10,6 @@
 3. KV Cache 避免重复计算历史 K/V，但会随层数、序列长度、Batch 和 KV Head 数增长。
 :::
 
-**学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**，从单次生成推进到推理服务。
-
-**跟不动？** 先读 [⚡ 本专栏速通版](00-速通-下篇.md#第-3-章-自回归推理与-kv-cache)：一场开卷接龙考试类比讲完整章，再回来按单元深入。
-
-**先看这几张核心图：** Autoregressive Loop、Prefill vs Decode、KV Cache Recompute 三张图。
-
-- [ ] 我能画出逐 Token 生成循环
-- [ ] 我能区分 TTFT 与 TPOT
-- [ ] 我能解释 KV Cache 节省和消耗了什么
-
 ## 本章单元
 
 - **03-1（约 15 分钟）**：[生成循环、Prefill 与 Decode](#_03-1-生成循环、prefill-与-decode)
@@ -27,7 +17,7 @@
 - **03-3（约 15 分钟）**：[采样与停止条件](#_03-3-采样与停止条件)
 - **03-4（约 15 分钟）**：[推理指标、服务与通信](#_03-4-推理指标、服务与通信)
 
-- **本章总结**：[串联知识、练习与检查](#本章总结)
+- **本章总结**：[串联知识](#本章总结)
 
 ## 03-1｜生成循环、Prefill 与 Decode
 
@@ -374,34 +364,6 @@ KV Cache 可以随 KV Head 按 Tensor Parallel Rank 分片。每个 Rank 保存�
 #### 练习 3：观察采样
 
 固定 Prompt 和随机种子，分别尝试 Greedy、低 Temperature、高 Temperature、Top-p，比较输出稳定性、重复性和多样性。
-
-### 15. 自测题
-
-1. 自回归生成为什么不能一次直接得到整段答案？
-2. Prefill 和 Decode 的输入 Shape 有什么核心差异？
-3. TTFT 和 TPOT 分别对应哪一阶段？
-4. KV Cache 保存哪些张量？为什么按层保存？
-5. 为什么缓存 K/V 而不缓存历史 Q？
-6. KV Cache 大小与哪些变量成正比？
-7. 使用 Cache 后，Decode 是否完全与上下文长度无关？
-8. Temperature、Top-k 和 Top-p 分别怎样改变采样？
-9. Continuous Batching 解决什么问题？
-10. Decode 阶段的集合通信为什么更关注延迟？
-
-::: details 自测答案
-
-1. 第 $t+1$ 个 Token 的输入包含此前已经选出的 Token，因此必须先得到第 $t$ 个结果才能继续。
-2. Prefill 通常一次输入完整 Prompt `[B,S]`；Decode 每轮通常只输入最新 Token `[B,1]`。
-3. TTFT 主要覆盖排队和 Prefill 到首 Token；TPOT/ITL 描述后续 Decode Token 的时间间隔。
-4. 每层历史 Token 的 K 和 V，因为每层都有独立的 Q/K/V 投影与 Attention。
-5. 未来的新 Q 会查询历史 K/V；历史 Q 完成本轮查询后不会被未来步骤复用。
-6. 与层数、并发 Batch、缓存长度、KV Head 数、Head Dim 和每元素字节数成正比，并包含 K/V 两份。
-7. 不是。它避免重算历史层输出，但当前 Q 仍需读取并处理可见历史 K/V。
-8. Temperature 调整分布尖锐程度；Top-k 保留固定数量的高分候选；Top-p 保留累计概率达到阈值的最小候选集合。
-9. 它在迭代边界动态加入新请求、移除已完成请求，避免整批等待最慢请求，提高设备利用率。
-10. 每个 Decode Step 工作量较小且 Token 间串行依赖，通信启动和同步延迟会逐步累积到每 Token 延迟。
-
-:::
 
 ### 16. 本章小结
 

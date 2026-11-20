@@ -10,13 +10,6 @@
 3. **下发 ≠ 执行**：算子调用只是把任务放进 Stream 队列就返回；Host 与 Device 各走各的时间线，同步（Event/Sync）是两条线的交汇点。
 :::
 
-**学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**。从"谁在指挥谁"的异构模型开始，到内存与搬运，再到 Stream/Event 编排，最后把一次算子调用拆成双时间线全景。
-
-- [ ] 我能写出最小的 Runtime 样板代码（init → setDevice → 干活 → reset → finalize）
-- [ ] 我能解释 Host 指针与 Device 指针为什么不能混用，以及三种拷贝方向
-- [ ] 我能用 Stream + Event 编排"搬运与计算重叠"，并说出每一步谁在等谁
-- [ ] 我能画出一次 aclnn 算子调用的 Host/Device 双时间线
-
 ## 本章单元
 
 - **1-0（约 15 分钟）**：[Host、Device 与异构计算](#_1-0-host、device-与异构计算)
@@ -143,26 +136,6 @@ int main() {
 
 **框架都替你做了什么？** 写 `torch_npu` 时从来没调过这些 API——`import torch_npu` 与 `.npu()` 背后，框架适配层已经完成了 Init/SetDevice/Context/Stream 的管理。学这一层不是为了手写，是为了**看懂框架和 HCCL 源码在做什么**。
 
-### 5. 自测题
-
-先用自己的话回答，再展开答案。
-
-1. Host 与 Device 的分工是什么？"异构"异在哪里？
-2. Runtime 在 CANN 栈中处于什么位置？它管哪六类资源？
-3. 写出最小样板代码的五个步骤，并说出哪一步必须在最前、哪一步必须在最后。
-4. `aclrtResetDevice` 之前必须完成什么？违反了会怎样？
-5. `ASCEND_RT_VISIBLE_DEVICES=2,3` 时，`aclrtSetDevice(0)` 操作的是哪张卡？
-
-::: details 自测答案
-
-1. Host（CPU）负责控制流：解析模型、准备数据、下发任务、等待结果；Device（NPU）负责大规模数据并行计算。异构指两套处理器、两套内存、两条时间线协作完成同一任务。
-2. 位于算子库/GE 之下、Driver 之上。管理 Device、Context、Memory、Stream、Event、Kernel/任务下发六类资源。
-3. `aclInit` → `aclrtSetDevice` → 干活 → `aclrtResetDevice` → `aclFinalize`；`aclInit` 必须最前（其后所有接口依赖它），`aclFinalize` 必须最后。
-4. 必须释放该设备上申请的全部资源（`aclrtFree` 内存、销毁 Stream/Event 等）；违反则报资源未释放/泄漏类错误。
-5. 可见列表中的第一张——物理 2 号卡（可见列表会重映射逻辑编号）。
-
-:::
-
 ### 本单元小结
 
 - **分工**：Host 指挥、Device 干活；代价是内存独立、时间线独立；
@@ -279,26 +252,6 @@ z = y.cpu()    # 背后：aclrtMemcpyAsync(D2H) + 同步当前 stream
 
 框架替你选好了 policy、锁页内存池和默认 Stream——但 Profiling 里看到的那段 `H2D/D2H` 时间，就是本章这些 API 在时间线上的具象。
 
-### 6. 自测题
-
-先用自己的话回答，再展开答案。
-
-1. 为什么 Host 指针和 Device 指针不能混用？"过桥"必须用哪个 API？
-2. 列出三种拷贝方向及各自的典型场景。
-3. 锁页内存（`aclrtMallocHost`）解决了什么问题？代价是什么？
-4. `aclrtMemcpyAsync` 返回后，数据就绪了吗？说出两种保证正确性的手段。
-5. `aclrtFree` 与 `aclrtResetDevice` 的先后顺序是什么？为什么？
-
-::: details 自测答案
-
-1. 两个地址空间互相不可见：CPU 解引用 Device 指针访问不到 HBM，反之亦然。必须用 `aclrtMemcpy`/`aclrtMemcpyAsync` 显式搬运。
-2. H2D：输入上卡（`.npu()`）；D2H：结果回 CPU（`.cpu()`）；D2D：卡内/跨卡数据重排（框架内部）。
-3. 解决普通内存可被换页、DMA 直达不可靠的问题；代价是长期占用 Host 物理内存、申请释放开销更大。
-4. 没有——只是任务入了队。手段：① 依赖该数据的任务下发到同一条 Stream（保序）；② 跨 Stream 时用 Event/`aclrtSynchronizeStream` 显式同步。
-5. 先 `aclrtFree` 后 `aclrtResetDevice`；ResetDevice 会校验资源是否全部释放，未释放则报错。
-
-:::
-
 ### 本单元小结
 
 - **边界**：Host/Device 两个地址空间，`aclrtMemcpy` 是唯一的桥，方向写反必炸；
@@ -396,26 +349,6 @@ copyStream：    [等event1]              [拷 batch2 数据 H2D][record event2]
 | 无同步 | —— | Host 继续跑，Device 自己排队 | 需要正确性自负的异步编程 |
 
 **异步的阴暗面**：Device 侧的错误（Kernel 崩溃、非法地址）在**发生时**不会立刻出现在调用点，而是在后续某个同步点才抛出——所以异步报错的堆栈往往"驴唇不对马嘴"（排障思路见 [常用命令速查：异步报错定位](cann常用命令.md)）。
-
-### 5. 自测题
-
-先用自己的话回答，再展开答案。
-
-1. Stream 的保序规则是什么？"下发 ≠ 执行"怎么理解？
-2. 默认 Stream 够用时为什么还要显式建 Stream？
-3. 说出 Event 闭环的三个 API 及各自语义。
-4. 双 Stream 重叠编排中，`aclrtStreamWaitEvent` 防的是什么问题？
-5. 为什么异步报错的堆栈经常"驴唇不对马嘴"？
-
-::: details 自测答案
-
-1. 同一条 Stream 内任务严格 FIFO 保序；不同 Stream 之间不保序。下发只是把任务描述放进队列，Host 立即返回，Device 稍后执行。
-2. 默认 Stream 只有单队列，任务只能串行；显式多 Stream 才能把搬运/计算/通信放到并行车道，实现重叠。
-3. `aclrtRecordEvent`：在指定 Stream 上打时间点；`aclrtStreamWaitEvent`：让某 Stream 等到该点再继续；`aclrtSynchronizeEvent`：Host 阻塞等待该点。
-4. 数据竞争：两条 Stream 各自闭眼跑，可能"还没写完就读"；用 WaitEvent 建立跨 Stream 的先后依赖，在动共享内存前对齐。
-5. Device 错误在发生时刻无法同步回 Host，要等后续某个同步点才抛出——堆栈指向的是"报错浮出水面的地方"，不是"事故现场"。
-
-:::
 
 ### 本单元小结
 
@@ -540,26 +473,6 @@ D2H 拷回结果后直接读——但忘了 `aclrtSynchronizeStream`，读到的
 - **向旁**：HCCL 的 AllReduce 一样是"准备 + 入队通信 Stream"的结构（[HCCL 源码 6 调用链走读](hccl-hcomm/06-allreduce-call-chain.md)）；
 - **向工具**：Profiling（msprof）呈现的正是 Device 时间线上每个任务的起止——学会本章的双时间线，Profiling 火焰图/时间轴就是它的放大版（[常用命令速查：msprof](cann常用命令.md)）。
 
-### 5. 自测题
-
-先用自己的话回答，再展开答案。
-
-1. 一次 aclnn 调用的两段分别做什么？哪一段碰 Device？
-2. 准备段"无副作用"带来了哪两个工程收益？
-3. workspace 是什么？由谁算出、由谁申请？
-4. 画出双时间线，标出 Host 开始等待的位置和 Device 开始执行的位置。
-5. "D2H 后直接读，偶尔读到旧数据"的 bug 根源是什么？怎么修？
-
-::: details 自测答案
-
-1. `GetWorkspaceSize` 准备段：纯 Host 工作（参数校验、shape 推导、算 workspace、组 executor），不碰 Device；执行段：把任务挂上 Stream 入队。
-2. executor 可复用（重复调用同一算子只准备一次）；Host 侧可多线程并发准备多个算子。
-3. 算子执行所需的设备侧临时空间；由准备段算出大小，由调用方用 `aclrtMalloc` 申请（可走内存池复用）。
-4. Host：Init → 拷贝入队 → 准备 → 执行入队 → …… → SynchronizeStream（此处开始等待）；Device：队列中的 [H2D] → [Kernel] → [D2H] 依次执行，起点在 Host 已往下跑之后。
-5. 异步拷贝刚入队、尚未完成，Host 抢先读了目标缓冲；在读取前补 `aclrtSynchronizeStream`（或 Event 同步）。
-
-:::
-
 ### 本单元小结
 
 - **两段式**：准备段（无副作用、可缓存并发）+ 执行段（轻量入队）——昇腾单算子接口的统一形态；
@@ -630,15 +543,9 @@ Device 时间线（干活，stream 队列 FIFO）
 
 回到导学立下的目标，逐条核对：
 
-- [ ] 我能写出最小样板代码（init → setDevice → 干活 → reset → finalize）
-- [ ] 我能解释 Host 指针与 Device 指针为什么不能混用，以及三种拷贝方向
-- [ ] 我能用 Stream + Event 编排"搬运与计算重叠"，说出每一步谁在等谁
-- [ ] 我能画出一次 aclnn 调用的 Host/Device 双时间线
-
 额外三条实操向检查：
 
 - [ ] 我知道 `ASCEND_RT_VISIBLE_DEVICES` 怎么重映射设备编号
-- [ ] 我能解释"异步报错堆栈驴唇不对马嘴"的原因与排查思路
 - [ ] 我看到 Profiling 时间轴时，能把它对应到本章双时间线的各区段
 
 ### 与 HCCL 主线的接口

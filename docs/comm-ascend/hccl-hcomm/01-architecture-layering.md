@@ -194,26 +194,6 @@ extern HcclResult HcclAllReduce(
 - `AlltoAllVC`（L185）没有 counts/displs，用 `sendCountMatrix` 二维矩阵描述全量收发关系。
 - 14 个 API 全部返回 `HcclResult`，全部接收 `HcclComm + aclrtStream` 结尾——这就是"统一签名模式"。
 
-## 6. 自测题
-
-1. 三层软件结构分别叫什么，各自职责一句话？
-2. 六族对外 API 各自的头文件前缀是什么？L2-res + L3-prim 组合面向谁？
-3. 四条架构硬约束分别是什么？违反依赖单向的代码可能出现在哪个目录？
-4. HCCL 与 HCOMM 是怎样做到独立编译、独立发版的？
-5. 为什么 `HcclAllReduce` 的 `count` 用元素个数而不是字节数？
-6. 如果框架同时发起两个 AllReduce 到同一个 stream，执行顺序如何保证？
-
-::: details 自测答案
-
-1. HCCL 集合通信算子层（算子入口→算法选择→执行）；HCOMM 集合通信域管理层（通信域、拓扑、资源管理）；HCOMM 基础通信层（基础资源与通信原语执行）。
-2. `hccl.h`（L1，hccl 仓）、`hccl/*.h`（L2）、`hcomm_*.h`（L3）、`ccu/*.hpp`（CCU 引擎专用），后三族均在 hcomm 仓。L2-res + L3-prim 是自定义通信算子开发接口（查拓扑拿资源 + 用原语编排数据搬运）；L3-res + L3-prim 是通信库开发接口（面向自研集合通信库）。
-3. 依赖单向、控制面/数据面分离、dlsym 跨仓解耦、四段式 + legacy 冻结。违反依赖方向的代码只允许出现在 legacy 兼容目录中。
-4. HCCL 通过 dlsym 在运行时动态加载 HCOMM 接口（src/common/hcomm_dlsym），编译期不链接，因此两仓可独立编译与版本演进。
-5. dataType 决定单元素宽度，算子语义以元素为单位；换算成字节数是执行层的职责（单元 6 的 `FillAllReduceOpParam` 里 `count × DATATYPE_SIZE_TABLE[dataType]`）。
-6. stream 语义 = 顺序执行队列，同 stream 上的任务按提交顺序执行——这是异步语义的正确性基础。
-
-:::
-
 ## 本单元小结
 
 - **三层**：算子层（hccl 仓）→ 域管理层 → 基础通信层（hcomm 仓）；

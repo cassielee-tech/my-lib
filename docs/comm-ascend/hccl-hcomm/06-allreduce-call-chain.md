@@ -307,26 +307,6 @@ if (forceLog || GetExternalInputHcclEnableEntryLog()) {   // 环境变量开关
 **③ 谁在等待？**
 三层同步（单元 3/4）：Thread 内算子顺序依赖；引擎内 Thread 间 ThreadNotify；跨 rank 的 ChannelNotify。宿主侧则是 `aclrtSynchronizeStream` 等 Stream 完成。追踪点：executor 代码中 Notify 的 Record/Wait 配对。
 
-### 14. 自测题
-
-1. 使用侧三段式是什么？为什么 `HcclAllReduce` 返回后还需要同步？
-2. 建通信域的三种方式分别适用什么场景？
-3. 三道闸门分别拦什么？`HcclAllReduceInner` 为什么是外部符号？
-4. `count == 0` 返回 SUCCESS 而不是报参数错误，好还是不好？（对比 MPI 的处理）
-5. 四条快速路径各自的命中条件是什么？为什么集合通信特别适合"缓存换规划"？
-6. AIV 缓存重放如果遇到 `sendBuf` 地址变了但 shape 没变，还能命中吗？
-
-::: details 自测答案
-
-1. 建域 → Stream 上调用算子 → 销毁域。因为算子是异步语义，调用只是把任务挂到 Stream，必须用 `aclrtSynchronizeStream` 等待完成，这也是通信与计算可重叠的机制基础。
-2. rank table 文件（`HcclCommInitClusterInfo`，有完整集群信息）；root 节点信息（`HcclCommInitRootInfo`，无 rank table 时两阶段协商）；`HcclCommInitAll`（单机批量建域）；另有 `HcclCreateSubCommConfig` 从已有域切子域。
-3. 闸门 1 拦 hcomm 版本 < 9.0.0（走老实现）；闸门 2 拦非 950/960 设备（新框架灰度放量）；闸门 3 拦 count==0（空操作直接成功）。`HcclAllReduceInner` 由旧版运行库提供、本仓不定义——仿真环境里是 NOT_SUPPORT 桩，真实部署环境才有实现。
-4. 见仁见智的接口设计题：MPI 同样允许 count=0；宽容性换来"空输入不算错误"的语义一致性，代价是可能掩盖上层逻辑 bug——HCCL 打了一条 WARNING 作为折中。
-5. CCU 兼容回落（9.0.0 + CCU）、CCU fast launch（快发条件）、AIV cache replay（同 shape 缓存命中）、单卡（rankSize==1）。因为训练的调用模式是"同 shape 高频重复"——梯度每步同样大小，缓存命中率天然高。
-6. 能。重放时按新 `inputPtr/outputPtr` 与基址的**偏移补丁**修正指令流，shape 才是缓存 key（单元 7 的 AIV 缓存逻辑展开）。
-
-:::
-
 ## 本单元小结
 
 - **使用侧**：建域（HCOMM）→ 算子（HCCL L1）→ 销毁；异步 Stream 语义是重叠的根源；

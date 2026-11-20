@@ -246,34 +246,6 @@ src/ops/all_reduce/
 
 同一个 AllReduce，selector 依据数据量、拓扑、芯片能力选择引擎，再进入对应 template 分支——**"同一通信域默认只用一种引擎"** 的约束就落在 selector 的选择逻辑里。单元 6 走读调用链、单元 7 精读 executor/template 时会再次遇到这三个目录；单元 9 的三引擎开发流程，则是从开发者视角把这三种 template 各写一遍。
 
-## 9. 自测题
-
-1. 通信引擎的统一模型由哪三部分组成？
-2. AICPU_TS 引擎中，AICPU 上的通信 Kernel 实际做什么？
-3. AIV 引擎为什么低延迟？代价是什么？
-4. CCU 与 AICPU_TS 在"下发什么给硬件"上有何不同？
-5. 引擎瀑布的降级方向是什么？为什么 `NOT_MATCH` 不是错误？
-6. 三引擎的"编排时机"分别是什么？
-7. CCU 位于芯片什么位置？六类硬件组件是什么？
-8. `ccu::Variable/Event/CcuBuffer` 分别对应什么硬件？为什么批量资源要用 `ccu::Array` 而不是原生数组？
-9. KernelArg 与 TaskArg 的区别是什么？
-10. 用片上缓存做 Reduce，访存次数怎么变？源码里引擎维度体现在哪个目录结构上？
-
-::: details 自测答案
-
-1. Thread（执行上下文，承载一串数据面算子）+ 线程执行调度器（TS/STARS/OS，调度到硬件）+ 通信硬件（RoCE 网卡、SDMA、UB 等）。
-2. 它不直接搬运数据，而是编排——提交通信 Task 描述符至 TS 队列，由 TS 调度器派发给硬件执行器执行。
-3. 少了 AICPU 编排与描述符下发的中间跳数，Vector Core 直接执行通信算子；代价是占用 Vector 计算核，通信与计算争抢资源。
-4. AICPU_TS 下发通用的 Task 描述符（由 TS 解释执行）；CCU 下发 CCU 可直接识别的预置指令序列（微码执行，配合 URMA 搬数据）。
-5. 从专用引擎（CCU/AIV）降级到通用引擎（AICPU 兜底）。因为责任链上每个选择器只知道自己"能不能干"，`NOT_MATCH` 是把机会让给下一级的正规信号，全部 NOT_MATCH 才是错误。
-6. AICPU：Kernel 启动后动态编排；AIV：Host 侧编排完成后随 Kernel 静态下发；CCU：无编排步骤，指令注册后由专用硬件执行。
-7. IO Die 上的专用集合通信协处理器；片上缓存、通用/同步/地址寄存器、并发执行引擎、指令空间、Channel 表。
-8. Variable→通用寄存器；Event→同步寄存器；CcuBuffer→4KB 片上缓存分片。CCU 并发操作（Loop/LoopGroup）要求资源地址连续，原生数组不保证连续性。
-9. KernelArg 是编排参数（rankId/rankSize/归约类型），走函数入参；TaskArg 是执行参数（地址/token），经 HcommCcuKernelLaunch 传入、Kernel 内 LoadArg 动态加载。
-10. 本地侧从 2(n−1) 读 + (n−1) 写降为 n 读 + 1 写——约一个数量级。每个算子的 `template/` 目录按引擎分子目录（aicpu / aiv / ccu）；selector 决定进入哪个分支，同一通信域默认只用一种引擎。
-
-:::
-
 ## 本单元小结
 
 - **统一模型**：Thread + 调度器 + 通信硬件，Thread 间靠 ThreadNotify 协同（接单元 3）；

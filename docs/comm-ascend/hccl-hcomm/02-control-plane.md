@@ -168,30 +168,6 @@ communicator/             # 域对象成型：通信上下文 + group_schedule_m
 | `team/`（hccl、hcomm 两族） | 子域/team 语义 | `HcclTeamCreate`/`MemberToRank` 接口的家 |
 | `dfx/`（cluster_monitor、ns_recovery、profiling、rtsq_poll、taskException） | 维测五件套 | 排障与监控的源码入口 |
 
-## 9. 自测题
-
-1. 通信域、Rank、RankGraph 分别解决什么问题？
-2. Endpoint 为什么是逻辑概念？它和物理端口是什么关系？
-3. Edge、Link、Channel 三者的递进关系是什么？
-4. netLayer 表达的物理事实是什么？它如何影响算法选择？
-5. HCCL 的 Edge/Link 与 NCCL 的什么概念对应？
-6. 一次建域在 HCOMM 源码里的四步流水线是什么？
-7. L2 控制面接口分哪四家族？各举一例。
-8. `HcclCommSuspend/Resume + RegCommStateCallback` 组合起来支撑什么能力？
-
-::: details 自测答案
-
-1. 通信域是执行上下文（管理成员与资源）；Rank 是域内拥有唯一 ID 的成员（通常一个 NPU）；RankGraph 是 rank 间通信关系图，描述"谁和谁怎么连"。
-2. 因为物理端口可以是硬件控制的 Bonding 口，软件不感知；一个 Node 可有多个 Endpoint，一个 Endpoint 映射一个物理端口，而一个物理端口可被多个 Endpoint 共享。
-3. Edge 描述"谁和谁连"（两端 Endpoint 的连接关系）；Link 从 Edge 提取"怎么建链"（两端 Endpoint + 协议）；Channel 由 Link 实例化，是含同步 Notify 的真正数据通道。
-4. 通信质量逐层增加而递减（Server 内 Layer0 直连最快，Server 间 Layer1 经交换机较慢）；算法选择器据此把大数据量放在高带宽层级、把小消息高频交互放在低延迟路径，例如分级 AllReduce。
-5. HCCL 的 Edge ≈ NCCL 的 Link；HCCL 的 Link ≈ NCCL 的 Path（名称对应不同，不能直接画等号）。
-6. api_c_adpt 入口 → rank_info_detect 探测 → rank_graph 建图 → resource_mgr 配资源，最终成型于 communicator。
-7. 建域（HcclCommInitRootInfo）、查询（HcclRankGraphGetLinks）、生命周期（HcclCommSuspend/Resume）、内存（HcclCommSetMemoryRange）。
-8. 通信域的故障恢复：Suspend 挂起域、状态回调通知框架、Resume 恢复——生产级通信库的可靠性能力。
-
-:::
-
 ## 本单元小结
 
 - **控制面核心**：建域 = 建 RankGraph；算子执行只读图——域的生命周期决定控制面"低频而厚重"的节奏；

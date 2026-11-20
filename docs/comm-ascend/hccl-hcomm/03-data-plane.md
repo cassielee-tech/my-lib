@@ -193,32 +193,6 @@ HcommChannelNotifyRecordOnThread(thread, channel, 1);           // ③ 通知发
 
 hccl 仓侧对这些原语的调用（wrapper 层：`SendRecvWrite` / `LocalReduce` 等语义化封装）在单元 7 精读——模板编排的每一个"动词"，最终都落到本单元的这批函数上。
 
-## 10. 自测题
-
-1. 数据面的四个原语名词是什么，各自对应什么硬件？Channel 的构成公式是什么？
-2. 网络语义和内存语义的核心区别是什么？各适用哪些协议？
-3. RoCE 场景下 Channel 内部有哪三样东西？
-4. 并发模型的并发单元和同步手段分别是什么？AIV 引擎下 Thread 对应什么物理实体？
-5. ThreadNotify 与 ChannelNotify 分别解决什么场景的同步？
-6. 数据面原语的四个家族是什么？`OnThread`、`Nbi`、`WithNotify` 三个后缀分别什么含义？
-7. Send/Receive 三步握手中 Notify 序号 0 和 1 分别承担什么方向？
-8. 为什么需要 HCCL Buffer？默认多大？
-9. HCCP 住在源码哪个目录？TaskCache 解决什么问题？
-
-::: details 自测答案
-
-1. 通信设备 Endpoint（NPU 网口/Host NIC）、通信通道 Channel（RoCE QP / UB Jetty）、通信内存 CommMem（NPU HBM / Host 内存）、通信引擎 CommEngine（AICPU_TS、CCU、AIV）。Channel = 两端通信设备（Endpoint）+ 通信协议 + N 个 Notify。
-2. 网络语义以 Channel 为核心，走 Write/Read/Notify，支持单边与双边操作，适用 RoCE、UB；内存语义以"通信设备 + 映射内存"为核心，像本地拷贝一样单边操作远端内存，适用 UB_MEM、HCCS。区别本质是"隔着通道收发"还是"直接够到对方内存"。
-3. 一一对应的远端 Channel 关联、一个或多个 QP（建链）、多个 Notify 实例（按序号收发同步信号）。
-4. 并发单元是 Thread（任务与 Thread 绑定）；同步手段是 Thread 内的多个 Notify 实例。AIV 下 Thread = AIV 核 + Device 内存的封装，同步用 Device 内存实现。
-5. ThreadNotify 用于同一通信实体内不同 Thread 之间协调顺序（如先搬运后规约）；ChannelNotify 用于不同通信实体之间，通过 Channel 上的 Notify 与数据通道让远端 Thread 确认数据已到。
-6. 本地操作（HcommLocalCopyOnThread）、Thread 同步（HcommThreadNotifyRecordOnThread）、Channel 通信（HcommReadOnThread）、批量与缓存（HcommBatchModeStart）。OnThread=操作绑定到某 Thread 执行；Nbi=非阻塞立即返回；WithNotify=搬运与通知原子组合。
-7. 0 = 发送端→接收端的"数据就绪"线；1 = 接收端→发送端的"已读完"确认线。
-8. 异步执行时用户指针可能失效，需先拷入固定地址的锁页内存；默认 200 MB，超限切块。
-9. `src/base_comm/resources/hccp/`；TaskCache 让相同 tag 的任务描述免重复编排，降低 Host 开销。
-
-:::
-
 ## 本单元小结
 
 - **四名词**：Endpoint（设备）、Channel（通道）、CommMem（内存）、CommEngine（引擎，单元 4 展开）；

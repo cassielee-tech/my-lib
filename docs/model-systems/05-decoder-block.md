@@ -8,16 +8,6 @@
 3. 一个现代 Pre-Norm Block 是两次“Norm → 子层 → Residual”的串联。
 :::
 
-**学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**，分别理解结构、FFN、资源和并行。
-
-**跟不动？** 先读 [⚡ 本专栏速通版](00-速通-上篇.md#第-5-章-rmsnorm、swiglu-与完整-decoder-block)：一条标准生产车间类比讲完整章，再回来按单元深入。
-
-**先看这几张核心图：** Decoder Block 总图、RMSNorm Process、SwiGLU Flow 三张图。
-
-- [ ] 我能默画一个 Decoder Block
-- [ ] 我能区分 Attention 与 FFN 的职责
-- [ ] 我能解释残差连接为什么不是简单重复
-
 ## 本章要解决的问题
 
 前四章已经得到 Token 表示并学会了 Attention，但 Attention 只是 Transformer Block 的一个子模块。现代 Decoder-only 模型通常还包含归一化、MLP 和残差连接。
@@ -44,7 +34,7 @@ x = x + SwiGLU(RMSNorm(x))
 - **05-3（约 15 分钟）**：[参数量、FLOPs 与显存对象](#_05-3-参数量、flops-与显存对象)
 - **05-4（约 15 分钟）**：[张量并行怎样切分 Block](#_05-4-张量并行怎样切分-block)
 
-- **本章总结**：[串联知识、练习与检查](#本章总结)
+- **本章总结**：[串联知识](#本章总结)
 
 ## 05-1｜RMSNorm、残差与 Block 结构
 
@@ -464,19 +454,6 @@ Block 最终输出:     [2,128,2048]
 ```
 
 :::
-
-### ✅ 理解检查
-
-1. 一个 Pre-Norm Decoder Block 的执行顺序是什么？
-2. RMSNorm 沿哪个维度计算？会不会混合不同 Token？
-3. 为什么残差分支输出必须恢复到 H？
-4. Attention 与 MLP 在“混合什么”方面有何区别？
-5. SwiGLU 为什么有 Gate、Up、Down 三个矩阵？
-6. 标准 MHA 的投影参数量为什么约为 `4H²`？
-7. SwiGLU 参数量为什么约为 `3HI`？
-8. 参数量和训练显存为什么不能画等号？
-9. 哪些 Block 操作更可能受内存带宽影响？
-10. 张量并行切分 MLP 后，为什么 Down 输出可能需要 AllReduce？
 
 ### 16. 参考答案
 

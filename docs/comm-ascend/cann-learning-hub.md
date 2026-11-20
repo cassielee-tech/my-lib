@@ -6,11 +6,8 @@ description:
 算子库：
 ops-math / ops-nn / ops-cv / ops-transformer
 
-
 通信库：
 HCCL / HIXL
-
-
 
 ---
 

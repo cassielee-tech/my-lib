@@ -10,16 +10,6 @@
 3. RoPE Scaling、Sliding Window、FlashAttention 和 Paged Attention 解决的是四类不同问题。
 :::
 
-**学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**。量化公式可留到第二遍阅读。
-
-**跟不动？** 先读 [⚡ 本专栏速通版](00-速通-下篇.md#第-2-章-现代模型的效率设计-gqa、量化与长上下文)：一个"给出版社省钱"类比讲完整章，再回来按单元深入。
-
-**先看这几张核心图：** MHA/GQA/MQA Sharing、Group Quantization、Long Context Techniques 三张图。
-
-- [ ] 我能算出 GQA 相对 MHA 的 KV 缩减比例
-- [ ] 我能区分权重、激活和 KV Cache 量化
-- [ ] 我能说出 FlashAttention 没有改变什么
-
 ## 1. 为什么“模型能算”还不够
 
 模型真正部署到硬件上，会遇到三个现实限制：
@@ -56,7 +46,7 @@
 - **02-3（约 15 分钟）**：[长上下文的四条优化路线](#_02-3-长上下文的四条优化路线)
 - **02-4（约 15 分钟）**：[把模型优化映射到算子与通信](#_02-4-把模型优化映射到算子与通信)
 
-- **本章总结**：[串联知识、练习与检查](#本章总结)
+- **本章总结**：[串联知识](#本章总结)
 
 ## 02-1｜MHA、MQA 与 GQA
 
@@ -406,34 +396,6 @@ Block Table：            B7      B2       B9
 #### 练习 3：为瓶颈选择方案
 
 分别为以下问题选择优先方案：Prefill 中 $S\times S$ 中间矩阵造成大量 HBM 访问；Decode 时 KV 太大；动态请求造成显存碎片；模型无法理解超出训练长度的位置。
-
-### 18. 自测题
-
-1. MHA、GQA、MQA 的核心差别是什么？
-2. KV Cache 为什么不保存历史 Q？
-3. GQA 的 KV Cache 相对 MHA 缩小多少？
-4. TP Size 大于 KV Head 数时为什么需要特别处理？
-5. Scale 在量化中起什么作用？
-6. Weight-Only、W8A8 和 KV Cache 量化分别压缩什么？
-7. 为什么 INT4 权重不保证推理比 FP16 快 4 倍？
-8. 长上下文对 Prefill 和 Decode 的压力有什么不同？
-9. FlashAttention、Sliding Window 和 RoPE Scaling 分别解决什么？
-10. Paged Attention 为什么不减少 KV Cache 的理论数据量？
-
-::: details 自测答案
-
-1. 区别在 K/V Head 的共享程度：MHA 每个 Q 对应独立 K/V，GQA 一组 Q 共享 K/V，MQA 所有 Q 共享一组 K/V。
-2. 每个 Decode Step 只需当前 Token 的 Q 查询全部历史 K/V，过去的 Q 不会再次参与后续注意力。
-3. 其他条件相同时，比例为 $N_{kv}/N_q$。例如 32 个 Q、8 个 KV 时降到 $1/4$。
-4. KV Head 无法在所有 Rank 间一一均分，可能需要复制 KV、改变分片或引入通信。
-5. Scale 建立低位整数与原始实数范围之间的映射，用于量化和近似反量化。
-6. Weight-Only 压权重；W8A8 压权重和激活；KV Cache 量化压历史 K/V。
-7. 还取决于硬件支持、Kernel 效率、反量化开销、Shape 和原始瓶颈；位宽只直接决定存储量。
-8. Prefill 主要承担全量 Attention 的平方计算与中间数据压力；Decode 每步读取随历史长度线性增长的 KV，并对单步延迟敏感。
-9. FlashAttention 优化精确 Attention 的 IO；Sliding Window 减少关注位置；RoPE Scaling 改善位置外推。
-10. 它只是把逻辑连续 KV 映射到按需分配的物理 Block；每个有效 Token 的 K/V 仍需保存。
-
-:::
 
 ### 19. 本章小结
 

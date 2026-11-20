@@ -81,24 +81,6 @@ HCCS / RoCE / UB / 物理链路
 
 而当你**自己写扩展算子**时，路径从 `HcclEngineCtxGet` 直接进入 HCOMM（单元 9/10/11）——**绕过 HCCL 算子层**：查拓扑（L2-res）→ 拿 Thread/Channel（L2-res）→ 用原语编排（L3-prim）。两条路径共享同一套名词与动词，这就是"通信平台与算子开发解耦"的准确含义，也是这门课把两个仓库放在一起讲的理由。
 
-## 6. 自测题
-
-1. 两个仓库的样例分别覆盖什么主题？
-2. 建域三式的初始化方式与适用场景分别是什么？
-3. ACL Graph 解决什么瓶颈？与图编译的异同？
-4. Send/Recv 样例的接口调用序列对应七步的哪几步？
-5. 路线图第 ⑤ 步"换算法"要用到哪些拓扑查询接口？
-
-::: details 自测答案
-
-1. hcomm 仓：建域三式 + ACL Graph；hccl 仓：自定义通信算子（04_p2p / 05_allgather）。
-2. root info（中小集群免表）/ rank table（大规模静态分配）/ 每线程一设备（单进程多卡）。
-3. Eager 模式逐算子 dispatch 的 Host 瓶颈；同图编译一样"一次生成多次执行"，但 ACL Graph 是运行时捕获（capture/replay），不需编译期构图。
-4. GetRankId/Size（查拓扑）→ ThreadAcquire/ChannelAcquire/GetHcclBuffer（建资源）→ LocalCopy/ChannelNotify 系（编排）——对应步骤②④⑥。
-5. HcclRankGraphGetLayers / GetRanksByLayer / GetLinks / GetTopoType 等——按层级取成员与链路，决定分层两跳的分组。
-
-:::
-
 ## 本单元小结
 
 - 样例两仓分工：hcomm 管建域与图捕获，hccl 管算子开发；

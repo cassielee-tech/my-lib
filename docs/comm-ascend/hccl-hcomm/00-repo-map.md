@@ -236,32 +236,6 @@ HcclAllReduce()                          ← include/hccl.h（框架调用）
 | hccl `user_guide/perf_analysis/`、`fault_diagnosis/` | 课程总结后的进阶方向 |
 | 两仓 `rfcs/` | 想理解"为什么这样设计"时 |
 
-## 11. 自测题
-
-先用自己的话回答，再展开答案。
-
-1. HCCL 和 HCOMM 的分工是什么？为什么拆成两个仓？
-2. `src/ops/all_reduce/` 目录下有哪四类固定内容？
-3. `op_common` 里的 selector、executor、template 分别解决什么问题？
-4. HCOMM 仓的三大源码块是什么？`base_comm` 与 `coll_communicator_mgr` 的分工边界在哪？
-5. `hccl/*.h`、`hcomm_*.h`、`ccu/*.hpp` 三族头文件分别对应哪个层级？
-6. 只想把 HCCL 源码编译通过，必须安装驱动固件吗？
-7. `experimental/` 和 `src/` 的代码是什么关系？`legacy/` 呢？
-8. `HcclRankGraphGetLinks` 与 `HcommWriteOnThread` 分别住在哪个仓、哪个平面？
-
-::: details 自测答案
-
-1. HCCL 提供通信算子入口与算法实现（集合/点对点算子层）；HCOMM 是通信基础库，管理通信域、拓扑、资源与底层原语，分为控制面与数据面。拆仓一是职责切分（决策与底座独立编译、独立发版，dlsym 衔接），二是开放底座让自定义通信算子可以独立开发、构建、部署。
-2. `all_reduce_op.cc/.h`（算子入口）、`selector/`（算法选择）、`template/`（算法模板，按引擎分 aicpu/aiv/ccu）、`executor/`（执行器实现）。
-3. selector 负责"用哪个算法/引擎"；template 提供算法在不同引擎上的模板化流程；executor 负责把选定的算法真正执行（编排数据面原语）；三者被所有算子目录复用。
-4. `base_comm`（基础通信层：封装硬件与协议，与业务无关）、`coll_communicator_mgr`（域管理层：通信域、拓扑、资源管理）、`legacy`（历史版本兼容，不承接新特性）。base_comm 提供资源与原语的"原子能力"；coll_communicator_mgr 在其上组织"域"——前者不知道 rank 语义，后者不知道协议细节。
-5. `hccl/*`（L2 通信域与拓扑资源）、`hcomm_*.h`（L3 原语与基础资源）、`ccu/*.hpp`（CCU 引擎 C++ 接口）——全部位于 hcomm 仓。
-6. 不必须。驱动与固件是运行态依赖；只编译源码可以不装，但运行/系统测试需要。
-7. `experimental/` 是社区贡献的试验性代码，目录结构与 `src/` 保持一致，但不保证接口兼容、不会被商用版本采纳；`legacy/` 是历史版本兼容，不承接新特性——读主线以 `src/` 为准。
-8. 前者是 hcomm 仓 L2 控制面（拓扑查询，api_c_adpt 入口）；后者是 hcomm 仓 L3 数据面（Channel 通信原语）。
-
-:::
-
 ## 本单元小结
 
 - **定位**：HCCL 是昇腾集群的集合通信库，上承框架、下接驱动，由"算子层（hccl 仓）+ 基础通信层（hcomm 仓）"组成，dlsym 衔接、独立发版；

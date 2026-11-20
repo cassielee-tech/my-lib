@@ -8,16 +8,6 @@
 3. Causal Mask 阻止当前 Token 偷看未来，多头注意力让模型并行学习不同关系。
 :::
 
-**学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**。先建立 Q/K/V 直觉，再进入公式和性能。
-
-**跟不动？** 先读 [⚡ 本专栏速通版](00-速通-上篇.md#第-4-章-self-attention、qkv-与多头注意力)：一场会议室"听谁说话"类比讲完整章，再回来按单元深入。
-
-**先看这几张核心图：** QKV Retrieval、Causal Attention Matrix、Multi-Head Attention 三张图；手算部分留到第二次。
-
-- [ ] 我能用自己的话解释 Q、K、V
-- [ ] 我能说出 Softmax 前后的数据含义
-- [ ] 我能解释为什么需要 Causal Mask
-
 ## 本章要解决的问题
 
 上一章把文本变成了 `[B,S,H]` 的 Token 向量，但每个向量主要表示当前位置自身。模型还需要让每个 Token 读取上下文，例如判断“它”指代“书”还是“小明”。Self-Attention 就是完成上下文信息交换的核心机制。
@@ -41,7 +31,7 @@
 - **04-3（约 15 分钟）**：[多头注意力与 Shape](#_04-3-多头注意力与-shape)
 - **04-4（约 15 分钟）**：[计算量、显存与 Flash Attention](#_04-4-计算量、显存与-flash-attention)
 
-- **本章总结**：[串联知识、练习与检查](#本章总结)
+- **本章总结**：[串联知识](#本章总结)
 
 ## 04-1｜Attention 直觉与 Q/K/V
 
@@ -418,19 +408,6 @@ BF16 每元素 2 Byte：
 #### 选做：与框架实现对比
 
 使用 `torch.nn.functional.scaled_dot_product_attention(q,k,v,is_causal=True)` 计算相同输入，注意该 API 常用 shape 为 `[B,heads,S,D]`，对比结果与朴素实现是否接近。
-
-### ✅ 理解检查
-
-1. Q、K、V 分别解决什么问题？
-2. 为什么 Self-Attention 中 Q、K、V 都来自 X，但仍要使用三组投影？
-3. `QKᵀ` 为什么得到 `[B,S,S]`？矩阵元素 `[i,j]` 表示什么？
-4. 为什么要除以 `√D`？
-5. Causal Mask 为什么在 Softmax 前加入？
-6. 为什么 Attention 权重矩阵每行和为 1？
-7. Multi-Head Attention 怎样保持总隐藏维 H 不变？
-8. 序列长度从 S 变成 2S，标准 Attention 的关系矩阵元素数如何变化？
-9. Flash Attention 主要减少什么开销？它是否改变 Attention 数学语义？
-10. Attention 与 Tensor/Context Parallel 可能怎样产生集合通信？
 
 ### 15. 参考答案
 

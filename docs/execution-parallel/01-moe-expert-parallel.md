@@ -10,16 +10,6 @@
 3. Expert Parallel 需要 Dispatch Alltoall 把 Token 送到 Expert，再用 Combine Alltoall 把结果送回。
 :::
 
-**学习节奏：** 本章拆为 **4 个学习单元，每个约 15 分钟**，围绕 Token 被谁处理、怎样移动展开。
-
-**跟不动？** 先读 [⚡ 本专栏速通版](00-速通-下篇.md#第-1-章-moe、router-与-expert-parallel)：一家分诊台医院类比讲完整章，再回来按单元深入。
-
-**先看这几张核心图：** Dense vs MoE、Router Top-k、Expert Parallel Alltoall 三张图。
-
-- [ ] 我能区分总参数与激活参数
-- [ ] 我能解释为什么路由需要负载均衡
-- [ ] 我能画出两次 Alltoall 的方向
-
 ## 一个心智模型：分诊台医院
 
 读公式之前，先在脑子里挂一张画：**Dense 模型是全科诊所，每个病人来了全体医生都上手**；MoE 则是一家**分诊台医院**——Router 是分诊台护士，看一眼病人（Token）就决定挂哪几个科；Expert 是各科医生，人数众多，但平时只在各自的诊室里等。这家医院的账本很特别：**全院养着 100 位医生（总参数大），每个病人只惊动 2 位（单 Token 计算稀疏）**——用显存买知识，用稀疏省计算。而医院通常只把深加工工位（FFN）换成多科诊室，会议室（Attention）照旧。
@@ -35,7 +25,7 @@
 - **01-3（约 15 分钟）**：[Token 重排与 Alltoall](#_01-3-token-重排与-alltoall)
 - **01-4（约 15 分钟）**：[MoE 的并行组合与性能瓶颈](#_01-4-moe-的并行组合与性能瓶颈)
 
-- **本章总结**：[串联知识、练习与检查](#本章总结)
+- **本章总结**：[串联知识](#本章总结)
 
 ## 01-1｜MoE、Router 与 Top-k
 
@@ -384,34 +374,6 @@ MoE 是理解 Alltoall 最典型的模型场景之一。阅读相关实现时，
 #### 练习 3：估算通信量
 
 设 $T=8192$、Top-2、$H=4096$、BF16，忽略额外开销，估算一次 Dispatch 和一次 Combine 的逻辑数据量。
-
-### 17. 自测题
-
-1. Sparse MoE 为什么能同时拥有较大总参数量和较低每 Token 激活量？
-2. Expert 通常替换 Transformer 的哪一部分？
-3. Router 的输入和输出分别是什么？
-4. Top-2 时，$T$ 个 Token 会产生多少 Assignment？
-5. 为什么需要 Expert Capacity？
-6. 路由失衡会造成哪些模型和系统问题？
-7. Expert Parallel 为什么使用 Alltoall 而不是 AllGather？
-8. 前向 MoE 为什么通常有两次 Alltoall？
-9. LoRA 的梯度 AllReduce 与 MoE 的 Token Alltoall 有什么语义差别？
-10. 为什么 MoE 激活参数少却不保证 Decode 一定快？
-
-::: details 自测答案
-
-1. 它保存许多 Expert 参数，但 Router 让每个 Token 只执行 Top-k 个 Expert。
-2. 常见做法是替换 Decoder Block 的 FFN/MLP，Attention 和残差等结构仍共享。
-3. 输入是 Token Hidden State；输出是对所有 Expert 的分数/概率以及 Top-k Expert ID 和权重。
-4. 逻辑上为 $2T$ 条 Assignment。
-5. 它限制单个 Expert 接收的最大 Token 数，使张量尺寸和计算负载可控；代价是可能 Padding 或丢弃溢出路径。
-6. 热门 Expert 过载、冷门 Expert 训练不足，同时造成 Straggler、通信热点和小 GEMM 低利用率。
-7. 每个源 Rank 只需把不同 Token 发给拥有对应 Expert 的目标 Rank；AllGather 会让所有 Rank 收到大量无关 Token。
-8. Dispatch 把 Token 发到 Expert 所在 Rank，Combine 把 Expert 输出送回 Token 原所属 Rank以恢复顺序。
-9. LoRA 梯度 AllReduce 聚合相同参数副本的梯度；MoE Alltoall 根据动态路由交换不同 Token 激活。
-10. Decode 的 Expert Batch 可能很小，还要读取分布式 Expert 权重并在每层执行延迟敏感的动态 Alltoall。
-
-:::
 
 ### 18. 本章小结
 
