@@ -4,3 +4,4 @@ dist/
 *.local
 docs/.vitepress/cache
 docs/.vitepress/dist
+docs/note.md
