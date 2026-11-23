@@ -190,3 +190,7 @@ communicator/             # 域对象成型：通信上下文 + group_schedule_m
 下一单元进入 **[3｜数据面：原语与资源](03-data-plane.md)**。
 
 [返回课程导学 →](../hccl-hcomm.md)
+
+## 深度参考
+
+- [通信域参考](/comm-ascend/reference/communicator/)：生命周期、四种创建方式与 HcclCommConfig/Team 配置详解。

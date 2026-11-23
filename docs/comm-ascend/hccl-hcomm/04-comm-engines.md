@@ -268,3 +268,7 @@ src/ops/all_reduce/
 下一单元进入 **[5｜集合通信算法与 selector 选择器](05-coll-algorithms.md)**。
 
 [返回课程导学 →](../hccl-hcomm.md)
+
+## 深度参考
+
+- [通信引擎参考](/comm-ascend/reference/engine/)：AICPU_TS / AIV / CCU / HostCPU_TS 逐一详解（CCU 篇含 12 张架构图）。

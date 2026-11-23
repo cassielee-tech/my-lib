@@ -254,3 +254,8 @@ Roofline 是"单算子三本账"（FLOPs/Bytes/峰值），本模型是"通信�
 ---
 
 <!-- chapter-navigation -->
+
+## 深度参考
+
+- [算子与算法总览](/comm-ascend/reference/overview/ops-algos-overview.md)：HCCL 全部算子 × 算法层的三维组合与选择机制（950 与 A2/A3/910 差异）；
+- [算子参考](/comm-ascend/reference/operators/)：13 个算子逐一解析——语义、约束、分级编排与 selector 实测算法名。

@@ -338,3 +338,8 @@ Selector() (op_common.cc:84)
 下一单元进入 **[6｜AllReduce 调用链走读](06-allreduce-call-chain.md)**。
 
 [返回课程导学 →](../hccl-hcomm.md)
+
+## 深度参考
+
+- [算法机制篇](/comm-ascend/reference/algorithms/algo_selector.md)：selector 组件构成与选择全流程；
+- [分层选择矩阵](/comm-ascend/reference/algorithms/algo_level_matrix.md)与[三维组合](/comm-ascend/reference/algorithms/combination.md)：逐算子 L0/L1/L2 默认算法与编排×拓扑×层级组合。

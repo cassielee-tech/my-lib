@@ -215,3 +215,7 @@ hccl 仓侧对这些原语的调用（wrapper 层：`SendRecvWrite` / `LocalRedu
 下一单元进入 **[4｜通信引擎：模型、瀑布与三引擎编排](04-comm-engines.md)**。
 
 [返回课程导学 →](../hccl-hcomm.md)
+
+## 深度参考
+
+- [协议与传输参考](/comm-ascend/reference/comm/)：HCCS/PCIe、RoCE/RDMA、对称内存、UB 族与 URMA 的 Transport 实现落点。

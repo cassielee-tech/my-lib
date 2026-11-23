@@ -493,3 +493,8 @@ Jupyter Notebook 的代码单元格中，Shell 命令前需要加 `!`：
 - [CANN 日志目录与查看方式](https://www.hiascend.com/document/detail/en/canncommercial/850/maintenref/logreference/logreference_0002.html)
 - [PyTorch NPU：ASCEND_LAUNCH_BLOCKING](https://www.hiascend.com/document/detail/zh/Pytorch/730/comref/Envvariables/docs/zh/environment_variable_reference/ASCEND_LAUNCH_BLOCKING.md)
 - [msProf 快速入门](https://www.hiascend.com/document/detail/en/mindstudio/2600/TITools/msProf/docs/en/getting_started/quick_start.md)
+
+## 深度参考
+
+- [环境变量参考](/comm-ascend/reference/runtime/env_vars.md)：HCCL 全量环境变量与配置优先级；
+- [通信性能分析](/comm-ascend/reference/profiling/)：Profiling 流程与慢快/拥塞分析方法。

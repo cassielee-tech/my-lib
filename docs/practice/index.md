@@ -19,6 +19,7 @@
 - **先读课程再读复盘**：各篇都以[HCCL 与 HCOMM 源码课程](/comm-ascend/hccl-hcomm.md)的分层、注册与建链流程为底，跨不过去时先补[单元 1](/comm-ascend/hccl-hcomm/01-architecture-layering.md)、[单元 2](/comm-ascend/hccl-hcomm/02-control-plane.md)；
 - **按"结论 → 全景 → 细节"读**：每篇开头都有先记住的结论清单，赶时间只读结论 + 方法论清单；
 - **方法论可平移**：影响面矩阵、参考实现三问、wire 契约意识、对照实验、rebase 三同步、"计价必须与执行分流同口径"，换一个需求照样能用。
+- **排障方法论**：三阶段定界、EI 错误码全表与八类排障决策树见[深度参考·排障手册](/comm-ascend/reference/debug/)——复盘记录真实案例，手册回答“这类问题按什么流程查”。
 
 ## 验收清单
 

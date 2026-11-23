@@ -49,6 +49,10 @@
 
 一门课程读透两个仓：基于 [HCCL 开源仓库](https://gitcode.com/cann/hccl) 读"内置算子怎么跑"，基于 [HCOMM 通信基础库仓库](https://gitcode.com/cann/hcomm) 练"自己写扩展算子"——概念与源码配对成单元，一条主线从 `HcclAllReduce` 走到第一个自定义算子。
 
+### 深度参考（HCCL 知识库）
+
+「查深查全」的参考手册层（整理自 HCCL/MC2 wiki，79 篇、12 个知识域）：[算子参考](reference/operators/)（13 个算子逐一解析）、[算法参考](reference/algorithms/)（Ring/NHR/AHC + selector 机制）、[组网形态](reference/networking/)、[协议与引擎](reference/comm/)、[排障手册](reference/debug/)（EI 错误码全表与八类决策树）等——导读见[深度参考目录](reference/)。
+
 ### 实战复盘（已独立成专栏）
 
 真实需求的完整生命周期复盘——Issue → 定位 → 方案 → 验证 → 检视 → 合入，见[实战复盘专栏](/practice/)。

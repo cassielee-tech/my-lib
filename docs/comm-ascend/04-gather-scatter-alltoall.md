@@ -241,3 +241,7 @@ Megatron TP+SP 组合中，前向用 AG、反向用 RS。设每层激活 512 MB�
 ---
 
 <!-- chapter-navigation -->
+
+## 深度参考
+
+- [AllGather](/comm-ascend/reference/operators/all_gather.md)、[ReduceScatter](/comm-ascend/reference/operators/reduce_scatter.md)、[AlltoAll/V/VC](/comm-ascend/reference/operators/all_to_all_v.md) 算子参考：产品支持矩阵、约束与实测算法名。

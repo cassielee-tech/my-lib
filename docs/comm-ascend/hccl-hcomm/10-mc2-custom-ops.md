@@ -166,3 +166,7 @@ examples/05_custom_ops_allgather/
 下一单元进入 **[11｜实战：examples 与第一个自定义算子](11-examples-first-op.md)**。
 
 [返回课程导学 →](../hccl-hcomm.md)
+
+## 深度参考
+
+- [扩展机制参考](/comm-ascend/reference/extension/)：算法插件（RFC 0002 完整接口）与 MC2 框架 API、RFC 演进。

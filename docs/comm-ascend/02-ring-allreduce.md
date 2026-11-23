@@ -268,3 +268,7 @@ S=512 MB、BW=25 GB/s、α=25 µs。分别计算 N=8 与 N=64 时 Ring AllReduce
 ---
 
 <!-- chapter-navigation -->
+
+## 深度参考
+
+- [Ring 算法参考](/comm-ascend/reference/algorithms/ring.md)：逐算子 α-β 耗时公式、两代代码路径与配置方式。

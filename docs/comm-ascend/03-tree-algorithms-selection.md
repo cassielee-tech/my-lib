@@ -257,3 +257,8 @@ Tree（03-2）：上行归约 + 下行广播，2·log₂N 轮
 ---
 
 <!-- chapter-navigation -->
+
+## 深度参考
+
+- [RHD/递归倍增参考](/comm-ascend/reference/algorithms/hdr.md)：非 2 幂规模的通用处理策略；
+- [算法选择机制](/comm-ascend/reference/algorithms/algo_selector.md)：HcclAlgoType 全枚举、选择全流程与 9 条引擎回退规则。

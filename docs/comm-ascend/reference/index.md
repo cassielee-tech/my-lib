@@ -1,0 +1,37 @@
+# 深度参考｜HCCL 知识库
+
+> 返回：[通信与昇腾](../index.md) · [首页](../../index.md)
+
+**定位**：这个区域是「查深查全」的参考手册层，整理自一套 HCCL/MC2 wiki（80 篇、覆盖 12 个知识域）。它和课程分工不同：
+
+- **课程**（[集合通信](../index.md#上篇集合通信岗位核心第-1-5-章)、[源码课程](../hccl-hcomm.md)）负责**从零建立心智模型**——按学习坡度组织；
+- **本参考区**负责**检索与核对**——按知识域组织，每篇保留事实基线（代码 commit / 文档路径），遇到「这个算子支持哪些算法名」「这个错误码什么含义」这类问题时进来查。
+
+**体例**：每篇开头有「前置阅读」指向对应课程章节；文首引用块是事实基线；表格与流程图密集，适合按需检索而非顺序阅读。
+
+## 知识域索引
+
+| 知识域 | 内容 | 篇数 | 前置课程 |
+| --- | --- | ---: | --- |
+| [总览](overview/hccl-overview.md) | HCCL 概述、算子与算法总览、L0/L1/L2 分级原理、集群组网总览 | 4 | 第 0/1/5 章 |
+| [算子参考](operators/index.md) | 13 个算子逐一解析：语义/原型/约束/分级编排/实测算法名 | 13 | 第 1/4 章 |
+| [算法参考](algorithms/index.md) | Ring/Mesh/RHD/NHR/AHC/Pipeline 等 + selector/组合机制 | 13 | 第 2/3 章 |
+| [组网形态](networking/index.md) | RoCE 集群、UB 超节点、多平面、层次化、单机、整机形态 | 6 | 第 5 章 |
+| [协议与传输](comm/index.md) | HCCS/PCIe、RoCE/RDMA、对称内存、UB 族、URMA | 7 | 源码课程单元 3 |
+| [通信域](communicator/index.md) | 通信域生命周期、四种创建方式、配置 | 3 | 源码课程单元 2 |
+| [通信引擎](engine/index.md) | AICPU_TS / AIV / CCU / HostCPU_TS | 5 | 源码课程单元 4 |
+| [执行模式](execution/index.md) | 执行形态、ACL Graph 图捕获、框架集成 | 3 | 源码课程单元 11 |
+| [排障手册](debug/index.md) | 三阶段定界、EI 错误码全表、八类排障决策树 | 12 | [实战复盘](/practice/) |
+| [性能分析](profiling/index.md) | 通信 Profiling 流程、慢快/拥塞分析 | 3 | CANN 命令速查 |
+| [运行与约束](runtime/index.md) | 约束、环境变量、可靠性、支持与构建 | 4 | CANN 命令速查 |
+| [扩展机制](extension/index.md) | 算法插件（RFC 0002）、MC2 框架与 RFC 演进 | 3 | 源码课程单元 10 |
+
+## 三个典型入口
+
+- **查一个算子**：如「AllGatherV 支持哪些算法、有什么约束」→ [算子参考｜all_gather_v](operators/all_gather_v.md)；
+- **查一个错误码**：如「EI0005 是什么、怎么定位」→ [排障手册｜错误码全表](debug/error_codes.md)；
+- **查一条链路**：如「一次 AllReduce 分几层执行」→ [总览｜L0/L1/L2 分级原理](overview/l0l1l2-principle.md)。
+
+---
+
+[返回通信与昇腾 →](../index.md)

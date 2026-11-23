@@ -101,3 +101,7 @@ HCCS / RoCE / UB / 物理链路
 进入 **[课程总结：HCCL 与 HCOMM 源码阅读地图 →](summary.md)**
 
 [返回课程导学 →](../hccl-hcomm.md)
+
+## 深度参考
+
+- [ACL Graph 参考](/comm-ascend/reference/execution/aclgraph.md)：图捕获生命周期、多 stream 拓扑与已知失败模式。

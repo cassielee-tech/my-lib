@@ -184,6 +184,149 @@ export default withMermaid(defineConfig({
                 { text: '课程总结｜源码阅读地图', link: '/comm-ascend/hccl-hcomm/summary' }
               ]
             },
+            {
+              text: '深度参考｜HCCL 知识库', collapsed: true,
+              items: [
+                { text: '导读', link: '/comm-ascend/reference/' },
+                {
+                  text: '总览', collapsed: true,
+                  items: [
+                    { text: 'HCCL 概述', link: '/comm-ascend/reference/overview/hccl-overview' },
+                    { text: '算子与算法总览', link: '/comm-ascend/reference/overview/ops-algos-overview' },
+                    { text: 'L0/L1/L2 分级原理', link: '/comm-ascend/reference/overview/l0l1l2-principle' },
+                    { text: '集群组网总览', link: '/comm-ascend/reference/overview/cluster-topology' }
+                  ]
+                },
+                {
+                  text: '算子参考', collapsed: true,
+                  items: [
+                    { text: '目录', link: '/comm-ascend/reference/operators/' },
+                    { text: 'AllReduce', link: '/comm-ascend/reference/operators/all_reduce' },
+                    { text: 'AllGather', link: '/comm-ascend/reference/operators/all_gather' },
+                    { text: 'AllGatherV', link: '/comm-ascend/reference/operators/all_gather_v' },
+                    { text: 'Reduce', link: '/comm-ascend/reference/operators/reduce' },
+                    { text: 'ReduceScatter', link: '/comm-ascend/reference/operators/reduce_scatter' },
+                    { text: 'ReduceScatterV', link: '/comm-ascend/reference/operators/reduce_scatter_v' },
+                    { text: 'Broadcast', link: '/comm-ascend/reference/operators/broadcast' },
+                    { text: 'Scatter', link: '/comm-ascend/reference/operators/scatter' },
+                    { text: 'AlltoAll/V/VC', link: '/comm-ascend/reference/operators/all_to_all_v' },
+                    { text: 'Send / Recv', link: '/comm-ascend/reference/operators/send' },
+                    { text: 'BatchSendRecv', link: '/comm-ascend/reference/operators/batch_send_recv' },
+                    { text: 'Barrier', link: '/comm-ascend/reference/operators/barrier' }
+                  ]
+                },
+                {
+                  text: '算法参考', collapsed: true,
+                  items: [
+                    { text: '目录', link: '/comm-ascend/reference/algorithms/' },
+                    { text: 'Ring', link: '/comm-ascend/reference/algorithms/ring' },
+                    { text: 'Mesh/FullMesh', link: '/comm-ascend/reference/algorithms/fullmesh' },
+                    { text: 'RHD（递归倍增）', link: '/comm-ascend/reference/algorithms/hdr' },
+                    { text: 'Star', link: '/comm-ascend/reference/algorithms/star' },
+                    { text: 'NHR', link: '/comm-ascend/reference/algorithms/nhr' },
+                    { text: 'NB', link: '/comm-ascend/reference/algorithms/nb' },
+                    { text: 'AHC', link: '/comm-ascend/reference/algorithms/ahc' },
+                    { text: 'Pipeline', link: '/comm-ascend/reference/algorithms/pipeline' },
+                    { text: 'Pairwise', link: '/comm-ascend/reference/algorithms/pairwise' },
+                    { text: '机制｜selector', link: '/comm-ascend/reference/algorithms/algo_selector' },
+                    { text: '机制｜分层矩阵', link: '/comm-ascend/reference/algorithms/algo_level_matrix' },
+                    { text: '机制｜组合', link: '/comm-ascend/reference/algorithms/combination' }
+                  ]
+                },
+                {
+                  text: '组网形态', collapsed: true,
+                  items: [
+                    { text: '目录', link: '/comm-ascend/reference/networking/' },
+                    { text: 'RoCE 集群', link: '/comm-ascend/reference/networking/roce_cluster' },
+                    { text: 'UB 超节点', link: '/comm-ascend/reference/networking/ub_superpod' },
+                    { text: '多平面网络', link: '/comm-ascend/reference/networking/multi_plane' },
+                    { text: '层次化混合组网', link: '/comm-ascend/reference/networking/hierarchical' },
+                    { text: '单机内部', link: '/comm-ascend/reference/networking/server_internal' },
+                    { text: '整机形态', link: '/comm-ascend/reference/networking/board_form_factor' }
+                  ]
+                },
+                {
+                  text: '协议与传输', collapsed: true,
+                  items: [
+                    { text: '目录', link: '/comm-ascend/reference/comm/' },
+                    { text: 'HCCS/PCIe/SIO', link: '/comm-ascend/reference/comm/hccs_pcie' },
+                    { text: 'RoCE/RDMA', link: '/comm-ascend/reference/comm/roce_rdma' },
+                    { text: '对称内存', link: '/comm-ascend/reference/comm/symmetric_mem' },
+                    { text: 'UB_MEM', link: '/comm-ascend/reference/comm/ub_mem' },
+                    { text: 'UB 网络（CTP/RTP/UBoE）', link: '/comm-ascend/reference/comm/ub_network' },
+                    { text: 'URMA', link: '/comm-ascend/reference/comm/urma' }
+                  ]
+                },
+                {
+                  text: '通信域', collapsed: true,
+                  items: [
+                    { text: '目录', link: '/comm-ascend/reference/communicator/' },
+                    { text: '创建方式', link: '/comm-ascend/reference/communicator/creation' },
+                    { text: '配置', link: '/comm-ascend/reference/communicator/config' }
+                  ]
+                },
+                {
+                  text: '通信引擎', collapsed: true,
+                  items: [
+                    { text: '目录', link: '/comm-ascend/reference/engine/' },
+                    { text: 'AICPU_TS', link: '/comm-ascend/reference/engine/aicpu_ts' },
+                    { text: 'AIV', link: '/comm-ascend/reference/engine/aiv' },
+                    { text: 'CCU', link: '/comm-ascend/reference/engine/ccu' },
+                    { text: 'Host CPU_TS', link: '/comm-ascend/reference/engine/host_cpu_ts' }
+                  ]
+                },
+                {
+                  text: '执行模式', collapsed: true,
+                  items: [
+                    { text: '目录', link: '/comm-ascend/reference/execution/' },
+                    { text: 'ACL Graph 图捕获', link: '/comm-ascend/reference/execution/aclgraph' },
+                    { text: '框架集成', link: '/comm-ascend/reference/execution/framework_integration' }
+                  ]
+                },
+                {
+                  text: '排障手册', collapsed: true,
+                  items: [
+                    { text: '总入口', link: '/comm-ascend/reference/debug/' },
+                    { text: '定位流程', link: '/comm-ascend/reference/debug/localization_flow' },
+                    { text: 'EI 错误码全表', link: '/comm-ascend/reference/debug/error_codes' },
+                    { text: '案例｜精度', link: '/comm-ascend/reference/debug/cases/precision/' },
+                    { text: '案例｜建链', link: '/comm-ascend/reference/debug/cases/link/' },
+                    { text: '案例｜整网', link: '/comm-ascend/reference/debug/cases/whole_network/' },
+                    { text: '案例｜coredump', link: '/comm-ascend/reference/debug/cases/coredump/' },
+                    { text: '案例｜资料配置', link: '/comm-ascend/reference/debug/cases/config_data/' },
+                    { text: '案例｜拦截', link: '/comm-ascend/reference/debug/cases/interception/' },
+                    { text: '案例｜AIC', link: '/comm-ascend/reference/debug/cases/aic/' },
+                    { text: '案例｜AIV', link: '/comm-ascend/reference/debug/cases/aiv/' }
+                  ]
+                },
+                {
+                  text: '性能分析', collapsed: true,
+                  items: [
+                    { text: '目录', link: '/comm-ascend/reference/profiling/' },
+                    { text: '采集与分析', link: '/comm-ascend/reference/profiling/collect_analyze' },
+                    { text: '慢快与拥塞', link: '/comm-ascend/reference/profiling/slowfast_congestion' }
+                  ]
+                },
+                {
+                  text: '运行与约束', collapsed: true,
+                  items: [
+                    { text: '目录', link: '/comm-ascend/reference/runtime/' },
+                    { text: '约束', link: '/comm-ascend/reference/runtime/constraints' },
+                    { text: '环境变量', link: '/comm-ascend/reference/runtime/env_vars' },
+                    { text: '可靠性与安全', link: '/comm-ascend/reference/runtime/reliability_security' },
+                    { text: '支持与构建', link: '/comm-ascend/reference/runtime/support_build' }
+                  ]
+                },
+                {
+                  text: '扩展机制', collapsed: true,
+                  items: [
+                    { text: '目录', link: '/comm-ascend/reference/extension/' },
+                    { text: '算法插件', link: '/comm-ascend/reference/extension/algo_plugin' },
+                    { text: 'MC2 与 RFC', link: '/comm-ascend/reference/extension/mc2_and_rfc' }
+                  ]
+                }
+              ]
+            },
           ]
         }
       ],

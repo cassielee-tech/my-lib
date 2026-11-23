@@ -266,3 +266,8 @@ Chunk/Channel（05-3）：拆小铺流水（单路利用率）· 多路并行（
 ---
 
 <!-- chapter-navigation -->
+
+## 深度参考
+
+- [L0/L1/L2 分级通信实现原理](/comm-ascend/reference/overview/l0l1l2-principle.md)：三层实现差异矩阵与一次 AllReduce 的端到端生命周期；
+- [组网形态](/comm-ascend/reference/networking/)：RoCE 集群、UB 超节点、多平面与层次化组网详解。
