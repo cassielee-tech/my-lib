@@ -63,6 +63,7 @@ export default withMermaid(defineConfig({
         ]
       },
       { text: '实战复盘', link: '/practice/' },
+      { text: '参考手册', link: '/comm-ascend/reference/' },
       { text: '后端知识', link: '/backend/' },
       { text: '工具与效率', link: '/tools-productivity/' },
       { text: '个人杂谈', link: '/essays/' }
@@ -184,8 +185,13 @@ export default withMermaid(defineConfig({
                 { text: '课程总结｜源码阅读地图', link: '/comm-ascend/hccl-hcomm/summary' }
               ]
             },
-            {
-              text: '深度参考｜HCCL 知识库', collapsed: true,
+            { text: 'HCCL 参考手册 →', link: '/comm-ascend/reference/' }
+          ]
+        }
+      ],
+      '/comm-ascend/reference/': [
+        {
+          text: 'HCCL 参考手册',
               items: [
                 { text: '导读', link: '/comm-ascend/reference/' },
                 {
@@ -326,8 +332,6 @@ export default withMermaid(defineConfig({
                   ]
                 }
               ]
-            },
-          ]
         }
       ],
       '/practice/': [
