@@ -1,8 +1,8 @@
 # CassieLee 的知识库
 
-一个基于 VitePress 搭建的个人知识博客。核心内容是 **HCCL 开发主线**——一门面向 CANN 集合通信算子开发岗位的六站课程，其余栏目为主线之外的补充。
+一个基于 VitePress 搭建的个人知识博客。核心内容是 **HCCL 开发主线**——面向 CANN 集合通信算子开发岗位的六站课程，以及日常需求中的交付产物。
 
-**在线阅读**：[cassielee-tech.github.io/my-lib](https://cassielee-tech.github.io/my-lib/) · **当前动态**：[now](docs/now.md) · **开始第一课**：[从模型到集合通信](docs/model-systems/01-landscape.md)
+**在线阅读**：[cassielee-tech.github.io/my-lib](https://cassielee-tech.github.io/my-lib/) 
 
 ## 仓库结构
 
@@ -12,9 +12,9 @@ my-lib/
 │   ├── index.md / now.md            # 首页导览 / Now 页（当前在做什么）
 │   ├── model-systems/               # 课程①：模型与系统
 │   ├── execution-parallel/          # 课程②：执行与并行
-│   ├── comm-ascend/                 # 课程③：通信与昇腾（岗位核心）
-│   │   ├── hccl-hcomm/              #   ├ HCCL/HCOMM 双仓源码课程（13 单元）
-│   │   └── reference/               #   └ HCCL 参考手册（80 篇知识库）
+│   ├── comm-ascend/                 # 课程③：通信与昇腾
+│   │   ├── hccl-hcomm/              #   ├ HCCL/HCOMM 双仓源码课程 
+│   │   └── reference/               #   └ HCCL 参考手册 
 │   ├── practice/                    # 实战复盘（复盘 + 需求交付物 + 研讨 + 模板库）
 │   │   ├── 26RP4/                   #   ├ 需求交付物（按迭代组织）
 │   │   └── 研讨/                     #   └ 研讨笔记
@@ -40,7 +40,7 @@ my-lib/
 
 ---
 
-## 课程｜三大专栏（原六站课程）
+## 课程｜三大专栏 
 
 ### [模型与系统](docs/model-systems/index.md)｜模型在算什么？训练怎样运转？
 
