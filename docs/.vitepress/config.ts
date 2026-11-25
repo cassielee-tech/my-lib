@@ -339,55 +339,65 @@ export default withMermaid(defineConfig({
           text: '实战复盘',
           items: [
             { text: '专栏目录', link: '/practice/' },
-            { text: '写作模板｜复盘手记', link: '/practice/template' },
-            { text: '1｜UBOE/UB_RTP 建链端口注入实战', link: '/practice/01-uboe-ubrtp-port-injection' },
             {
-              text: '26RP4｜需求交付物', collapsed: false,
+              text: '模板与方法论', collapsed: false,
+              items: [
+                { text: '复盘写作模板｜复盘手记', link: '/practice/00-模板与方法论/template' },
+                { text: 'SRS/SD 文档模板', link: '/practice/00-模板与方法论/01-SRS_SD文档模板' },
+                { text: '需求实验方法论参考', link: '/practice/00-模板与方法论/需求实验方法论参考' },
+                { text: '实验用例设计与脚本写法参考', link: '/practice/00-模板与方法论/实验用例设计与脚本写法经验参考' }
+              ]
+            },
+            {
+              text: '需求迭代', collapsed: false,
               items: [
                 {
-                  text: '01｜Reduce-64bit 分级算法', collapsed: true,
+                  text: '26RP4/01｜Reduce-64bit 分级算法', collapsed: true,
                   items: [
-                    { text: '复盘｜Reduce 64bit 特殊规约分级算法', link: '/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/' },
-                    { text: '前置知识', link: '/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/02-前置知识' },
-                    { text: 'SE 设计', link: '/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/03-SE设计' },
-                    { text: 'SRS/SD', link: '/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/04-SRS_SD' },
-                    { text: '问题对齐', link: '/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/08-问题对齐-DPU-Reduce写非root用户输出buffer' },
-                    { text: '经验总结', link: '/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/09-经验总结' }
+                    { text: '复盘｜Reduce 64bit 特殊规约分级算法', link: '/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/' },
+                    { text: '前置知识', link: '/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/02-前置知识' },
+                    { text: 'SE 设计', link: '/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/03-SE设计' },
+                    { text: 'SRS/SD', link: '/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/04-SRS_SD' },
+                    { text: '问题对齐', link: '/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/08-问题对齐-DPU-Reduce写非root用户输出buffer' },
+                    { text: '经验总结', link: '/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/09-经验总结' }
                   ]
                 },
                 {
-                  text: '02｜AllGatherV/Reduce 零拷贝', collapsed: true,
+                  text: '26RP4/02｜AllGatherV/Reduce 零拷贝', collapsed: true,
                   items: [
-                    { text: '复盘｜AllGatherV/Reduce 零拷贝实战', link: '/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/' },
-                    { text: '预调研', link: '/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/01-预调研' },
-                    { text: '前置知识', link: '/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/02-前置知识' },
-                    { text: 'SE 设计', link: '/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/03-SE设计' },
-                    { text: 'SRS/SD', link: '/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/04-SRS_SD' },
-                    { text: '经验总结', link: '/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/09-经验总结' }
-                  ]
-                },
-                {
-                  text: '03｜HCCL aclgraph 零拷贝方案', collapsed: true,
-                  items: [
-                    { text: 'SE 设计', link: '/practice/26RP4/03-HCCL-aclgraph模式零拷贝方案/03-SE设计' }
+                    { text: '复盘｜AllGatherV/Reduce 零拷贝实战', link: '/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/' },
+                    { text: '预调研', link: '/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/01-预调研' },
+                    { text: '前置知识', link: '/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/02-前置知识' },
+                    { text: 'SE 设计', link: '/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/03-SE设计' },
+                    { text: 'SRS/SD', link: '/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/04-SRS_SD' },
+                    { text: '经验总结', link: '/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/09-经验总结' }
                   ]
                 }
               ]
             },
             {
-              text: '研讨', collapsed: true,
+              text: '问题修复', collapsed: false,
               items: [
-                { text: 'AllGather selector 代价模型研讨', link: '/practice/研讨/allgather-selector-研讨/' },
-                { text: '决策树与 Corner Case', link: '/practice/研讨/allgather-selector-研讨/allgather-selector-decision-tree' },
-                { text: '选择策略研究', link: '/practice/研讨/allgather-selector-研讨/allgather-selector-costmodel-analysis' }
+                { text: '01｜UBOE/UB_RTP 建链端口注入实战', link: '/practice/02-问题修复/01-uboe-ubrtp-port-injection' },
+                {
+                  text: '02｜HCCL aclgraph 零拷贝方案', collapsed: true,
+                  items: [
+                    { text: 'SE 设计', link: '/practice/02-问题修复/02-HCCL-aclgraph模式零拷贝方案/03-SE设计' }
+                  ]
+                }
               ]
             },
             {
-              text: '模板与方法论', collapsed: true,
+              text: '研讨笔记', collapsed: false,
               items: [
-                { text: 'SRS/SD 文档模板', link: '/practice/00-模板库/01-SRS_SD文档模板' },
-                { text: '需求实验方法论参考', link: '/practice/00-需求实验方法论参考' },
-                { text: '实验用例设计与脚本写法参考', link: '/practice/00-实验用例设计与脚本写法经验参考' }
+                {
+                  text: 'AllGather Selector 算法选择策略研究', collapsed: true,
+                  items: [
+                    { text: '代价模型研讨（13 图）', link: '/practice/03-研讨笔记/allgather-selector-算法选择策略研究/' },
+                    { text: '决策树与 Corner Case', link: '/practice/03-研讨笔记/allgather-selector-算法选择策略研究/allgather-selector-decision-tree' },
+                    { text: '选择策略研究', link: '/practice/03-研讨笔记/allgather-selector-算法选择策略研究/allgather-selector-costmodel-analysis' }
+                  ]
+                }
               ]
             }
           ]

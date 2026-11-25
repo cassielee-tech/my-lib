@@ -284,4 +284,4 @@ Issue 查重/创建 → feature 分支（基于最新 upstream/master，squash �
 
 ---
 
-[返回课程导学 →](/comm-ascend/hccl-hcomm.md) · [返回课程总结 →](/comm-ascend/hccl-hcomm/summary.md) · [返回实践总结 →](index.md) · [返回专栏目录 →](/comm-ascend/)
+[返回课程导学 →](/comm-ascend/hccl-hcomm.md) · [返回课程总结 →](/comm-ascend/hccl-hcomm/summary.md) · [返回实战复盘 →](/practice/) · [返回专栏目录 →](/comm-ascend/)

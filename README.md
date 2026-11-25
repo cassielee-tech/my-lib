@@ -15,9 +15,11 @@ my-lib/
 │   ├── comm-ascend/                 # 课程③：通信与昇腾
 │   │   ├── hccl-hcomm/              #   ├ HCCL/HCOMM 双仓源码课程 
 │   │   └── reference/               #   └ HCCL 参考手册 
-│   ├── practice/                    # 实战复盘（复盘 + 需求交付物 + 研讨 + 模板库）
-│   │   ├── 26RP4/                   #   ├ 需求交付物（按迭代组织）
-│   │   └── 研讨/                     #   └ 研讨笔记
+│   ├── practice/                    # 实战复盘（四个子专栏）
+│   │   ├── 00-模板与方法论/          #   ├ 模板与方法论
+│   │   ├── 01-需求迭代/26RP4/        #   ├ 需求迭代（需求交付物，按迭代组织）
+│   │   ├── 02-问题修复/              #   ├ 问题修复（Issue → 合入）
+│   │   └── 03-研讨笔记/              #   └ 研讨笔记（专题研究）
 │   ├── backend/                     # 后端知识
 │   ├── tools-productivity/          # 工具与效率
 │   ├── essays/                      # 个人杂谈
@@ -64,70 +66,67 @@ my-lib/
 
 [总览](docs/comm-ascend/reference/overview/hccl-overview.md) · [算子参考](docs/comm-ascend/reference/operators/index.md) · [算法参考](docs/comm-ascend/reference/algorithms/index.md) · [组网形态](docs/comm-ascend/reference/networking/index.md) · [协议与传输](docs/comm-ascend/reference/comm/index.md) · [通信域](docs/comm-ascend/reference/communicator/index.md) · [通信引擎](docs/comm-ascend/reference/engine/index.md) · [执行模式](docs/comm-ascend/reference/execution/index.md) · [排障手册](docs/comm-ascend/reference/debug/index.md) · [性能分析](docs/comm-ascend/reference/profiling/index.md) · [运行与约束](docs/comm-ascend/reference/runtime/index.md) · [扩展机制](docs/comm-ascend/reference/extension/index.md)
 
-## 实战复盘｜复盘文章 + 需求交付物 + 研讨
+## 实战复盘｜四个子专栏
 
-### 复盘文章（[专栏目录](docs/practice/index.md)）
+[专栏目录](docs/practice/index.md)——**模板与方法论**（怎么写、怎么做实验）、**需求迭代**（立项需求全链路交付物）、**问题修复**（Issue 驱动的修复实战）、**研讨笔记**（专题研讨过程记录）。
 
-| 篇 | 主题 |
-| ---: | --- |
-| 1 | [UBOE/UB_RTP 建链端口注入：从 Issue 到合入](docs/practice/01-uboe-ubrtp-port-injection.md) |
-| 2 | [Reduce 64bit/特殊规约分级算法：集合通信与 HCCL 基础理论](docs/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/index.md) |
-| 3 | [AllGatherV/Reduce 零拷贝（对称内存）：从门禁到数据面](docs/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/index.md) |
+### 模板与方法论（`docs/practice/00-模板与方法论/`）
 
-### 26RP4/01｜Reduce-64bit 与特殊规约分级算法（[复盘文](docs/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/index.md)）
+| 材料 | 说明 |
+| --- | --- |
+| [复盘写作模板](docs/practice/00-模板与方法论/template.md) | 复盘手记骨架与完稿自检清单 |
+| [SRS/SD 文档模板](docs/practice/00-模板与方法论/01-SRS_SD文档模板.md) | 文档模板（评审 / STC / 代码评审 / 用例模板 xlsx 同目录） |
+| [需求实验方法论参考](docs/practice/00-模板与方法论/需求实验方法论参考.md) | 远程仿真实验全链路经验（环境/工具/观测/实验设计/踩坑） |
+| [实验用例设计与脚本写法经验参考](docs/practice/00-模板与方法论/实验用例设计与脚本写法经验参考.md) | UT / ST / 真机三层用例设计与脚本写法经验 |
+
+### 需求迭代（`docs/practice/01-需求迭代/`）
+
+#### 26RP4/01｜Reduce-64bit 与特殊规约分级算法（[复盘文](docs/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/index.md)）
 
 需求 AR20260930049502 全链路交付物（hccl 仓 `feature/reduce-64bit-prod-2level-hier` 分支，PR #3755 已合入）：
 
 | 材料 | 说明 |
 | --- | --- |
-| [02-前置知识](docs/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/02-前置知识.md) | 小白版理论向导 |
-| [03-SE设计](docs/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/03-SE设计.md) | SE 串讲版设计 |
-| [04-SRS_SD](docs/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/04-SRS_SD.md) | SRS/SD 全文：决策记录、风险表、死锁排查扩展节、cost 三轮迭代与实测数据 |
-| [05-STC.xlsx](docs/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/05-STC.xlsx) | 用例台账 58 条（ST 15 / UT 6 / Checker 25 / NPU 12），执行情况已反填 |
-| [06-SRS_SD评审.xlsx](docs/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/06-SRS_SD评审.xlsx) | 设计评审记录 9 条（7 闭环 2 开放） |
-| [07-代码评审-PR3755.xlsx](docs/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/07-代码评审-PR3755.xlsx) | PR #3755 代码评审记录 20 条（人工 6 + AI 去重 14） |
-| [08-问题对齐](docs/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/08-问题对齐-DPU-Reduce写非root用户输出buffer.md) | DPU-Reduce 写非 root 输出 buffer 存量缺陷对齐材料 |
-| [09-经验总结](docs/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/09-经验总结.md) | 组内知识分享串讲文档 |
-| [scripts/](docs/practice/26RP4/01-Reduce-64bit与特殊规约分级算法/scripts) | NPU / ST / Checker 一键执行脚本 |
+| [02-前置知识](docs/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/02-前置知识.md) | 小白版理论向导 |
+| [03-SE设计](docs/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/03-SE设计.md) | SE 串讲版设计 |
+| [04-SRS_SD](docs/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/04-SRS_SD.md) | SRS/SD 全文：决策记录、风险表、死锁排查扩展节、cost 三轮迭代与实测数据 |
+| [05-STC.xlsx](docs/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/05-STC.xlsx) | 用例台账 58 条（ST 15 / UT 6 / Checker 25 / NPU 12），执行情况已反填 |
+| [06-SRS_SD评审.xlsx](docs/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/06-SRS_SD评审.xlsx) | 设计评审记录 9 条（7 闭环 2 开放） |
+| [07-代码评审-PR3755.xlsx](docs/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/07-代码评审-PR3755.xlsx) | PR #3755 代码评审记录 20 条（人工 6 + AI 去重 14） |
+| [08-问题对齐](docs/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/08-问题对齐-DPU-Reduce写非root用户输出buffer.md) | DPU-Reduce 写非 root 输出 buffer 存量缺陷对齐材料 |
+| [09-经验总结](docs/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/09-经验总结.md) | 组内知识分享串讲文档 |
+| [scripts/](docs/practice/01-需求迭代/26RP4/01-Reduce-64bit与特殊规约分级算法/scripts) | NPU / ST / Checker 一键执行脚本 |
 
-### 26RP4/02｜AllGatherV 与 Reduce 零拷贝模式（[复盘文](docs/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/index.md)）
+#### 26RP4/02｜AllGatherV 与 Reduce 零拷贝模式（[复盘文](docs/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/index.md)）
 
 需求 AR20261029516478 全链路交付物（hccl 仓 `feature/zero-copy-agv-reduce` 分支）：
 
 | 材料 | 说明 |
 | --- | --- |
-| [01-预调研](docs/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/01-预调研.md) | 零拷贝机制现状摸底（file:line 事实与待确认项分离表述） |
-| [02-前置知识](docs/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/02-前置知识.md) | 对称内存小白版向导 |
-| [03-SE设计](docs/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/03-SE设计.md) | 四算子方案全文 |
-| [04-SRS_SD](docs/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/04-SRS_SD.md) | 需求与设计 |
-| [05-STC.xlsx](docs/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/05-STC.xlsx) | 用例与执行台账 |
-| [06-SRS_SD评审.xlsx](docs/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/06-SRS_SD评审.xlsx) | 设计评审记录 |
-| [07-代码评审-PR3842.xlsx](docs/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/07-代码评审-PR3842.xlsx) | PR #3842 代码评审记录 |
-| [09-经验总结](docs/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/09-经验总结.md) | 经验总结（含 Reduce 对称内存 in-place 边界 WAR 图解） |
-| [scripts/](docs/practice/26RP4/02-AllGatherV与Reduce零拷贝模式/scripts) | 真机一键测试脚本 |
+| [01-预调研](docs/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/01-预调研.md) | 零拷贝机制现状摸底（file:line 事实与待确认项分离表述） |
+| [02-前置知识](docs/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/02-前置知识.md) | 对称内存小白版向导 |
+| [03-SE设计](docs/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/03-SE设计.md) | 四算子方案全文 |
+| [04-SRS_SD](docs/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/04-SRS_SD.md) | 需求与设计 |
+| [05-STC.xlsx](docs/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/05-STC.xlsx) | 用例与执行台账 |
+| [06-SRS_SD评审.xlsx](docs/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/06-SRS_SD评审.xlsx) | 设计评审记录 |
+| [07-代码评审-PR3842.xlsx](docs/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/07-代码评审-PR3842.xlsx) | PR #3842 代码评审记录 |
+| [09-经验总结](docs/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/09-经验总结.md) | 经验总结（含 Reduce 对称内存 in-place 边界 WAR 图解） |
+| [scripts/](docs/practice/01-需求迭代/26RP4/02-AllGatherV与Reduce零拷贝模式/scripts) | 真机一键测试脚本 |
 
-### 26RP4/03｜HCCL aclgraph 模式零拷贝方案（进行中）
+### 问题修复（`docs/practice/02-问题修复/`）
 
-| 材料 | 说明 |
-| --- | --- |
-| [03-SE设计](docs/practice/26RP4/03-HCCL-aclgraph模式零拷贝方案/03-SE设计.md) | SE 设计（进行中，尚无复盘文） |
+| 篇 | 主题 |
+| ---: | --- |
+| 1 | [UBOE/UB_RTP 建链端口注入：从 Issue 到合入](docs/practice/02-问题修复/01-uboe-ubrtp-port-injection.md) |
+| 2 | [HCCL aclgraph 模式零拷贝方案](docs/practice/02-问题修复/02-HCCL-aclgraph模式零拷贝方案/03-SE设计.md)（进行中，SE 设计） |
 
-### 研讨（[目录](docs/practice/研讨/allgather-selector-研讨/index.md)）
-
-| 材料 | 说明 |
-| --- | --- |
-| [AllGather selector 代价模型研讨](docs/practice/研讨/allgather-selector-研讨/index.md) | 选路代价模型可视化：13 图 + corner case 扫描（CSV）+ 图表生成脚本 |
-| [决策树与 Corner Case](docs/practice/研讨/allgather-selector-研讨/allgather-selector-decision-tree.md) | 完整决策树、老路径分支表、阈值表、代码行号索引 |
-| [选择策略研究](docs/practice/研讨/allgather-selector-研讨/allgather-selector-costmodel-analysis.md) | 引入 cost model 后的算法选择策略研究 |
-
-### 模板与方法论
+### 研讨笔记｜AllGather Selector 算法选择策略研究（`docs/practice/03-研讨笔记/`）
 
 | 材料 | 说明 |
 | --- | --- |
-| [SRS/SD 文档模板](docs/practice/00-模板库/01-SRS_SD文档模板.md) | 文档模板（评审 / STC / 代码评审 / 用例模板 xlsx 同目录） |
-| [需求实验方法论参考](docs/practice/00-需求实验方法论参考.md) | 远程仿真实验全链路经验（环境/工具/观测/实验设计/踩坑） |
-| [实验用例设计与脚本写法经验参考](docs/practice/00-实验用例设计与脚本写法经验参考.md) | UT / ST / 真机三层用例设计与脚本写法经验 |
-| [复盘写作模板](docs/practice/template.md) | 复盘手记骨架与完稿自检清单 |
+| [代价模型研讨（13 图）](docs/practice/03-研讨笔记/allgather-selector-算法选择策略研究/index.md) | 选路代价模型可视化：13 图 + corner case 扫描（CSV）+ 图表生成脚本 |
+| [决策树与 Corner Case](docs/practice/03-研讨笔记/allgather-selector-算法选择策略研究/allgather-selector-decision-tree.md) | 完整决策树、老路径分支表、阈值表、代码行号索引 |
+| [选择策略研究](docs/practice/03-研讨笔记/allgather-selector-算法选择策略研究/allgather-selector-costmodel-analysis.md) | 引入 cost model 后的算法选择策略研究 |
 
 ## 杂项
 
@@ -137,9 +136,10 @@ my-lib/
 
 ## 交付物命名约定
 
-- **需求目录**：`NN-需求简称`，`NN` 按立项顺序编号；外层按迭代组织（当前 `26RP4/`）。
+- **需求迭代**：外层按迭代组织（当前 `26RP4/`）；需求目录 `NN-需求简称`，`NN` 按立项顺序编号。
 - **需求文档**：类型编号固定——`01-预调研`、`02-前置知识`、`03-SE设计`、`04-SRS_SD`、`05-STC`、`06-SRS_SD评审`、`07-代码评审`、`08-问题对齐`、`09-经验总结`；某需求没有的类型直接缺号，不为连续而重排。
-- **模板库**：`NN-模板名` 只表示模板清单顺序，与需求文档的类型号无关。
+- **问题修复**：`NN-主题`，按修复顺序编号。
+- **模板**：`NN-模板名` 只表示模板清单顺序，与需求文档的类型号无关。
 
 > 历史：六专栏（model / systems / device / parallel / collective / ascend）已合并为三大专栏，旧路径由主题脚本自动重定向。
 > 2026-11：原 GitCode my-cann 仓（design/note）已融合入 `docs/practice`；其 study 学习底稿即本站三大课程，以本站为准，不再单独维护。本仓同时推送 [GitHub](https://github.com/cassielee-tech/my-lib) 与 [GitCode](https://gitcode.com/cassielee-tech/my-lib)。

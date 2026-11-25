@@ -178,7 +178,7 @@ AllGather + CLOS 且 `perTransfer < 1MB` 时钳到 1MB，按查表语义命中 2
 ## 4. 复现
 
 ```bash
-cd docs/practice/研讨/allgather-selector-研讨
+cd docs/practice/03-研讨笔记/allgather-selector-算法选择策略研究
 python3 generate_charts.py
 ```
 
