@@ -1,0 +1,3 @@
+
+
+allgather selector的算法选择策略，尤其是引入新的cost model之后最终形成一个决策树，最好寻找到一个coner case
