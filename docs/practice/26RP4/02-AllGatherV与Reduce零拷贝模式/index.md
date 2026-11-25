@@ -1,10 +1,10 @@
 # 实战复盘｜AllGatherV/Reduce 零拷贝（对称内存）：从门禁到数据面的完整实战
 
-> **所属专栏**：[实战复盘](index.md) · 第 3 篇
+> **所属专栏**：[实战复盘](/practice/) · 第 3 篇
 > **面向读者**：组内同行——有集合通信与分布式训练背景，不要求读过 hccl 仓源码。
 > **事实基准**：hccl 仓 `feature/zero-copy-agv-reduce` 分支 `6e568841`（2026-11-12，父提交 `7442bf8e`；单 squash 提交，40 文件 +1390/-208）。文中 文件:行号 均按此基线核对，可直接跳转源码验证。
 > **主线案例**：需求 AR20261029516478（AllGatherV/Reduce 接入对称内存零拷贝）。同一设计文档中的 Scatter 由他人负责、RSV 明确不开启，均不在本支范围。
-> **配套文档**：[my-cann 仓需求目录](https://gitcode.com/cassielee-tech/my-cann/tree/main/design/26RP4/02-AllGatherV与Reduce零拷贝模式)——《02-前置知识》（小白版向导）、《01-预调研》（现状与待确认项）、《03-SE设计》（四算子方案全文）、《04-SRS_SD》（需求与设计）、《05-STC.xlsx》（用例与执行台账）、`scripts/run_agv_reduce_npu_test.sh`（真机一键脚本）。
+> **配套交付物**（与本篇同目录）：《[01-预调研](01-预调研.md)》（现状与待确认项）、《[02-前置知识](02-前置知识.md)》（小白版向导）、《[03-SE设计](03-SE设计.md)》（四算子方案全文）、《[04-SRS_SD](04-SRS_SD.md)》（需求与设计）、[05-STC.xlsx](05-STC.xlsx)（用例与执行台账）、`06-SRS_SD评审.xlsx`、`07-代码评审-PR3842.xlsx`、《[09-经验总结](09-经验总结.md)》、`scripts/run_agv_reduce_npu_test.sh`（真机一键脚本）。
 
 ---
 
@@ -558,7 +558,7 @@ const bool recvFromRoot = (GetRankFromMap(stepInfo.fromRank) == tempAlgParams_.r
 
 **延伸阅读**：
 
-- 本需求全量材料：[my-cann 仓需求目录](https://gitcode.com/cassielee-tech/my-cann/tree/main/design/26RP4/02-AllGatherV与Reduce零拷贝模式)（《02-前置知识》《01-预调研》《03-SE设计》《04-SRS_SD》《05-STC.xlsx》、`scripts/run_agv_reduce_npu_test.sh`）；
+- 本需求全量材料：见本页头部「配套交付物」——《01-预调研》《02-前置知识》《03-SE设计》《04-SRS_SD》《05-STC.xlsx》《09-经验总结》与 `scripts/run_agv_reduce_npu_test.sh`，均与本篇同目录；
 - hccl 仓（[gitcode.com/cann/hccl](https://gitcode.com/cann/hccl)）官方文档：`docs/zh/architecture/architecture-brief.md`（分层与架构约束）、`docs/zh/api_ref/comm_op_interface/HcclAllGatherV.md` / `HcclReduce.md`（对称内存约束与注册契约）、`docs/zh/user_guide/comm_ops_support_list/comm_ops_support_a3.md`（A3 单算子零拷贝支持表）、`docs/zh/user_guide/coll_algo_intro/{README.md,NHR.md,hierarchical_comm_principle.md}`（算法与分级原理）；
 - hcomm 仓（[gitcode.com/cann/hcomm](https://gitcode.com/cann/hcomm)）API 文档：`docs/zh/api_ref/comm_mgr_c/HcclCommSymWinRegister.md`（注册契约与 A3/950 差异）、`HcclSymWinGetRemoteAddr.md` / `HcclSymWinGetPeerPointer.md`（远端地址换算与协议限制）。
 - 博客深度参考：[对称内存与零拷贝](/comm-ascend/reference/comm/symmetric_mem.md)（窗口/offset/注册契约的完整参考）与 [AllGatherV 算子参考](/comm-ascend/reference/operators/all_gather_v.md)。

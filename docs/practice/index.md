@@ -1,4 +1,4 @@
-# 实践总结
+# 实战复盘
 
 > 返回：[通信与昇腾](/comm-ascend/) · [首页](../index.md)
 
@@ -6,20 +6,45 @@
 
 **写新的一篇？** 从[写作模板](template.md)开始复制骨架，写完过一遍模板里的完稿自检。
 
-## 文章列表
+## 复盘文章
 
-| 篇 | 主题 | 读完能够带走 | 状态 |
+| 篇 | 主题 | 读完能够带走 | 配套交付物 |
 | ---: | --- | --- | --- |
-| 1 | [UBOE/UB_RTP 建链端口注入：从 Issue 到合入](01-uboe-ubrtp-port-injection.md) | channel 建链知识链路（RA socket 模型 / 状态机 / hccpTag wire 契约）+ 影响面矩阵、分层验证、检视闭环方法论 | ✅ |
-| 2 | [Reduce 64bit/特殊规约分级算法：集合通信与 HCCL 基础理论](02-reduce-64bit-hierarchical-algorithm.md) | Reduce 语义与 RS+AG 分级账本、selector/attrs/cost 选路链、64bit/PROD 执行分流 + 死锁排除法、计价同口径教训 | ✅ |
-| 3 | [AllGatherV/Reduce 零拷贝（对称内存）：从门禁到数据面](03-allgatherv-reduce-zerocopy.md) | 对称内存窗口与注册契约、五步接入链路与四层门禁、数据面四环节可替换性判定 + 局部子域/多轮编址/checker 契约三则排障、六条工程教训 | ✅ |
+| 1 | [UBOE/UB_RTP 建链端口注入：从 Issue 到合入](01-uboe-ubrtp-port-injection.md) | channel 建链知识链路（RA socket 模型 / 状态机 / hccpTag wire 契约）+ 影响面矩阵、分层验证、检视闭环方法论 | — |
+| 2 | [Reduce 64bit/特殊规约分级算法：集合通信与 HCCL 基础理论](26RP4/01-Reduce-64bit与特殊规约分级算法/index.md) | Reduce 语义与 RS+AG 分级账本、selector/attrs/cost 选路链、64bit/PROD 执行分流 + 死锁排除法、计价同口径教训 | [SRS/SD](26RP4/01-Reduce-64bit与特殊规约分级算法/04-SRS_SD.md) · [STC 台账](26RP4/01-Reduce-64bit与特殊规约分级算法/05-STC.xlsx) 等 |
+| 3 | [AllGatherV/Reduce 零拷贝（对称内存）：从门禁到数据面](26RP4/02-AllGatherV与Reduce零拷贝模式/index.md) | 对称内存窗口与注册契约、五步接入链路与四层门禁、数据面四环节可替换性判定 + 局部子域/多轮编址/checker 契约三则排障、六条工程教训 | [SRS/SD](26RP4/02-AllGatherV与Reduce零拷贝模式/04-SRS_SD.md) · [STC 台账](26RP4/02-AllGatherV与Reduce零拷贝模式/05-STC.xlsx) 等 |
+
+## 需求交付物（按迭代组织）
+
+复盘是"讲给同行听的故事"，交付物是"当时的原始工程记录"——同一个需求的两面，所以同居一个目录：复盘文（`index.md`）旁边就是它的前置知识、SE 设计、SRS/SD 全文、STC 用例台账与评审记录。
+
+- **[26RP4/01｜Reduce-64bit 与特殊规约分级算法](26RP4/01-Reduce-64bit与特殊规约分级算法/)**——[02-前置知识](26RP4/01-Reduce-64bit与特殊规约分级算法/02-前置知识.md) · [03-SE设计](26RP4/01-Reduce-64bit与特殊规约分级算法/03-SE设计.md) · [04-SRS_SD](26RP4/01-Reduce-64bit与特殊规约分级算法/04-SRS_SD.md) · [08-问题对齐](26RP4/01-Reduce-64bit与特殊规约分级算法/08-问题对齐-DPU-Reduce写非root用户输出buffer.md) · [09-经验总结](26RP4/01-Reduce-64bit与特殊规约分级算法/09-经验总结.md)，另有 STC / SRS_SD 评审 / PR3755 代码评审三份 xlsx 台账与 `scripts/` 一键脚本；
+- **[26RP4/02｜AllGatherV 与 Reduce 零拷贝模式](26RP4/02-AllGatherV与Reduce零拷贝模式/)**——[01-预调研](26RP4/02-AllGatherV与Reduce零拷贝模式/01-预调研.md) · [02-前置知识](26RP4/02-AllGatherV与Reduce零拷贝模式/02-前置知识.md) · [03-SE设计](26RP4/02-AllGatherV与Reduce零拷贝模式/03-SE设计.md) · [04-SRS_SD](26RP4/02-AllGatherV与Reduce零拷贝模式/04-SRS_SD.md) · [09-经验总结](26RP4/02-AllGatherV与Reduce零拷贝模式/09-经验总结.md)，另有评审/代码评审 xlsx 台账与 `scripts/run_agv_reduce_npu_test.sh` 真机一键脚本；
+- **[26RP4/03｜HCCL aclgraph 模式零拷贝方案](26RP4/03-HCCL-aclgraph模式零拷贝方案/)**——[03-SE设计](26RP4/03-HCCL-aclgraph模式零拷贝方案/03-SE设计.md)（进行中）。
+
+## 研讨
+
+- **[AllGather selector 代价模型研讨](研讨/allgather-selector-研讨/index.md)**——零拷贝方案选路的代价模型推导：选路总览、老/新路径分支矩阵、引擎优先级、16P 代价曲线、决策热力图等 13 图，附 corner case 扫描数据（CSV）与图表生成脚本。
+
+## 模板与方法论
+
+- [SRS/SD 文档模板](00-模板库/01-SRS_SD文档模板.md)（评审 / STC / 代码评审 / 用例模板为 xlsx，同目录）
+- [需求实验方法论参考](00-需求实验方法论参考.md)
+- [实验用例设计与脚本写法经验参考](00-实验用例设计与脚本写法经验参考.md)
+
+## 交付物命名约定
+
+- **需求目录**：`NN-需求简称`，`NN` 按立项顺序编号；外层按迭代组织（当前 `26RP4/`）。
+- **需求文档**：类型编号固定——`01-预调研`、`02-前置知识`、`03-SE设计`、`04-SRS_SD`、`05-STC`、`06-SRS_SD评审`、`07-代码评审`、`08-问题对齐`、`09-经验总结`；某需求没有的类型直接缺号，不为连续而重排。
+- **模板库**：`NN-模板名` 只表示模板清单顺序，与需求文档的类型号无关。
 
 ## 阅读提示
 
 - **先读课程再读复盘**：各篇都以[HCCL 与 HCOMM 源码课程](/comm-ascend/hccl-hcomm.md)的分层、注册与建链流程为底，跨不过去时先补[单元 1](/comm-ascend/hccl-hcomm/01-architecture-layering.md)、[单元 2](/comm-ascend/hccl-hcomm/02-control-plane.md)；
 - **按"结论 → 全景 → 细节"读**：每篇开头都有先记住的结论清单，赶时间只读结论 + 方法论清单；
+- **复盘与交付物对照读**：复盘讲脉络，交付物（同目录）是当时的第一手记录——决策记录、风险表、用例台账都在里面；
 - **方法论可平移**：影响面矩阵、参考实现三问、wire 契约意识、对照实验、rebase 三同步、"计价必须与执行分流同口径"，换一个需求照样能用。
-- **排障方法论**：三阶段定界、EI 错误码全表与八类排障决策树见[深度参考·排障手册](/comm-ascend/reference/debug/)——复盘记录真实案例，手册回答“这类问题按什么流程查”。
+- **排障方法论**：三阶段定界、EI 错误码全表与八类排障决策树见[深度参考·排障手册](/comm-ascend/reference/debug/)——复盘记录真实案例，手册回答"这类问题按什么流程查"。
 
 ## 验收清单
 

@@ -10,7 +10,7 @@
 - `docs/execution-parallel`：执行与并行（上篇·单卡执行系统 + 下篇·并行策略）
 - `docs/comm-ascend`：通信与昇腾（上篇·集合通信 + 下篇·昇腾与 HCCL，含双仓源码课程）
 - `docs/comm-ascend/reference`：HCCL 参考手册（80 篇知识库，独立内容类型）
-- `docs/practice`：实战复盘（独立专栏，含写作模板）
+- `docs/practice`：实战复盘（独立专栏：复盘文章 ＋ 26RP4 需求交付物 ＋ 研讨笔记 ＋ 模板库）
 - `docs/now.md`：Now 页面（当前在做什么）
 - `docs/index.md`：首页（含四类内容导览与专栏导航）
 - `docs/backend`：后端知识
@@ -18,6 +18,7 @@
 - `docs/essays`：个人杂谈（含 AI Agent 文章与实用提示词收集）
 
 > 历史：六专栏（model / systems / device / parallel / collective / ascend）已合并为上述三大专栏，旧路径由主题脚本自动重定向。
+> 2026-11：原 GitCode my-cann 仓（design/note）已融合入 `docs/practice`；其 study 学习底稿即本站三大课程，以本站为准，不再单独维护。
 
 ## 本地运行
 

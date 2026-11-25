@@ -33,7 +33,7 @@ features:
     linkText: 进入专栏
   - icon: 🧪
     title: 实战复盘
-    details: 真实需求从 Issue 到合入的完整复盘 —— 问题定位、方案演进、分层验证与检视闭环，沉淀可平移的工程方法论。
+    details: 真实需求从 Issue 到合入的完整复盘 —— 问题定位、方案演进、分层验证与检视闭环，沉淀可平移的工程方法论；复盘文旁即是全套需求交付物与研讨笔记。
     link: /practice/
     linkText: 进入专栏
   - icon: 🧱
@@ -60,7 +60,7 @@ features:
 | --- | --- | --- | --- |
 | **课程** | 从零建立心智模型 | 按顺序学，每章有类比与直觉铺垫 | 顶栏三大专栏 |
 | **参考手册** | "这个算子/错误码/组网怎么查" | 按需检索，80 篇 HCCL 知识库 | 顶栏「参考手册」 |
-| **实战复盘** | 真实需求怎么从 Issue 走到合入 | 读方法论与踩坑记录 | 顶栏「实战复盘」 |
+| **实战复盘** | 真实需求怎么从 Issue 走到合入 | 读方法论与踩坑记录，复盘文旁就是全套需求交付物 | 顶栏「实战复盘」 |
 | **杂项** | 后端、工具速查、个人思考 | 随手翻 | 后端知识 / 工具与效率 / 个人杂谈 |
 
 课程教"理解"，手册管"检索"，复盘看"案例"——三类内容互相链接：课程各章末尾的「深度参考」指向手册，手册每篇开头的「前置阅读」指回课程。
@@ -74,7 +74,7 @@ features:
 | [模型与系统](model-systems/index.md) | 模型在算什么？训练怎样运转？ | 上篇·模型全景（1-6 章）＋ 下篇·训练与推理系统（1-6 章） | [第 1 章｜从模型到集合通信](model-systems/01-landscape.md) |
 | [执行与并行](execution-parallel/index.md) | 算子怎样在单卡上跑得快？并行为什么产生通信？ | 上篇·单卡执行系统（1-8 章＋专题）＋ 下篇·并行策略（1-9 章） | [第 1 章｜全景与性能分析](execution-parallel/01-landscape-performance.md) |
 | [通信与昇腾](comm-ascend/index.md) | 通信算法与代价模型；昇腾平台与源码落地 | 上篇·集合通信（1-5 章，岗位核心）＋ 下篇·昇腾与 HCCL（含双仓源码课程） | [第 1 章｜Collective 语义与代价模型](comm-ascend/01-collective-semantics-cost.md) |
-| [实战复盘](practice/index.md) | 真实需求从 Issue 到合入 | 3 篇实战 ＋ 写作模板，持续更新 | [第 1 篇｜UBOE/UB_RTP 建链端口注入](practice/01-uboe-ubrtp-port-injection.md) |
+| [实战复盘](practice/index.md) | 真实需求从 Issue 到合入 | 3 篇复盘 ＋ 26RP4 全套需求交付物 ＋ 研讨笔记，持续更新 | [第 1 篇｜UBOE/UB_RTP 建链端口注入](practice/01-uboe-ubrtp-port-injection.md) |
 
 ## 学习路线
 
