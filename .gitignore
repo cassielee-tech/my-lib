@@ -6,4 +6,5 @@ docs/.vitepress/cache
 docs/.vitepress/dist
 docs/note.md
 .claude/
+.obsidian/
 *.bak*
