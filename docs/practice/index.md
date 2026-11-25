@@ -11,8 +11,8 @@
 | 篇 | 主题 | 读完能够带走 | 配套交付物 |
 | ---: | --- | --- | --- |
 | 1 | [UBOE/UB_RTP 建链端口注入：从 Issue 到合入](01-uboe-ubrtp-port-injection.md) | channel 建链知识链路（RA socket 模型 / 状态机 / hccpTag wire 契约）+ 影响面矩阵、分层验证、检视闭环方法论 | — |
-| 2 | [Reduce 64bit/特殊规约分级算法：集合通信与 HCCL 基础理论](26RP4/01-Reduce-64bit与特殊规约分级算法/index.md) | Reduce 语义与 RS+AG 分级账本、selector/attrs/cost 选路链、64bit/PROD 执行分流 + 死锁排除法、计价同口径教训 | [SRS/SD](26RP4/01-Reduce-64bit与特殊规约分级算法/04-SRS_SD.md) · [STC 台账](26RP4/01-Reduce-64bit与特殊规约分级算法/05-STC.xlsx) 等 |
-| 3 | [AllGatherV/Reduce 零拷贝（对称内存）：从门禁到数据面](26RP4/02-AllGatherV与Reduce零拷贝模式/index.md) | 对称内存窗口与注册契约、五步接入链路与四层门禁、数据面四环节可替换性判定 + 局部子域/多轮编址/checker 契约三则排障、六条工程教训 | [SRS/SD](26RP4/02-AllGatherV与Reduce零拷贝模式/04-SRS_SD.md) · [STC 台账](26RP4/02-AllGatherV与Reduce零拷贝模式/05-STC.xlsx) 等 |
+| 2 | [Reduce 64bit/特殊规约分级算法：集合通信与 HCCL 基础理论](26RP4/01-Reduce-64bit与特殊规约分级算法/index.md) | Reduce 语义与 RS+AG 分级账本、selector/attrs/cost 选路链、64bit/PROD 执行分流 + 死锁排除法、计价同口径教训 | [SRS/SD](26RP4/01-Reduce-64bit与特殊规约分级算法/04-SRS_SD.md) · STC 台账（xlsx） |
+| 3 | [AllGatherV/Reduce 零拷贝（对称内存）：从门禁到数据面](26RP4/02-AllGatherV与Reduce零拷贝模式/index.md) | 对称内存窗口与注册契约、五步接入链路与四层门禁、数据面四环节可替换性判定 + 局部子域/多轮编址/checker 契约三则排障、六条工程教训 | [SRS/SD](26RP4/02-AllGatherV与Reduce零拷贝模式/04-SRS_SD.md) · STC 台账（xlsx） |
 
 ## 需求交付物（按迭代组织）
 
@@ -20,7 +20,7 @@
 
 - **[26RP4/01｜Reduce-64bit 与特殊规约分级算法](26RP4/01-Reduce-64bit与特殊规约分级算法/)**——[02-前置知识](26RP4/01-Reduce-64bit与特殊规约分级算法/02-前置知识.md) · [03-SE设计](26RP4/01-Reduce-64bit与特殊规约分级算法/03-SE设计.md) · [04-SRS_SD](26RP4/01-Reduce-64bit与特殊规约分级算法/04-SRS_SD.md) · [08-问题对齐](26RP4/01-Reduce-64bit与特殊规约分级算法/08-问题对齐-DPU-Reduce写非root用户输出buffer.md) · [09-经验总结](26RP4/01-Reduce-64bit与特殊规约分级算法/09-经验总结.md)，另有 STC / SRS_SD 评审 / PR3755 代码评审三份 xlsx 台账与 `scripts/` 一键脚本；
 - **[26RP4/02｜AllGatherV 与 Reduce 零拷贝模式](26RP4/02-AllGatherV与Reduce零拷贝模式/)**——[01-预调研](26RP4/02-AllGatherV与Reduce零拷贝模式/01-预调研.md) · [02-前置知识](26RP4/02-AllGatherV与Reduce零拷贝模式/02-前置知识.md) · [03-SE设计](26RP4/02-AllGatherV与Reduce零拷贝模式/03-SE设计.md) · [04-SRS_SD](26RP4/02-AllGatherV与Reduce零拷贝模式/04-SRS_SD.md) · [09-经验总结](26RP4/02-AllGatherV与Reduce零拷贝模式/09-经验总结.md)，另有评审/代码评审 xlsx 台账与 `scripts/run_agv_reduce_npu_test.sh` 真机一键脚本；
-- **[26RP4/03｜HCCL aclgraph 模式零拷贝方案](26RP4/03-HCCL-aclgraph模式零拷贝方案/)**——[03-SE设计](26RP4/03-HCCL-aclgraph模式零拷贝方案/03-SE设计.md)（进行中）。
+- **26RP4/03｜HCCL aclgraph 模式零拷贝方案**——[03-SE设计](26RP4/03-HCCL-aclgraph模式零拷贝方案/03-SE设计.md)（进行中，尚无复盘文）。
 
 ## 研讨
 

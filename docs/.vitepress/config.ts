@@ -377,7 +377,9 @@ export default withMermaid(defineConfig({
             {
               text: '研讨', collapsed: true,
               items: [
-                { text: 'AllGather selector 代价模型研讨', link: '/practice/研讨/allgather-selector-研讨/' }
+                { text: 'AllGather selector 代价模型研讨', link: '/practice/研讨/allgather-selector-研讨/' },
+                { text: '决策树与 Corner Case', link: '/practice/研讨/allgather-selector-研讨/allgather-selector-decision-tree' },
+                { text: '选择策略研究', link: '/practice/研讨/allgather-selector-研讨/allgather-selector-costmodel-analysis' }
               ]
             },
             {

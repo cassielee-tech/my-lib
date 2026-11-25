@@ -9,25 +9,95 @@
 
 ## 1. 图表清单与阅读顺序
 
-建议顺序：**01 → 02 → 03 → 04 → 05 → 06 → 07 → 09 → 10 → 11 → 12 → 13**。
+建议顺序：**01 → 02 → 03 → 04 → 05 → 06 → 07 → 09 → 10 → 11 → 12 → 13**（每图下方图注即一句话结论）。
 
-| 图 | 内容 | 一句话结论 |
-|---|---|---|
-| `01_选路总览.png` | 入口分流 + 新老两条路径 | AllGather 同时存在 `SelectorEngine`（cost model）与 `ExecuteSelector`（手写 if/else）两套选路 |
-| `02_老路径分支矩阵.png` | 老路径：引擎 × 拓扑 | 只有 `MESH_1D`/960 走新路径；CLOS / UBX / PCIE 混合仍由阈值树主导 |
-| `03_新路径管线.png` | cost model 五步 → costTable → tuner → min-cost | 阈值没有消失，而是变成 `opCustomCheck` 等"补丁叶子" |
-| `04_引擎优先级.png` | `GetEnginePriority` 候选分层 | 同层取 min cost；`AIV_URMA` 档 URMA 存在则必选 |
-| `05_util阶梯与AG钳制.png` | util 分段阶跃 + AllGather-CLOS 1MB 钳制 | 钳制后 CLOS 段在 `perTransfer < 2MB` 内 util 恒为 0.3，2MB 处跳到 0.4288 |
-| `06_16P代价曲线.png` | 16P：SoleNHR vs ParallelMeshNHR | `P=1` 时 16P 全程 Parallel 更便宜；SoleNHR 只在小数据段接近 |
-| `07_64P_64KB翻转.png` | **核心 corner case**：64P、`P=1`、64KB | 65535B→65536B，NHR util 0.3→0.4288，cost 跳降 ≈74µs，胜负翻转 |
-| `08_代价构成分解.png` | A/util、B、C、D 分量 | 小数据由 D 主导，大数据由 A/util 主导；翻转点由 A/util 的阶跃触发 |
-| `09_决策区域热力图.png` | rankSize × dataSize 胜负区域 | 左上（小数据）NHR 胜，右下（大数据）Parallel 胜；16P 2~4MB 有硬排除红区 |
-| `10_flipflop扫描.png` | Δcost 在 util 断点附近的多次穿越 | 决策边界不是单阈值，而是"跳变带"；不同 rank/P 首次翻转点不同 |
-| `11_阈值标尺.png` | 阈值常量 + 比较符审计 | 同一 4MB：`>=` 与 `>` 混用；同一 16MB：`>` 与 `<` 混用 |
-| `12_两级拓扑与4段数据比.png` | L0×L1 拓扑 + Parallel 4 段 dataRatio | `α` 由公式计算并量化到 1/8；4 段按 `max(seg0,seg1)+max(seg2,seg3)` 聚合 |
-| `13_代价公式映射.png` | 公式与代码的对应关系 | `perTransfer` 用于查 util，`dataSize` 用于乘 cost，两者不是同一个量 |
+### 01｜入口分流 + 新老两条路径
 
-`ag_*.png` 是同目录早期分析留下的图，可作为交叉参考。
+![入口分流与新老两条路径](01_选路总览.png)
+
+> AllGather 同时存在 `SelectorEngine`（cost model）与 `ExecuteSelector`（手写 if/else）两套选路
+
+### 02｜老路径：引擎 × 拓扑
+
+![老路径分支矩阵：引擎 × 拓扑](02_老路径分支矩阵.png)
+
+> 只有 `MESH_1D`/960 走新路径；CLOS / UBX / PCIE 混合仍由阈值树主导
+
+### 03｜新路径管线
+
+![cost model 五步 → costTable → tuner → min-cost](03_新路径管线.png)
+
+> 阈值没有消失，而是变成 `opCustomCheck` 等"补丁叶子"
+
+### 04｜引擎优先级：`GetEnginePriority` 候选分层
+
+![GetEnginePriority 候选分层](04_引擎优先级.png)
+
+> 同层取 min cost；`AIV_URMA` 档 URMA 存在则必选
+
+### 05｜util 阶梯与 AllGather 钳制
+
+![util 分段阶跃 + AllGather-CLOS 1MB 钳制](05_util阶梯与AG钳制.png)
+
+> 钳制后 CLOS 段在 `perTransfer < 2MB` 内 util 恒为 0.3，2MB 处跳到 0.4288
+
+### 06｜16P 代价曲线：SoleNHR vs ParallelMeshNHR
+
+![16P 代价曲线：SoleNHR vs ParallelMeshNHR](06_16P代价曲线.png)
+
+> `P=1` 时 16P 全程 Parallel 更便宜；SoleNHR 只在小数据段接近
+
+### 07｜核心 corner case：64P、`P=1`、64KB
+
+![核心 corner case：64P、P=1、64KB](07_64P_64KB翻转.png)
+
+> 65535B→65536B，NHR util 0.3→0.4288，cost 跳降 ≈74µs，胜负翻转
+
+### 08｜代价构成分解
+
+![A/util、B、C、D 分量](08_代价构成分解.png)
+
+> 小数据由 D 主导，大数据由 A/util 主导；翻转点由 A/util 的阶跃触发
+
+### 09｜决策区域热力图
+
+![rankSize × dataSize 胜负区域](09_决策区域热力图.png)
+
+> 左上（小数据）NHR 胜，右下（大数据）Parallel 胜；16P 2~4MB 有硬排除红区
+
+### 10｜flipflop 扫描
+
+![Δcost 在 util 断点附近的多次穿越](10_flipflop扫描.png)
+
+> 决策边界不是单阈值，而是"跳变带"；不同 rank/P 首次翻转点不同
+
+### 11｜阈值标尺
+
+![阈值常量与比较符审计](11_阈值标尺.png)
+
+> 同一 4MB：`>=` 与 `>` 混用；同一 16MB：`>` 与 `<` 混用
+
+### 12｜两级拓扑与 4 段数据比
+
+![L0×L1 拓扑 + Parallel 4 段 dataRatio](12_两级拓扑与4段数据比.png)
+
+> `α` 由公式计算并量化到 1/8；4 段按 `max(seg0,seg1)+max(seg2,seg3)` 聚合
+
+### 13｜代价公式映射
+
+![公式与代码的对应关系](13_代价公式映射.png)
+
+> `perTransfer` 用于查 util，`dataSize` 用于乘 cost，两者不是同一个量
+
+### 附｜早期交叉参考图
+
+![util 分段阶跃函数示意](ag_util_steps.png)
+
+![候选算法 cost 曲线](ag_cost_curves.png)
+
+![rankSize × dataSize 算法胜负热力图](ag_decision_heatmap.png)
+
+![决策边界附近的 flip-flop 带](ag_flipflop_band.png)
 
 ---
 
@@ -108,7 +178,7 @@ AllGather + CLOS 且 `perTransfer < 1MB` 时钳到 1MB，按查表语义命中 2
 ## 4. 复现
 
 ```bash
-cd "allgather selector 研讨"
+cd docs/practice/研讨/allgather-selector-研讨
 python3 generate_charts.py
 ```
 
@@ -121,4 +191,4 @@ python3 generate_charts.py
 
 - `allgather-selector-decision-tree.md`：完整决策树、老路径分支表、阈值表、代码行号索引；
 - 本目录：把决策树和 cost model 的"形状"可视化，便于在研讨中快速对齐；
-- 两者使用同一套代码事实，图表中的假设以本 README 第 2 节为准。
+- 两者使用同一套代码事实，图表中的假设以本页第 2 节为准。

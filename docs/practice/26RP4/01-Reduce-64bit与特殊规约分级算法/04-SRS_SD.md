@@ -416,7 +416,7 @@ sequenceDiagram
 
 | 维度 | 取值（→ 对应用例） |
 | ---- | ---- |
-| 数据类型 × 规约 | INT64×{SUM/PROD/MAX/MIN}、UINT64×SUM、FP64×SUM、PROD@{FP16/FP32}（→ 001-008）；全 12 组合 64bit 矩阵与 PROD@{int8/int32} 等由 STC Checker L2 28 条与 NPU 组覆盖（`scripts/run_checker_case.sh`，明细见 STC） |
+| 数据类型 × 规约 | INT64×`{SUM/PROD/MAX/MIN}`、UINT64×SUM、FP64×SUM、PROD@`{FP16/FP32}`（→ 001-008）；全 12 组合 64bit 矩阵与 PROD@`{int8/int32}` 等由 STC Checker L2 28 条与 NPU 组覆盖（`scripts/run_checker_case.sh`，明细见 STC） |
 | 数据形状 | 整除切分（001-008）/ 尾块非整除 12rank×243（009）/ 16M 多 loop 分轮（010）/ count=1 单元素退化（015） |
 | root 语义 | root=13 非 0（011，仅 root 写回语义；非 root 不被写的机器断言因 DPU 存量缺陷暂撤，见风险 7） |
 | 指定与回归 | spec 强制指定 token 7 条（001/005/007/009/010/011/015）；三级 32rank 维持 Sole（012）；单机 8rank 维持单机算法（013）；两级 FP32+MAX 门禁负向（014） |
@@ -430,8 +430,8 @@ sequenceDiagram
 
 | 用例 | 断言要点 |
 | ---- | ---- |
-| UT-1a 两级 × {INT64/UINT64/FP64}×SUM ∪ PROD@{INT64/FP16/FP32} | SelectAicpuAlgo 特判返回新算法名（真实生效形态 CLOS 构造） |
-| UT-1b 三级 × {INT64×SUM, FP32×PROD} | 维持 Sole（AicpuReduceSoleNHRAicpuReduce） |
+| UT-1a 两级 × `{INT64/UINT64/FP64}`×SUM ∪ PROD@`{INT64/FP16/FP32}` | SelectAicpuAlgo 特判返回新算法名（真实生效形态 CLOS 构造） |
+| UT-1b 三级 × `{INT64×SUM, FP32×PROD}` | 维持 Sole（AicpuReduceSoleNHRAicpuReduce） |
 | UT-1c 两级 × 非 64bit 且非 PROD（fp32×sum/min/max） | 不选新算法（常规分级分支） |
 | UT-2 cost 候选池门禁 | INT64/PROD@int32 进池；FP32+SUM 被拒且 reason 含 `opCustomCheck` |
 | UT-3 CalcHostReduceSlope 语义 | 64bit/PROD 按 1.2ns/count×copies/dts 折算；非 host 路径/copies≤0/dts=0 归零 |

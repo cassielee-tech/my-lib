@@ -4,7 +4,7 @@
 > **面向读者**：组内同行——有集合通信与分布式训练背景，不要求读过 hccl 仓源码。
 > **事实基准**：hccl 仓 `feature/zero-copy-agv-reduce` 分支 `6e568841`（2026-11-12，父提交 `7442bf8e`；单 squash 提交，40 文件 +1390/-208）。文中 文件:行号 均按此基线核对，可直接跳转源码验证。
 > **主线案例**：需求 AR20261029516478（AllGatherV/Reduce 接入对称内存零拷贝）。同一设计文档中的 Scatter 由他人负责、RSV 明确不开启，均不在本支范围。
-> **配套交付物**（与本篇同目录）：《[01-预调研](01-预调研.md)》（现状与待确认项）、《[02-前置知识](02-前置知识.md)》（小白版向导）、《[03-SE设计](03-SE设计.md)》（四算子方案全文）、《[04-SRS_SD](04-SRS_SD.md)》（需求与设计）、[05-STC.xlsx](05-STC.xlsx)（用例与执行台账）、`06-SRS_SD评审.xlsx`、`07-代码评审-PR3842.xlsx`、《[09-经验总结](09-经验总结.md)》、`scripts/run_agv_reduce_npu_test.sh`（真机一键脚本）。
+> **配套交付物**（与本篇同目录）：《[01-预调研](01-预调研.md)》（现状与待确认项）、《[02-前置知识](02-前置知识.md)》（小白版向导）、《[03-SE设计](03-SE设计.md)》（四算子方案全文）、《[04-SRS_SD](04-SRS_SD.md)》（需求与设计）、`05-STC.xlsx`（用例与执行台账）、`06-SRS_SD评审.xlsx`、`07-代码评审-PR3842.xlsx`、《[09-经验总结](09-经验总结.md)》、`scripts/run_agv_reduce_npu_test.sh`（真机一键脚本）。xlsx 台账与脚本从仓库对应目录下载。
 
 ---
 
@@ -467,7 +467,7 @@ const bool recvFromRoot = (GetRankFromMap(stepInfo.fromRank) == tempAlgParams_.r
 | --- | --- | --- |
 | UT | `op_common_sym` 6 个用例：AR/RS/Reduce × 算法 × 层级矩阵、64bit/PROD、空 topo、单边语义、窗口有效性 | 6/6；全量 UT 597 条 0 失败（`fe20d3a` 快照；加这 6 条前为 591） |
 | ST | AGV：displs 空洞/全 0/非法/in-place/重叠/非单调 6 条专项；Reduce：白名单强制选路、非白名单回退、同 comm 连续两次调用、3 级 ParallelNHRNHR | AGV 默认 12/12（`f73a83c5` 快照；HEAD 为 13 个 TEST_F）；Reduce 23/23（同快照；HEAD 为 28 个 TEST_F）；全量 ST 记录 261 条 0 失败（`f73a83c5` / `st_suite_results.tsv`），另有 402 条口径来自 PR#3842 基线，两者不是同一快照 |
-| 真机 | 2 节点×8 测试集群：AGV 8 rank 多档数据量；Reduce SoleNHR/Parallel、root∈{0,3,8,15}、16MB/512MB 多轮 | 回归记录 24/24（当时脚本口径；HEAD 脚本有 26 个 active 用例，构成不能精确还原）；AGV 512MB 56.18→86.27 GB/s（1.53x，STC 未记录 dtype） |
+| 真机 | 2 节点×8 测试集群：AGV 8 rank 多档数据量；Reduce SoleNHR/Parallel、root∈`{0,3,8,15}`、16MB/512MB 多轮 | 回归记录 24/24（当时脚本口径；HEAD 脚本有 26 个 active 用例，构成不能精确还原）；AGV 512MB 56.18→86.27 GB/s（1.53x，STC 未记录 dtype） |
 
 **证据边界要讲清楚**：
 
