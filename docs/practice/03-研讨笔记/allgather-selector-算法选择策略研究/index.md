@@ -12,6 +12,7 @@
 - 讲稿：`分享_10分钟.md`（时间表 + 逐页口播 + Q&A）
 - 幻灯片：`slides/` 下 S1–S4、S6–S10（9 页，16:9；S5 已从分享版移除，文件保留）
 - 合并 PDF：`AllGather选算法_10分钟分享.pdf`（10 页 = 9 张幻灯片 + 第 3 页附录 `15_算法全景矩阵`）
+- 交互式计算器：`allgather_cost_calculator.html`（浏览器直接打开，选 rankSize / L0 / 端口 P / per-rank 数据量，实时算 `SoleNHR` 与 `ParallelMeshNHR` 的 cost、胜负与最近 util 断点）
 - 一键重生成：`python3 make_slides.py`，再 `python3 make_pdf.py`
 
 ---

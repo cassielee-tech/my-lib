@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AllGather 选路代价计算器</title>
+<style>
+  :root{
+    --ink:#1f2937; --gray:#6b7280; --line:#e5e7eb; --bg:#f5f7fa;
+    --blue:#2e5eaa; --orange:#e07b39; --purple:#7c3aed; --red:#c0392b; --green:#2a9d8f;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:28px 24px 48px; background:var(--bg); color:var(--ink);
+    font-family:"Hiragino Sans GB","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1{font-size:22px; margin:0 0 4px}
+  .sub{color:var(--gray); font-size:13px; margin-bottom:20px}
+  .wrap{max-width:1180px; margin:0 auto}
+  .grid{display:grid; grid-template-columns:320px 1fr; gap:18px; align-items:start}
+  @media (max-width:900px){ .grid{grid-template-columns:1fr} }
+  .card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 18px 16px}
+  .card h2{font-size:13px; letter-spacing:.04em; color:var(--gray); margin:0 0 14px; font-weight:600}
+  label{display:block; font-size:12px; color:var(--gray); margin:12px 0 5px}
+  label:first-of-type{margin-top:0}
+  select,input[type=number]{
+    width:100%; padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;
+    font-size:14px; color:var(--ink); background:#fff; font-variant-numeric:tabular-nums;
+  }
+  select:focus,input:focus{outline:2px solid #c7d2fe; outline-offset:1px; border-color:#93a4c8}
+  .row{display:flex; gap:8px}
+  .row > *{flex:1}
+  .presets{display:flex; flex-wrap:wrap; gap:6px; margin-top:14px}
+  .presets button{
+    font-size:12px; padding:5px 9px; border:1px solid #d1d5db; background:#fff;
+    border-radius:999px; cursor:pointer; color:var(--gray);
+  }
+  .presets button:hover{border-color:var(--blue); color:var(--blue)}
+  .hint{font-size:11.5px; color:#9aa3ae; line-height:1.6; margin-top:12px}
+
+  .results{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  @media (max-width:640px){ .results{grid-template-columns:1fr} }
+  .cand{border:1px solid var(--line); border-radius:10px; padding:14px 16px; position:relative}
+  .cand.win{border-color:var(--green); box-shadow:0 0 0 3px rgba(42,157,143,.10)}
+  .cand .name{font-size:13px; color:var(--gray)}
+  .cand .cost{font-size:30px; font-weight:700; font-variant-numeric:tabular-nums; margin-top:4px}
+  .cand .cost small{font-size:14px; font-weight:500; color:var(--gray); margin-left:3px}
+  .badge{position:absolute; top:12px; right:12px; font-size:11px; padding:2px 8px;
+         border-radius:999px; background:#e8f5f3; color:var(--green); font-weight:600}
+  .cand .meta{font-size:11.5px; color:var(--gray); margin-top:8px; font-variant-numeric:tabular-nums}
+
+  .delta{margin-top:12px; font-size:12.5px; color:var(--gray)}
+  .delta b{color:var(--ink)}
+
+  table{width:100%; border-collapse:collapse; font-size:12px; font-variant-numeric:tabular-nums}
+  th,td{text-align:right; padding:7px 6px; border-bottom:1px solid #f0f1f4}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--gray); font-weight:500; font-size:11px; letter-spacing:.02em}
+  tr.hl td{background:#fdf2f2}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11.5px}
+
+  .chart{margin-top:6px}
+  svg{width:100%; height:auto; display:block}
+  .legend{display:flex; gap:16px; font-size:12px; color:var(--gray); margin-top:6px}
+  .legend i{display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px}
+  .brk{margin-top:14px; padding:10px 12px; border-radius:8px; background:#fdf7ec;
+       border:1px solid #f3d9b5; font-size:12.5px; line-height:1.7; color:#7a5a2e}
+  .brk b{color:#8a5a12}
+  .note{font-size:11.5px; color:#9aa3ae; line-height:1.7; margin-top:16px}
+  .warn{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AllGather 选路代价计算器</h1>
+  <div class="sub">按仓内 <span class="mono">cost_table.cc / cost_model.cc</span> 复刻的模型计算 — 用于趋势判断与边界定位，不是上板实测</div>
+
+  <div class="grid">
+    <!-- 输入 -->
+    <div class="card">
+      <h2>输入</h2>
+
+      <label for="rank">rankSize（总卡数）</label>
+      <select id="rank">
+        <option>16</option><option>32</option><option selected>64</option>
+        <option>128</option><option>256</option><option>512</option>
+      </select>
+
+      <div class="row">
+        <div>
+          <label for="l0">L0（机内卡数）</label>
+          <select id="l0"><option>4</option><option selected>8</option><option>16</option></select>
+        </div>
+        <div>
+          <label for="ports">CLOS 端口 P</label>
+          <select id="ports"><option selected>1</option><option>2</option><option>4</option><option>8</option></select>
+        </div>
+      </div>
+
+      <label for="ds">per-rank 数据量</label>
+      <div class="row">
+        <input id="ds" type="number" value="64" min="0" step="any">
+        <select id="unit" style="flex:0 0 88px">
+          <option value="1">B</option>
+          <option value="1024" selected>KB</option>
+          <option value="1048576">MB</option>
+          <option value="1073741824">GB</option>
+        </select>
+      </div>
+
+      <div class="presets">
+        <button data-p="64,8,1,65535,1">64P 断点前 1 字节</button>
+        <button data-p="64,8,1,64,1024">64P 64KB</button>
+        <button data-p="16,8,1,1024,1024">16P 1MB</button>
+        <button data-p="128,8,1,64,1024">128P 64KB</button>
+      </div>
+
+      <div class="hint">
+        假设：非 POD、单端口向量、两级拓扑（机内 Mesh / 机间 NHR）。<br>
+        候选：<span class="mono">AicpuAllGatherSoleNHR</span> 与 <span class="mono">AicpuAllGatherParallelMeshNHR</span>。
+      </div>
+    </div>
+
+    <!-- 结果 -->
+    <div>
+      <div class="card">
+        <h2>结果</h2>
+        <div class="results">
+          <div class="cand" id="candNhr">
+            <div class="name">SoleNHR</div>
+            <div class="cost"><span id="costNhr">—</span><small>μs</small></div>
+            <div class="meta" id="metaNhr"></div>
+            <span class="badge" id="badgeNhr" hidden>胜出</span>
+          </div>
+          <div class="cand" id="candPar">
+            <div class="name">ParallelMeshNHR</div>
+            <div class="cost"><span id="costPar">—</span><small id="unitPar">μs</small></div>
+            <div class="meta" id="metaPar"></div>
+            <span class="badge" id="badgePar" hidden>胜出</span>
+          </div>
+        </div>
+        <div class="delta" id="delta"></div>
+        <div class="warn" id="warn"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2>代价曲线（当前点已标出）</h2>
+        <div class="chart"><svg id="chart" viewBox="0 0 760 280" preserveAspectRatio="xMidYMid meet"></svg></div>
+        <div class="legend">
+          <span id="lgNhr"><i style="background:#e07b39"></i>SoleNHR</span>
+          <span id="lgPar"><i style="background:#7c3aed"></i>ParallelMeshNHR</span>
+          <span style="color:#c0392b">◦ 当前数据量</span>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2>分段明细</h2>
+        <div id="detailNhr"></div>
+        <div id="detailPar" style="margin-top:16px"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2>SoleNHR 的 util 断点</h2>
+        <div class="brk" id="brk">—</div>
+      </div>
+
+      <div class="note">
+        模型说明：<span class="mono">segCost = (A/util + B) × dataSize + C</span>，
+        <span class="mono">cost = max(Σ组内折叠, ΣD)</span>；
+        <span class="mono">perTransfer = dataSize × dr</span>（NHR 再 × rankSize/2），只用于查 util 表。
+        查表规则：区间左闭右开，落在哪段用哪段的 util——正好等于上界，算下一段。
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const MIB = 1024 * 1024;
+  const BW = 56e9;         // 跨芯片带宽 B/ns? （B/s）
+  const LOCAL = 1400e9;    // 本地拷贝带宽
+
+  // util 表：每行 [上界, util]，覆盖区间 [上一行上界, 本行上界)
+  const CLOS_TAB = [
+    [0.125*MIB, 0.10388], [0.25*MIB, 0.10388], [0.5*MIB, 0.10388],
+    [1*MIB, 0.1855], [2*MIB, 0.3], [4*MIB, 0.4288], [8*MIB, 0.5302],
+    [16*MIB, 0.568], [32*MIB, 0.6549], [64*MIB, 0.7184],
+    [128*MIB, 0.7408], [256*MIB, 0.7644]
+  ];
+  const MESH_TAB = [
+    [1*MIB, 0.7135], [2*MIB, 0.7758], [4*MIB, 0.8112], [8*MIB, 0.8301],
+    [16*MIB, 0.84], [32*MIB, 0.8449], [64*MIB, 0.8475], [128*MIB, 0.8487], [256*MIB, 0.8494]
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (x, d=1) => x.toLocaleString("zh-CN", {minimumFractionDigits:d, maximumFractionDigits:d});
+  const fmtBytes = (n) => {
+    if (n >= MIB) return fmt(n/MIB, n % MIB === 0 ? 0 : 2) + " MB";
+    if (n >= 1024) return fmt(n/1024, n % 1024 === 0 ? 0 : 1) + " KB";
+    return fmt(n, 0) + " B";
+  };
+
+  // ---------- 模型 ----------
+  function ubUtil(net, per, op) {
+    op = op || "AG";
+    let ds = per;
+    if (op === "AG" && net === "CLOS" && ds < MIB) ds = MIB;   // AG 钳制
+    const tab = net === "CLOS" ? CLOS_TAB : MESH_TAB;
+    let i = 0;
+    while (i < tab.length && tab[i][0] <= ds) i++;             // 第一个 上界 > ds
+    return i === tab.length ? tab[tab.length - 1][1] : tab[i][1];
+  }
+
+  function nhrParams(rank, net, p, dr) {
+    const log2r = Math.floor(Math.log2(rank));
+    const kernel = Math.max(8*log2r - 7, 10);
+    const reff = Math.max(Math.floor(5*log2r/3), 2);
+    const task = 5*(reff-1) + 2*(reff-1)*2;
+    return { A:(rank-1)/(p*BW), B:1/LOCAL, C:2e-6*kernel, D:1.2e-6*task,
+             dr:(dr===undefined?1:dr), net:net, rs:rank, at:"NHR" };
+  }
+
+  function meshParams(rank, net, p, n, inToOut) {
+    const task = 5*(rank-1) + 2*(rank-1)*2;
+    const b = 1/LOCAL + (inToOut ? 1/LOCAL : 0);
+    const A = net === "MESH" ? n/BW : n*(rank-1)/(p*BW);
+    return { A:A, B:b, C:2e-6*8, D:0.6e-6*task, dr:n, net:net, rs:rank, at:"MESH" };
+  }
+
+  function quantize(r) {
+    let idx = Math.floor(r/0.125 + 0.5);
+    idx = Math.max(1, Math.min(7, idx));
+    return idx/8;
+  }
+  function alphaOf(l0, l1, p1) { return quantize(l1 / (l1 + l0*(l1-1)/p1)); }
+
+  function segCost(seg, ds) {
+    let dr = seg.dr;
+    if (seg.at === "NHR") dr *= seg.rs/2;
+    let per = Math.trunc(Math.fround(Math.fround(ds) * Math.fround(dr)));
+    if (per === 0) per = ds;
+    const u = ubUtil(seg.net, per);
+    return { per:per, util:u, cost:(seg.A/u + seg.B)*ds + seg.C };
+  }
+
+  function algCost(segs, groups, intraMax, ds) {
+    const totalD = segs.reduce((s,x)=>s+x.D, 0);
+    let idx = 0, total = 0;
+    const rows = [];
+    for (const g of groups) {
+      const vals = [];
+      for (let i=0;i<g;i++) { vals.push(segCost(segs[idx], ds)); idx++; }
+      total += intraMax ? Math.max(...vals.map(v=>v.cost)) : vals.reduce((s,v)=>s+v.cost,0);
+      rows.push(vals);
+    }
+    return { cost:Math.max(total, totalD), groupSum:total, totalD:totalD, rows:rows };
+  }
+
+  function soleNhr(rank, p) {
+    return { segs:[nhrParams(rank,"CLOS",p)], groups:[1], intraMax:false, l1:1, a:0 };
+  }
+
+  function parallel(rank, p, l0) {
+    const l1 = Math.floor(rank/l0);
+    const a = alphaOf(l0, l1, p), b = 1-a;
+    const segs = [
+      meshParams(l0, "MESH", 1, a, true),
+      nhrParams(l1, "CLOS", p, b),
+      meshParams(l0, "MESH", 1, b*l1, false),
+      nhrParams(l1, "CLOS", p, a*l0)
+    ];
+    const bConst = 23e-6;
+    const dAdd = 1.5e-6 * (9*rank + 32) / 32;
+    for (const s of segs) { s.C += bConst; if (s.D > 0) s.D += dAdd; }
+    return { segs:segs, groups:[2,2], intraMax:true, l1:l1, a:a };
+  }
+
+  // ---------- 渲染 ----------
+  function currentInputs() {
+    const rank = parseInt($("rank").value, 10);
+    const l0 = parseInt($("l0").value, 10);
+    const p = parseInt($("ports").value, 10);
+    const val = parseFloat($("ds").value);
+    const unit = parseFloat($("unit").value);
+    const ds = Math.max(0, Math.round(val * unit));
+    return { rank:rank, l0:l0, p:p, ds:ds };
+  }
+
+  function detailTable(title, res, segs, groups, intraMax, color) {
+    let html = `<div style="font-size:12.5px;font-weight:600;color:${color};margin-bottom:6px">${title}</div>`;
+    html += `<table><thead><tr>
+      <th>段</th><th>链路</th><th>dr</th><th>perTransfer</th><th>util</th><th>A/util × ds</th><th>+C</th><th>segCost</th>
+    </tr></thead><tbody>`;
+    let idx = 0;
+    for (const vals of res.rows) {
+      vals.forEach((v, k) => {
+        const seg = segs[idx];
+        const gIdx = res.rows.length > 1 ? (idx < 2 ? 1 : 2) : 1;
+        html += `<tr${idx===0?"":""}>
+          <td>seg${idx}</td>
+          <td>${seg.net}</td>
+          <td>${fmt(seg.dr, 3)}</td>
+          <td>${fmtBytes(v.per)}</td>
+          <td>${fmt(v.util, 4)}</td>
+          <td>${fmt((seg.A/v.util)*currentInputs().ds*1e6, 1)}</td>
+          <td>${fmt(seg.C*1e6, 1)}</td>
+          <td>${fmt(v.cost*1e6, 1)}</td>
+        </tr>`;
+        idx++;
+      });
+    }
+    const agg = intraMax
+      ? "max(seg0, seg1) + max(seg2, seg3)"
+      : "单段";
+    html += `</tbody></table>
+      <div style="font-size:11.5px;color:#6b7280;margin-top:6px">
+        组内折叠：${agg}　→　分段合计 ${fmt(res.groupSum*1e6,1)} μs　|　ΣD 下界 ${fmt(res.totalD*1e6,1)} μs
+        →　<b style="color:#1f2937">cost = max = ${fmt(res.cost*1e6,1)} μs</b>
+      </div>`;
+    return html;
+  }
+
+  function drawChart(rank, p, l0, ds, cN, cP) {
+    const svg = $("chart");
+    const W = 760, H = 280, L = 54, R = 14, T = 14, B = 34;
+    const iw = W - L - R, ih = H - T - B;
+    const x0 = 8*1024, x1 = Math.max(64*MIB, ds*4);
+    const samples = 240;
+    const xs = [], cn = [], cp = [];
+    const hasPar = typeof cP === "number" && isFinite(cP);
+    const mkSole = soleNhr(rank, p);
+    const mkPar  = hasPar ? parallel(rank, p, l0) : null;
+    for (let i=0;i<samples;i++) {
+      const t = i/(samples-1);
+      const x = Math.round(x0 * Math.pow(x1/x0, t));
+      xs.push(x);
+      cn.push(algCost(mkSole.segs, mkSole.groups, mkSole.intraMax, x).cost*1e6);
+      if (hasPar) cp.push(algCost(mkPar.segs, mkPar.groups, mkPar.intraMax, x).cost*1e6);
+    }
+    const lo = Math.max(1, Math.min(...cn, ...cp));
+    const hi = Math.max(...cn, ...cp, 10);    const d0 = Math.floor(Math.log10(lo));
+    const d1 = Math.ceil(Math.log10(hi));
+    const y0 = Math.pow(10, d0), y1 = Math.pow(10, d1);
+    const X = (v) => L + (Math.log(v/x0)/Math.log(x1/x0))*iw;
+    const Y = (v) => T + ih - (Math.log10(Math.max(v, y0)/y0) / Math.log10(y1/y0))*ih;
+    const fmtPower = (v) => v >= 1e6 ? (v/1e6)+"M" : v >= 1e3 ? (v/1e3)+"k" : String(v);
+
+    const path = (arr) => arr.map((v,i)=>`${i?"L":"M"}${X(xs[i]).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
+
+    // 网格与刻度
+    let g = "";
+    for (let d=d0; d<=d1; d++) {
+      const yv = Math.pow(10, d), y = Y(yv);
+      g += `<line x1="${L}" y1="${y.toFixed(1)}" x2="${W-R}" y2="${y.toFixed(1)}" stroke="#eef0f4"/>`;
+      g += `<text x="${L-8}" y="${(y+3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="#9aa3ae">${fmtPower(yv)}</text>`;
+    }
+    for (let e=13; e<=26; e+=3) {
+      const v = Math.pow(2,e);
+      if (v < x0 || v > x1) continue;
+      const x = X(v);
+      g += `<line x1="${x.toFixed(1)}" y1="${T}" x2="${x.toFixed(1)}" y2="${T+ih}" stroke="#eef0f4"/>`;
+      g += `<text x="${x.toFixed(1)}" y="${H-14}" text-anchor="middle" font-size="10" fill="#9aa3ae">${fmtBytes(v)}</text>`;
+    }
+    g += `<line x1="${L}" y1="${T+ih}" x2="${W-R}" y2="${T+ih}" stroke="#d1d5db"/>`;
+    g += `<text x="${L-8}" y="${T+4}" text-anchor="end" font-size="10" fill="#9aa3ae">μs</text>`;
+
+    const cxn = Math.max(x0, Math.min(x1, ds));
+    const px = X(cxn);
+    const marker = `
+      <line x1="${px.toFixed(1)}" y1="${T}" x2="${px.toFixed(1)}" y2="${T+ih}" stroke="#c0392b" stroke-dasharray="3 3" opacity=".55"/>
+      <circle cx="${px.toFixed(1)}" cy="${Y(cN).toFixed(1)}" r="4" fill="#fff" stroke="#e07b39" stroke-width="2"/>` +
+      (hasPar ? `<circle cx="${px.toFixed(1)}" cy="${Y(cP).toFixed(1)}" r="4" fill="#fff" stroke="#7c3aed" stroke-width="2"/>` : "");
+
+    svg.innerHTML = g +
+      `<path d="${path(cn)}" fill="none" stroke="#e07b39" stroke-width="2"/>` +
+      (hasPar ? `<path d="${path(cp)}" fill="none" stroke="#7c3aed" stroke-width="2"/>` : "") +
+      marker;
+  }
+
+  function nearestBreak(rank, p, ds) {
+    const s = rank/2;                       // SoleNHR: dr = 1，NHR 再 × rs/2
+    for (const [b] of CLOS_TAB) {
+      if (b < 2*MIB) continue;              // AG 钳制把 perTransfer < 2MB 的断点压平了
+      const dsB = b / s;                    // 反解回 per-rank
+      if (dsB >= ds) return { perB:b, dsB:dsB };
+    }
+    return null;
+  }
+
+  function render() {
+    const {rank, l0, p, ds} = currentInputs();
+    const warnEl = $("warn");
+    warnEl.textContent = "";
+    if (!(rank > 0) || !(ds > 0)) {
+      ["costNhr","costPar"].forEach(id => $(id).textContent = "—");
+      $("unitPar").hidden = false;
+      $("detailNhr").innerHTML = ""; $("detailPar").innerHTML = "";
+      $("delta").textContent = ""; $("brk").textContent = "输入数据量";
+      return;
+    }
+    const parValid = rank % l0 === 0 && rank / l0 >= 2;
+    const sn = soleNhr(rank, p);
+    const rn = algCost(sn.segs, sn.groups, sn.intraMax, ds);
+    const cN = rn.cost*1e6;
+    $("costNhr").textContent = fmt(cN, 1);
+    $("metaNhr").textContent = `perTransfer ${fmtBytes(Math.trunc(ds*rank/2))}`;
+    $("detailNhr").innerHTML = detailTable("SoleNHR", rn, sn.segs, sn.groups, sn.intraMax, "#e07b39");
+    $("lgPar").hidden = !parValid;
+
+    if (!parValid) {
+      warnEl.textContent = rank % l0 !== 0
+        ? `rankSize ${rank} 不能被 L0=${l0} 整除，Parallel 四段不成立。`
+        : `L1 = rankSize / L0 = ${rank/l0}，需要 L1 ≥ 2（即 L0 < rankSize），Parallel 四段不成立。`;
+      $("costPar").textContent = "不适用";
+      $("unitPar").hidden = true;
+      $("metaPar").textContent = "需要 L0 整除 rankSize 且 L1 ≥ 2";
+      $("detailPar").innerHTML = "";
+      $("candNhr").classList.remove("win");
+      $("candPar").classList.remove("win");
+      $("badgeNhr").hidden = true;
+      $("badgePar").hidden = true;
+      $("delta").innerHTML = "只给出 <b>SoleNHR</b> 的代价；换一个 L0 或 rankSize 再比较 Parallel。";
+      $("brk").textContent = "Parallel 不成立，本轮只算 SoleNHR。";
+      drawChart(rank, p, l0, ds, cN, null);
+      return;
+    }
+
+    const sp = parallel(rank, p, l0);
+    const rp = algCost(sp.segs, sp.groups, sp.intraMax, ds);
+    const cP = rp.cost*1e6;
+
+    $("costPar").textContent = fmt(cP, 1);
+    $("unitPar").hidden = false;
+    $("metaPar").textContent  = `α = ${fmt(sp.a,3)}　L1 = ${sp.l1}`;
+
+    const nWins = cN < cP;
+    $("candNhr").classList.toggle("win", nWins);
+    $("candPar").classList.toggle("win", !nWins);
+    $("badgeNhr").hidden = !nWins;
+    $("badgePar").hidden = nWins;
+    $("delta").innerHTML = `Δ = SoleNHR − Parallel = <b>${(cN-cP >= 0 ? "+" : "")}${fmt(cN-cP,1)} μs</b>
+      → <b>${nWins ? "SoleNHR" : "ParallelMeshNHR"}</b> 胜出，领先 ${fmt(Math.abs(cN-cP),1)} μs`;
+
+    $("detailPar").innerHTML = detailTable("ParallelMeshNHR", rp, sp.segs, sp.groups, sp.intraMax, "#7c3aed");
+
+    // 断点提示
+    const nb = nearestBreak(rank, p, ds);
+    if (!nb) {
+      $("brk").textContent = "当前数据量已超过表内最大档位（256MB）。";
+    } else {
+      const bEdge = Math.ceil(nb.dsB);
+      const gap = bEdge - ds;
+      const parCostAt = (d) => algCost(sp.segs, sp.groups, sp.intraMax, d).cost;
+      const before = algCost(sn.segs, sn.groups, sn.intraMax, Math.max(1, bEdge-1));
+      const after  = algCost(sn.segs, sn.groups, sn.intraMax, bEdge);
+      const pb = parCostAt(Math.max(1, bEdge-1)), pa = parCostAt(bEdge);
+      const flip = (before.cost < pb) !== (after.cost < pa);
+      $("brk").innerHTML =
+        (gap > 0
+          ? `下一个 util 断点：perTransfer = <b>${fmtBytes(nb.perB)}</b> → per-rank <b>${fmtBytes(bEdge)}</b>（还差 ${fmt(gap,0)} 字节）`
+          : `当前就在 util 断点上：perTransfer = <b>${fmtBytes(nb.perB)}</b> → per-rank <b>${fmtBytes(bEdge)}</b>（正好等于上界，util 取下一档）`) + `<br>` +
+        `断点两侧：SoleNHR ${fmt(before.cost*1e6,1)} → ${fmt(after.cost*1e6,1)} μs，` +
+        `Parallel ${fmt(pb*1e6,1)} → ${fmt(pa*1e6,1)} μs　` +
+        (flip ? `<b style="color:#c0392b">→ 这里会发生胜负翻转</b>` : `→ 不翻转`);
+    }
+
+    drawChart(rank, p, l0, ds, cN, cP);
+  }
+
+  // 事件
+  ["rank","l0","ports","ds","unit"].forEach(id => {
+    $(id).addEventListener("input", render);
+    $(id).addEventListener("change", render);
+  });
+  document.querySelectorAll(".presets button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const [r, l0, p, v, u] = btn.dataset.p.split(",").map(Number);
+      $("rank").value = String(r);
+      $("l0").value = String(l0);
+      $("ports").value = String(p);
+      // 按最合适的单位回填
+      if (u === 1) { $("unit").value = "1"; $("ds").value = String(v); }
+      else { $("unit").value = String(u); $("ds").value = String(v/u); }
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
