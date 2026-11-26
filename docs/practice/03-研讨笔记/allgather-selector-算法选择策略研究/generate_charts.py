@@ -16,12 +16,13 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Rectangle
+from matplotlib.ticker import FuncFormatter
 import numpy as np
 
 OUT = os.path.dirname(os.path.abspath(__file__))
 
 plt.rcParams.update({
-    "font.sans-serif": ["PingFang HK", "Arial Unicode MS", "Heiti TC"],
+    "font.sans-serif": ["Hiragino Sans GB", "Songti SC", "Arial Unicode MS"],
     "axes.unicode_minus": False,
     "figure.dpi": 160,
     "savefig.dpi": 160,
@@ -456,7 +457,7 @@ def chart06():
         ax.axvline(b * MIB, color="#D1D5DB", ls=":", lw=1.0)
     ax.set_xscale("log")
     ax.set_xlabel("per-rank dataSize（字节，对数轴）", fontsize=11)
-    ax.set_ylabel("cost（µs）", fontsize=11)
+    ax.set_ylabel("cost（μs）", fontsize=11)
     ax.legend(fontsize=10.5, loc="upper left")
     fig.subplots_adjust(bottom=0.15)
     fig.text(0.5, 0.02, "假设：非 POD、CLOS 端口 P=1、L0=8、α 量化到 1/8；"
@@ -485,7 +486,7 @@ def chart07():
             fontweight="bold")
     ax.set_xscale("log")
     ax.set_xlabel("per-rank dataSize（对数轴）", fontsize=10.5)
-    ax.set_ylabel("cost（µs）", fontsize=10.5)
+    ax.set_ylabel("cost（μs）", fontsize=10.5)
     ax.legend(fontsize=10)
     ax.set_title("(a) 全局视图", fontsize=12)
 
@@ -499,15 +500,20 @@ def chart07():
     ax.axvline(64, color=C["warn"], ls="--", lw=1.6)
     ax.axhline((zn[-1] + zp[-1]) / 2, color="#D1D5DB", lw=1.0, ls=":")
     x0, x1 = 60, 68
-    ax.annotate("65535B：Parallel 赢 ≈22µs", xy=(63.95, 276), xytext=(60.3, 305), fontsize=9.2,
-                color=C["par"], arrowprops=dict(arrowstyle="->", color=C["par"], lw=1.2))
-    ax.annotate("65536B：SoleNHR 赢 ≈22µs\nutil 0.3→0.4288（跳降≈74µs）",
-                xy=(64.05, 257), xytext=(64.35, 242), fontsize=8.8, color=C["nhr"], va="bottom",
+    n_lo = alg_cost(*sole_nhr(rank, p), 65535)[0] * 1e6
+    p_lo = alg_cost(*parallel(rank, p), 65535)[0] * 1e6
+    n_hi = alg_cost(*sole_nhr(rank, p), 65536)[0] * 1e6
+    p_hi = alg_cost(*parallel(rank, p), 65536)[0] * 1e6
+    ax.annotate(f"65535B：Parallel 赢 ≈{n_lo - p_lo:.1f}μs", xy=(63.95, p_lo), xytext=(60.3, 305),
+                fontsize=9.2, color=C["par"], arrowprops=dict(arrowstyle="->", color=C["par"], lw=1.2))
+    ax.annotate(f"65536B：SoleNHR 赢 ≈{p_hi - n_hi:.1f}μs\n"
+                f"util 0.3→0.4288（跳降≈{n_lo - n_hi:.1f}μs）",
+                xy=(64.05, n_hi), xytext=(64.35, 242), fontsize=8.8, color=C["nhr"], va="bottom",
                 arrowprops=dict(arrowstyle="->", color=C["nhr"], lw=1.2))
     ax.set_xlim(60, 68)
     ax.set_ylim(238, 336)
     ax.set_xlabel("per-rank dataSize（KB）", fontsize=10.5)
-    ax.set_ylabel("cost（µs）", fontsize=10.5)
+    ax.set_ylabel("cost（μs）", fontsize=10.5)
     ax.legend(fontsize=9.5, loc="upper left")
     ax.set_title("(b) 64KB 附近放大", fontsize=12)
     fig.subplots_adjust(bottom=0.17)
@@ -569,7 +575,7 @@ def chart08():
         ax.set_title(title, fontsize=13)
         ax.set_xlabel("per-rank dataSize", fontsize=10)
         ax.legend(fontsize=8.5, loc="upper left")
-    axes[0].set_ylabel("cost 分量（µs）", fontsize=10.5)
+    axes[0].set_ylabel("cost 分量（μs）", fontsize=10.5)
     fig.text(0.5, 0.015, "最终 cost = max(分量和, ΣD)；柱顶数字为最终 cost。小数据由 D 主导，大数据由 A/util 主导。",
              ha="center", fontsize=9, color=C["gray"])
     save(fig, "08_代价构成分解.png")
@@ -622,7 +628,7 @@ def chart09():
 def chart10():
     cases = [(64, 1), (32, 2), (16, 4), (128, 1)]
     fig, axes = plt.subplots(2, 2, figsize=(15, 9))
-    fig.suptitle("flip-flop 扫描：Δcost = cost(SoleNHR) − cost(ParallelMeshNHR)", fontsize=18,
+    fig.suptitle("flip-flop 扫描：Δcost = cost(SoleNHR) - cost(ParallelMeshNHR)", fontsize=18,
                  fontweight="bold")
     for ax, (rank, p) in zip(axes.flat, cases):
         ds = np.logspace(math.log10(8 * 1024), math.log10(64 * MIB), 900).astype(np.int64)
@@ -645,11 +651,13 @@ def chart10():
                         fontsize=8.2, color=C["warn"], ha="right",
                         arrowprops=dict(arrowstyle="->", color=C["warn"], lw=1.0))
         ax.set_yscale("symlog", linthresh=10, linscale=0.7)
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda v, pos: f"{v:g}"))
         ax.set_xscale("log")
         ax.set_title(f"rank={rank}P, CLOS P={p}", fontsize=12)
         ax.set_xlabel("per-rank dataSize（对数轴）", fontsize=9)
-        ax.set_ylabel("Δcost（µs，symlog）", fontsize=9)
+        ax.set_ylabel("Δcost（μs，symlog）", fontsize=9)
         ax.legend(fontsize=8, loc="upper left")
+    fig.subplots_adjust(top=0.90, bottom=0.10, left=0.06, right=0.98, hspace=0.36, wspace=0.16)
     fig.text(0.5, 0.01, "竖虚线：SoleNHR 的 CLOS util 断点（2/4/8/16/32/64/128/256MB 折算到 per-rank）；"
                         "每次跨断点 cost 跳变，可能穿越 0 线。", ha="center", fontsize=9, color=C["gray"])
     save(fig, "10_flipflop扫描.png")
@@ -721,11 +729,10 @@ def chart12():
                                          fc=fc, ec="white", lw=1.5))
             ax1.text(c, s, f"{s * l0 + c}", ha="center", va="center", fontsize=7.5, color=C["ink"])
         ax1.add_patch(Rectangle((-0.5, s - 0.5), l0, 1.0, fill=False, ec=C["par"], lw=2.2))
-    ax1.text(-0.05, -0.85, "L0：机内 MESH（8 卡）", fontsize=9.5, color=C["mesh"])
-    ax1.text(-0.05, -1.05, "L1：服务器间 CLOS/NHR", fontsize=9.5, color=C["nhr"])
-
+    fig.text(0.045, 0.042, "L0：机内 MESH（8 卡）", fontsize=9.5, color=C["mesh"])
+    fig.text(0.045, 0.010, "L1：服务器间 CLOS/NHR", fontsize=9.5, color=C["nhr"])
     ax2 = fig.add_axes([0.52, 0.14, 0.45, 0.76])
-    segs = ["seg0\nMesh L0\nα", "seg1\nNHR L1\n1−α", "seg2\nMesh L0\n(1−α)·L1", "seg3\nNHR L1\nα·L0"]
+    segs = ["seg0\nMesh L0\nα", "seg1\nNHR L1\n1-α", "seg2\nMesh L0\n(1-α)·L1", "seg3\nNHR L1\nα·L0"]
     vals = [a, b, b * l1, a * l0]
     colors = [C["mesh"], C["nhr"], C["mesh"], C["nhr"]]
     bars = ax2.bar(range(4), vals, color=colors, alpha=0.9, width=0.62)
@@ -736,7 +743,7 @@ def chart12():
     ax2.set_xticklabels(segs, fontsize=9)
     ax2.set_ylabel("dataRatio（相对 per-rank dataSize）", fontsize=10)
     ax2.set_title("ParallelMeshNHR 的 4 段数据比与聚合方式", fontsize=13, pad=8)
-    ax2.text(0.5, 0.95, f"α = quantize( L1 / (L1 + L0·(L1−1)/P) ) = {a:.3f}\n"
+    ax2.text(0.5, 0.95, f"α = quantize( L1 / (L1 + L0·(L1-1)/P) ) = {a:.3f}\n"
                         f"cost = max(seg0,seg1) + max(seg2,seg3)，再与 ΣD 取 max",
              transform=ax2.transAxes, ha="center", va="top", fontsize=9,
              bbox=dict(boxstyle="round,pad=0.35", fc=C["bg"], ec="#D1D5DB"))
@@ -761,11 +768,11 @@ def chart13():
     for x1, x2 in [(0.235, 0.275), (0.465, 0.50), (0.72, 0.75)]:
         arrow(ax, (x1, 0.72), (x2, 0.72), lw=2)
 
-    box(ax, 0.14, 0.47, 0.22, 0.10, "A：跨卡传输斜率\nMesh: n/BW\nNHR: n·(rs−1)/(P·BW)",
+    box(ax, 0.14, 0.47, 0.22, 0.10, "A：跨卡传输斜率\nMesh: n/BW\nNHR: n·(rs-1)/(P·BW)",
         fc="white", ec=C["mesh"], fs=9)
     box(ax, 0.40, 0.47, 0.22, 0.10, "B：本地拷贝斜率\n1/1400GB/s\n（64bit/PROD 另加 Breduce）",
         fc="white", ec=C["ok"], fs=9)
-    box(ax, 0.66, 0.47, 0.22, 0.10, "C / D：固定开销\nC = 2µs × kernelNum\nD = 1.2µs/0.6µs × taskNum",
+    box(ax, 0.66, 0.47, 0.22, 0.10, "C / D：固定开销\nC = 2μs × kernelNum\nD = 1.2μs/0.6μs × taskNum",
         fc="white", ec=C["warn"], fs=9)
     arrow(ax, (0.61, 0.675), (0.14, 0.525), color="#9AA3AE", lw=1.2, ls="--")
     arrow(ax, (0.61, 0.675), (0.40, 0.525), color="#9AA3AE", lw=1.2, ls="--")
@@ -823,6 +830,267 @@ def scan_and_dump():
     return rows
 
 
+
+# --------------------------------------------------------------------------- #
+# 14 35 个唯一算法名：引擎 × 编排 × 链路
+# --------------------------------------------------------------------------- #
+# 名单来源：src/ops/all_gather/algorithm/executor/*.cc 中 REGISTER_EXEC*/REGISTER_EXECUTOR*
+# 宏的第一实参（HcclCMDType::HCCL_CMD_ALLGATHER 之后），去重后共 35 个。
+AG_ALGO_NAMES = [
+    "AicpuAllGatherConcurMeshNHR",
+    "AicpuAllGatherParallelMeshNHR",
+    "AicpuAllGatherParallelMeshNHRMultiJetty",
+    "AicpuAllGatherParallelNHRNHR",
+    "AicpuAllGatherPipeLineMeshNHR",
+    "AicpuAllGatherPipeLineMeshNHRNHR",
+    "AicpuAllGatherSequenceMeshConcurNHR",
+    "AicpuAllGatherSequenceMeshConcurNHRNHR",
+    "AicpuAllGatherSequenceMeshConcurRHD",
+    "AicpuAllGatherSequenceMeshConcurRHDRHD",
+    "AicpuAllGatherSoleMesh",
+    "AicpuAllGatherSoleMeshConcur",
+    "AicpuAllGatherSoleNHR",
+    "AicpuAllGatherSoleNHRMultiLink",
+    "AivAllGatherSoleMesh",
+    "AivUrmaAllGatherSequenceMeshConcurMesh",
+    "CcuMSAllGatherSoleMesh",
+    "CcuMSAllGatherSoleMesh2Die",
+    "CcuSchedAllGatherConcurMeshNHRMultiLink",
+    "CcuSchedAllGatherParallelMeshNHR",
+    "CcuSchedAllGatherParallelMeshNHRMultiLink",
+    "CcuSchedAllGatherPipeLineMeshNHR",
+    "CcuSchedAllGatherSequenceMeshMesh",
+    "CcuSchedAllGatherSoleMesh",
+    "CcuSchedAllGatherSoleMesh2Die",
+    "CcuSchedAllGatherSoleMeshConcur",
+    "CcuSchedAllGatherSoleNHR",
+    "CcuSchedAllGatherSoleNHRMultiLink",
+    "DpuAllGatherPipeLineMeshNHRNHR",
+    "DpuAllGatherPipeLineMeshNHRNHRNDA",
+    "DpuAllGatherSequenceMeshConcurNHRNHR",
+    "DpuAllGatherSequenceMeshConcurRHDRHD",
+    "DpuAllGatherSequenceMeshNHR",
+    "DpuAllGatherSequenceMeshRHD",
+    "DpuAllGatherSequenceNHRNHRNDA",
+]
+
+ENGINE_LABEL = {
+    "Aicpu": "AICPU", "Aiv": "AIV", "AivUrma": "AIV_URMA",
+    "CcuMS": "CCU_MS", "CcuSched": "CCU_SCHED", "Dpu": "DPU",
+}
+FAMILIES = ["Sole", "Parallel", "PipeLine", "Sequence", "Concur"]
+FAM_COLOR = {
+    "Sole": ("#DCE7F5", "#2E5EAA"),
+    "Parallel": ("#EDE4FB", "#7C3AED"),
+    "PipeLine": ("#FBE3D1", "#E07B39"),
+    "Sequence": ("#DDF0EC", "#2A9D8F"),
+    "Concur": ("#FBE0DC", "#C0392B"),
+}
+
+
+def _split_algo(name):
+    engine_raw, rest = name.split("AllGather", 1)
+    family = next(f for f in FAMILIES if rest.startswith(f))
+    return ENGINE_LABEL[engine_raw], family, rest[len(family):]
+
+
+def chart14():
+    grid, engine_tot, fam_tot = {}, {}, {}
+    for n in AG_ALGO_NAMES:
+        eng, fam, suffix = _split_algo(n)
+        grid.setdefault(eng, {}).setdefault(fam, []).append(suffix)
+        engine_tot[eng] = engine_tot.get(eng, 0) + 1
+        fam_tot[fam] = fam_tot.get(fam, 0) + 1
+
+    engines = sorted(engine_tot, key=lambda e: -engine_tot[e])
+    fams = sorted(fam_tot, key=lambda f: -fam_tot[f])
+
+    fig, ax = plain_axes((16, 9))
+    ax.text(0.5, 0.955, "35 个唯一算法名 = 引擎 × 编排 × 链路的合法组合",
+            ha="center", va="center", fontsize=20, fontweight="bold")
+    ax.text(0.5, 0.915, "同一套编排换个引擎就是另一个名字；实际在册 35 个，老路径只会直接给出其中 27 个",
+            ha="center", va="center", fontsize=11, color=C["gray"])
+
+    x0, x1 = 0.185, 0.865
+    top, bottom = 0.745, 0.170
+    cw = (x1 - x0) / len(fams)
+    ch = (top - bottom) / len(engines)
+
+    # 列头
+    for j, fam in enumerate(fams):
+        cx = x0 + (j + 0.5) * cw
+        ax.text(cx, 0.786, fam, ha="center", va="center", fontsize=12, fontweight="bold",
+                color=FAM_COLOR[fam][1])
+        ax.text(cx, 0.762, f"{fam_tot[fam]} 个", ha="center", va="center", fontsize=9, color=C["gray"])
+
+    # 行标签
+    for i, eng in enumerate(engines):
+        cy = top - (i + 0.5) * ch
+        ax.text(0.172, cy + 0.014, eng, ha="right", va="center", fontsize=11.5, fontweight="bold")
+        ax.text(0.172, cy - 0.016, f"{engine_tot[eng]} 个", ha="right", va="center",
+                fontsize=9, color=C["gray"])
+
+    # 单元格
+    for i, eng in enumerate(engines):
+        for j, fam in enumerate(fams):
+            cell_x = x0 + j * cw
+            cell_y = top - (i + 1) * ch
+            items = grid.get(eng, {}).get(fam, [])
+            if not items:
+                ax.add_patch(Rectangle((cell_x + 0.004, cell_y + 0.004), cw - 0.008, ch - 0.008,
+                                       fc="#F8F9FB", ec="#EDEEF2", lw=0.8, zorder=1))
+                continue
+            fc, ec = FAM_COLOR[fam]
+            ax.add_patch(FancyBboxPatch((cell_x + 0.004, cell_y + 0.004), cw - 0.008, ch - 0.008,
+                                        boxstyle="round,pad=0.002,rounding_size=0.006",
+                                        fc=fc, ec=ec, lw=1.0, zorder=1))
+            ax.text(cell_x + 0.016, cell_y + ch - 0.020, str(len(items)), ha="left", va="center",
+                    fontsize=13, fontweight="bold", color=ec, zorder=3)
+            ax.text(cell_x + cw / 2 + 0.008, cell_y + ch / 2 - 0.008, "\n".join(items),
+                    ha="center", va="center", fontsize=6.6, color=C["ink"], linespacing=1.42, zorder=3)
+
+    # 汇总
+    ax.text(0.5, 0.132,
+            "  +  ".join(f"{fam} {fam_tot[fam]}" for fam in fams) + f"  =  {len(AG_ALGO_NAMES)} 个算法名",
+            ha="center", va="center", fontsize=12, fontweight="bold", color=C["ink"])
+    ax.text(0.5, 0.096,
+            "名字读法：<引擎><算子><编排><链路/模板>   例：CcuSched · AllGather · Sole · NHRMultiLink",
+            ha="center", va="center", fontsize=10, color=C["gray"])
+    ax.text(0.5, 0.058,
+            "来源：src/ops/all_gather/algorithm/executor/*.cc 的 REGISTER_EXEC* 宏，去重后 35 个；"
+            "部分注册在 CANN_VERSION / AICPU_COMPILE 宏内，实际编入集合随构建而定",
+            ha="center", va="center", fontsize=8.6, color="#9AA3AE")
+    save(fig, "14_35个算法名.png")
+
+
+
+# --------------------------------------------------------------------------- #
+# 15 算法全景：注册 35 = 老路径 27 + 新路径独占 8
+# --------------------------------------------------------------------------- #
+# 老路径可达集合：src/ops/all_gather/selector/*.cc 中 selectAlgName = "..." 的字面量（27 个，全部在册）
+AG_OLD_PATH_NAMES = {
+    "AicpuAllGatherConcurMeshNHR",
+    "AicpuAllGatherParallelMeshNHR",
+    "AicpuAllGatherParallelNHRNHR",
+    "AicpuAllGatherPipeLineMeshNHR",
+    "AicpuAllGatherPipeLineMeshNHRNHR",
+    "AicpuAllGatherSequenceMeshConcurNHRNHR",
+    "AicpuAllGatherSoleMesh",
+    "AicpuAllGatherSoleMeshConcur",
+    "AicpuAllGatherSoleNHR",
+    "AicpuAllGatherSoleNHRMultiLink",
+    "AivAllGatherSoleMesh",
+    "CcuMSAllGatherSoleMesh",
+    "CcuMSAllGatherSoleMesh2Die",
+    "CcuSchedAllGatherConcurMeshNHRMultiLink",
+    "CcuSchedAllGatherParallelMeshNHR",
+    "CcuSchedAllGatherParallelMeshNHRMultiLink",
+    "CcuSchedAllGatherPipeLineMeshNHR",
+    "CcuSchedAllGatherSequenceMeshMesh",
+    "CcuSchedAllGatherSoleMesh",
+    "CcuSchedAllGatherSoleMesh2Die",
+    "CcuSchedAllGatherSoleMeshConcur",
+    "CcuSchedAllGatherSoleNHR",
+    "CcuSchedAllGatherSoleNHRMultiLink",
+    "DpuAllGatherPipeLineMeshNHRNHR",
+    "DpuAllGatherPipeLineMeshNHRNHRNDA",
+    "DpuAllGatherSequenceMeshNHR",
+    "DpuAllGatherSequenceNHRNHRNDA",
+}
+
+# 老路径分支矩阵（附录 02）里，各引擎在 5 种拓扑下的覆盖
+ENGINE_TOPO = {
+    "AICPU": ("5/5", "单级 · 两级 · UBX · PCIE · CLOS"),
+    "CCU_SCHED": ("5/5", "单级 · 两级 · UBX · PCIE · CLOS"),
+    "DPU": ("3/5", "两级 · UBX · PCIE（NDA 走这一支）"),
+    "CCU_MS": ("3/5", "单级 · UBX · PCIE（两级仅 2P≥4MB 回退）"),
+    "AIV": ("5/5", "单级 · 两级 · UBX · PCIE · CLOS"),
+    "AIV_URMA": ("0/5", "无老路径分支，只有新路径能选"),
+}
+NEW_ONLY_COLOR = "#C0392B"
+
+
+def chart15():
+    grid, engine_tot = {}, {}
+    old_cnt = 0
+    for n in AG_ALGO_NAMES:
+        eng, fam, suffix = _split_algo(n)
+        is_old = n in AG_OLD_PATH_NAMES
+        old_cnt += int(is_old)
+        grid.setdefault(eng, {}).setdefault(fam, []).append((suffix, is_old))
+        engine_tot[eng] = engine_tot.get(eng, 0) + 1
+
+    engines = sorted(engine_tot, key=lambda e: -engine_tot[e])
+    fams = sorted({f for e in grid for f in grid[e]},
+                  key=lambda f: -sum(len(v) for e in grid for ff, v in grid[e].items() if ff == f))
+
+    fig, ax = plain_axes((16, 9))
+    ax.text(0.5, 0.955, "算法全景：注册 35 个，老路径只覆盖其中 27 个",
+            ha="center", va="center", fontsize=20, fontweight="bold")
+    ax.text(0.5, 0.915, "同一套编排换个引擎就是另一个名字；带 ○ 的 8 个只有新路径（cost model）能选到",
+            ha="center", va="center", fontsize=11, color=C["gray"])
+
+    x0, x1 = 0.130, 0.722
+    top, bottom = 0.690, 0.170
+    cw = (x1 - x0) / len(fams)
+    ch = (top - bottom) / len(engines)
+
+    # 列头
+    for j, fam in enumerate(fams):
+        cx = x0 + (j + 0.5) * cw
+        ax.text(cx, 0.728, fam, ha="center", va="center", fontsize=11.5, fontweight="bold",
+                color=FAM_COLOR[fam][1])
+    ax.text(0.855, 0.728, "老路径的拓扑覆盖", ha="center", va="center", fontsize=10.5,
+            fontweight="bold", color=C["ink"])
+
+    # 行标签
+    for i, eng in enumerate(engines):
+        cy = top - (i + 0.5) * ch
+        ax.text(0.122, cy + 0.012, eng, ha="right", va="center", fontsize=10.5, fontweight="bold")
+        ax.text(0.122, cy - 0.016, f"{engine_tot[eng]} 个", ha="right", va="center",
+                fontsize=8.5, color=C["gray"])
+
+    lh = 0.0122
+    for i, eng in enumerate(engines):
+        for j, fam in enumerate(fams):
+            cell_x = x0 + j * cw
+            cell_y = top - (i + 1) * ch
+            items = grid.get(eng, {}).get(fam, [])
+            if not items:
+                ax.add_patch(Rectangle((cell_x + 0.003, cell_y + 0.004), cw - 0.006, ch - 0.008,
+                                       fc="#F8F9FB", ec="#EDEEF2", lw=0.8, zorder=1))
+                continue
+            fc, ec = FAM_COLOR[fam]
+            ax.add_patch(FancyBboxPatch((cell_x + 0.003, cell_y + 0.004), cw - 0.006, ch - 0.008,
+                                        boxstyle="round,pad=0.002,rounding_size=0.006",
+                                        fc=fc, ec=ec, lw=1.0, zorder=1))
+            ax.text(cell_x + 0.013, cell_y + ch - 0.017, str(len(items)), ha="left", va="center",
+                    fontsize=11.5, fontweight="bold", color=ec, zorder=3)
+            start_y = cell_y + ch / 2 - 0.006 + (len(items) - 1) * lh / 2
+            for k, (suffix, is_old) in enumerate(items):
+                label = suffix if is_old else f"○ {suffix}"
+                ax.text(cell_x + cw / 2 + 0.006, start_y - k * lh, label, ha="center", va="center",
+                        fontsize=6.3, color=C["ink"] if is_old else NEW_ONLY_COLOR, zorder=3)
+
+        # 右侧：老路径拓扑覆盖
+        cy = top - (i + 0.5) * ch
+        cover, detail = ENGINE_TOPO.get(eng, ("—", ""))
+        ax.text(0.742, cy + 0.013, f"老路径 {cover}", ha="left", va="center", fontsize=9,
+                fontweight="bold", color=C["ink"] if cover != "0/5" else NEW_ONLY_COLOR)
+        ax.text(0.742, cy - 0.015, detail, ha="left", va="center", fontsize=7.2, color=C["gray"])
+
+    # 图例与汇总
+    ax.text(0.135, 0.128, "○ 仅新路径可选", ha="left", va="center", fontsize=9.5, color=NEW_ONLY_COLOR)
+    ax.text(0.300, 0.128, "其余为老路径也会直接选（27 个）", ha="left", va="center", fontsize=9.5,
+            color=C["gray"])
+    ax.text(0.5, 0.082, "注册 35 = 老路径可达 27 + 新路径独占 8",
+            ha="center", va="center", fontsize=13, fontweight="bold", color=C["ink"])
+    ax.text(0.5, 0.040,
+            "新路径独占的 8 个集中在 RHD / MultiJetty / URMA 等较新变体：老阈值树只为老算法加过分支",
+            ha="center", va="center", fontsize=9, color=C["gray"])
+    save(fig, "15_算法全景矩阵.png")
+
+
 if __name__ == "__main__":
     chart01()
     chart02()
@@ -837,5 +1105,7 @@ if __name__ == "__main__":
     chart11()
     chart12()
     chart13()
+    chart14()
+    chart15()
     scan_and_dump()
     print("done")
