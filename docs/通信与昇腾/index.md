@@ -12,15 +12,15 @@
 
 | 章 | 主题 | 学完能够回答的问题 | 状态 |
 | ---: | --- | --- | --- |
-| 1 | [Collective 语义与代价模型](01-collective-semantics-cost.md) | 六大原语的输入输出是什么？α-β-γ 账本怎么算？ | ✅ |
-| 2 | [Ring AllReduce 完整推导](02-ring-allreduce.md) | Ring 为什么等于 RS 加 AG？每轮发送哪一块数据？ | ✅ |
-| 3 | [Tree、Recursive Doubling 与算法选择](03-tree-algorithms-selection.md) | 小消息和大消息为什么选不同算法？分界线在哪？ | ✅ |
+| 1 | [Collective 语义与代价模型](01-Collective语义与代价模型.md) | 六大原语的输入输出是什么？α-β-γ 账本怎么算？ | ✅ |
+| 2 | [Ring AllReduce 完整推导](02-Ring-AllReduce推导.md) | Ring 为什么等于 RS 加 AG？每轮发送哪一块数据？ | ✅ |
+| 3 | [Tree、Recursive Doubling 与算法选择](03-Tree、RD与算法选择.md) | 小消息和大消息为什么选不同算法？分界线在哪？ | ✅ |
 | 4 | [AllGather、ReduceScatter 与 AlltoAll](04-gather-scatter-alltoall.md) | 数据布局怎样变化？MoE AlltoAll 为什么容易失衡？ | ✅ |
-| 5 | [拓扑、分层通信与通信计算重叠](05-topology-hierarchical-overlap.md) | 机内和机间链路怎样组合？Chunk、Channel、重叠各解决什么？ | ✅ |
+| 5 | [拓扑、分层通信与通信计算重叠](05-拓扑、分层与重叠.md) | 机内和机间链路怎样组合？Chunk、Channel、重叠各解决什么？ | ✅ |
 
 - 学习顺序即章号顺序：语义账本（1）→ 算法（2/3）→ 原语场景（4）→ 拓扑与兑现（5）；
 - **第 2 章务必手推**：4 rank 的 RS+AG 两阶段模拟是本篇的验收硬指标；
-- 每读一章，对照 [HCCL 源码 5](源码课程/05-coll-algorithms.md) 的实现视角看一遍——理论/实现双轨并进。
+- 每读一章，对照 [HCCL 源码 5](源码课程/05-算法与selector.md) 的实现视角看一遍——理论/实现双轨并进。
 
 **验收**：手工模拟 4~8 个 rank 的 Ring AllReduce（每轮谁发哪块）；用 α-β-γ 模型按消息大小与 rank 数比较算法，算出分界点；解释机内/机间分层通信为什么快；说出 chunk/channel/重叠各自解决什么、代价是什么。
 
@@ -32,20 +32,20 @@
 
 | 章 | 主题 | 学完能够回答的问题 | 状态 |
 | ---: | --- | --- | --- |
-| 0 | [认识昇腾与 CANN](00-ascend-cann.md) | NPU/达芬奇架构、CANN 软件栈、版本与环境链？ | ✅ |
-| 1 | [Runtime 与任务执行](01-runtime-task-execution.md) | Host/Device 分工、内存搬运、Stream/Event、aclnn 两段式与双时间线？ | ✅ |
-| 2 | [从 PyTorch 走向 HCCL](02-pytorch-to-hccl.md) | torch_npu 三件注册、ProcessGroup 门面、Stream 缝合与 AllReduce 六站旅程？ | ✅ 主线收官 |
+| 0 | [认识昇腾与 CANN](00-认识昇腾与CANN.md) | NPU/达芬奇架构、CANN 软件栈、版本与环境链？ | ✅ |
+| 1 | [Runtime 与任务执行](01-Runtime与任务执行.md) | Host/Device 分工、内存搬运、Stream/Event、aclnn 两段式与双时间线？ | ✅ |
+| 2 | [从 PyTorch 走向 HCCL](02-从PyTorch走向HCCL.md) | torch_npu 三件注册、ProcessGroup 门面、Stream 缝合与 AllReduce 六站旅程？ | ✅ 主线收官 |
 
 工具与参考（同属昇腾类）：
 
-- [CANN 常用命令速查](cann常用命令.md)：环境、版本、设备监控、日志、Profiling 与分布式排障；
+- [CANN 常用命令速查](CANN常用命令.md)：环境、版本、设备监控、日志、Profiling 与分布式排障；
 - [CANN Learning Hub 笔记](cann-learning-hub.md)：CANN 组件与 CUDA 生态对照表。
 
 ### HCCL 与 HCOMM（双仓源码课程）
 
 | 课程 | 主题 | 学完能够回答的问题 | 状态 |
 | ---: | --- | --- | --- |
-| 课程 | [HCCL 与 HCOMM 源码学习](源码课程/index.md) | 12 个单元（0-11）+ 总结，分四幕：双仓全景与架构；底座（控制面 / 数据面 / 引擎）；算子层（算法与 selector、AllReduce 调用链、executor/template、资源与 dlsym）；扩展（七步流程、MC2、实战） | ✅ |
+| 课程 | [HCCL 与 HCOMM 源码学习](源码课程/index.md) | 12 个单元（0-11）+ 总结，分四幕：双仓全景与架构；底座（控制面 / 数据面 / 引擎）；算子层（算法与 selector、AllReduce 调用链、executor/复盘写作模板.md、资源与 dlsym）；扩展（七步流程、MC2、实战） | ✅ |
 
 一门课程读透两个仓：基于 [HCCL 开源仓库](https://gitcode.com/cann/hccl) 读"内置算子怎么跑"，基于 [HCOMM 通信基础库仓库](https://gitcode.com/cann/hcomm) 练"自己写扩展算子"——概念与源码配对成单元，一条主线从 `HcclAllReduce` 走到第一个自定义算子。
 

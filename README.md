@@ -46,25 +46,25 @@ my-lib/
 
 ### [模型与系统](docs/模型与系统/index.md)｜模型在算什么？训练怎样运转？
 
-- **上篇·模型全景（6 章）**：1 [从模型到集合通信](docs/模型与系统/01-landscape.md) · 2 [张量、计算图与反向传播](docs/模型与系统/02-tensor-autograd.md) · 3 [Tokenization 与 Embedding](docs/模型与系统/03-tokenization-embedding.md) · 4 [Self-Attention](docs/模型与系统/04-self-attention.md) · 5 [完整 Decoder Block](docs/模型与系统/05-decoder-block.md) · 6 [RoPE 与长上下文（选修）](docs/模型与系统/06-rope-long-context.md) · ⚡ [速通版](docs/模型与系统/00-速通-上篇.md)
-- **下篇·训练与推理系统（6 章）**：1 [训练循环](docs/模型与系统/01-training-loop.md) · 2 [训练显存与计算优化](docs/模型与系统/02-training-memory-compute.md) · 3 [推理与 KV Cache（选修）](docs/模型与系统/03-inference-kv-cache.md) · 4 [后训练与对齐（选修）](docs/模型与系统/04-post-training-alignment.md) · 5 [推理引擎与 KV Cache（选修）](docs/模型与系统/05-inference-engine.md) · 6 [PD 调度与推理指标（选修）](docs/模型与系统/06-pd-scheduling.md) · ⚡ [速通版](docs/模型与系统/00-速通-下篇.md)
+- **上篇·模型全景（6 章）**：1 [从模型到集合通信](docs/模型与系统/01-从模型到集合通信.md) · 2 [张量、计算图与反向传播](docs/模型与系统/02-张量、计算图与反向传播.md) · 3 [Tokenization 与 Embedding](docs/模型与系统/03-模型输入.md) · 4 [Self-Attention](docs/模型与系统/04-self-attention.md) · 5 [完整 Decoder Block](docs/模型与系统/05-完整Decoder-Block.md) · 6 [RoPE 与长上下文（选修）](docs/模型与系统/06-RoPE与长上下文.md) · ⚡ [速通版](docs/模型与系统/00-速通-上篇.md)
+- **下篇·训练与推理系统（6 章）**：1 [训练循环](docs/模型与系统/01-训练循环.md) · 2 [训练显存与计算优化](docs/模型与系统/02-训练显存与计算优化.md) · 3 [推理与 KV Cache（选修）](docs/模型与系统/03-推理与KV-Cache.md) · 4 [后训练与对齐（选修）](docs/模型与系统/04-后训练与对齐.md) · 5 [推理引擎与 KV Cache（选修）](docs/模型与系统/05-推理引擎与KV-Cache.md) · 6 [PD 调度与推理指标（选修）](docs/模型与系统/06-PD调度与推理指标.md) · ⚡ [速通版](docs/模型与系统/00-速通-下篇.md)
 
 ### [执行与并行](docs/执行与并行/index.md)｜单卡怎样跑得快？并行为什么产生通信？
 
-- **上篇·单卡执行系统（8 章 + 专题）**：1 [全景与性能分析](docs/执行与并行/01-landscape-performance.md) · 2 [GPU/NPU 执行模型](docs/执行与并行/02-execution-model.md) · 3 [存储层次与数据搬运](docs/执行与并行/03-memory-hierarchy.md) · 4 [Kernel、Tiling 与流水线](docs/执行与并行/04-kernel-tiling-pipeline.md) · 5 [FLOPs、带宽与 Roofline](docs/执行与并行/05-flops-bandwidth-roofline.md) · 6 [Eager、计算图与图编译](docs/执行与并行/06-eager-graph-compilation.md) · 7 [Stream、Event 与异步执行](docs/执行与并行/07-stream-event-async.md) · 8 [数据类型、布局与融合](docs/执行与并行/08-dtype-layout-fusion.md) · 专题 [2026 主流 AI 加速卡全景](docs/执行与并行/accelerator-cards-2026.md) · ⚡ [速通版](docs/执行与并行/00-速通-上篇.md)
-- **下篇·并行策略（9 章）**：1 [MoE 与 Expert Parallel](docs/执行与并行/01-moe-expert-parallel.md) · 2 [效率设计（选修）](docs/执行与并行/02-efficient-llm-design.md) · 3 [系统分析](docs/执行与并行/03-llm-systems-analysis.md) · 4 [分布式基础](docs/执行与并行/04-distributed-basics.md) · 5 [数据并行与 DDP](docs/执行与并行/05-ddp.md) · 6 [Tensor Parallel](docs/执行与并行/06-tensor-parallel.md) · 7 [Pipeline Parallel](docs/执行与并行/07-pipeline-parallel.md) · 8 [Context Parallel](docs/执行与并行/08-context-parallel.md) · 9 [ZeRO、FSDP 与混合并行](docs/执行与并行/09-zero-fsdp.md) · ⚡ [速通版](docs/执行与并行/00-速通-下篇.md)
+- **上篇·单卡执行系统（8 章 + 专题）**：1 [全景与性能分析](docs/执行与并行/01-全景与性能分析.md) · 2 [GPU/NPU 执行模型](docs/执行与并行/02-GPU与NPU执行模型.md) · 3 [存储层次与数据搬运](docs/执行与并行/03-存储层次与数据搬运.md) · 4 [Kernel、Tiling 与流水线](docs/执行与并行/04-Kernel、Tiling与流水线.md) · 5 [FLOPs、带宽与 Roofline](docs/执行与并行/05-FLOPs、带宽与Roofline.md) · 6 [Eager、计算图与图编译](docs/执行与并行/06-Eager、计算图与图编译.md) · 7 [Stream、Event 与异步执行](docs/执行与并行/07-Stream、Event与异步执行.md) · 8 [数据类型、布局与融合](docs/执行与并行/08-数据类型、布局与融合.md) · 专题 [2026 主流 AI 加速卡全景](docs/执行与并行/主流AI加速卡全景.md) · ⚡ [速通版](docs/执行与并行/00-速通-上篇.md)
+- **下篇·并行策略（9 章）**：1 [MoE 与 Expert Parallel](docs/执行与并行/01-moe-expert-parallel.md) · 2 [效率设计（选修）](docs/执行与并行/02-效率设计.md) · 3 [系统分析](docs/执行与并行/03-大模型系统拆解.md) · 4 [分布式基础](docs/执行与并行/04-分布式基础.md) · 5 [数据并行与 DDP](docs/执行与并行/05-数据并行与DDP.md) · 6 [Tensor Parallel](docs/执行与并行/06-tensor-parallel.md) · 7 [Pipeline Parallel](docs/执行与并行/07-pipeline-parallel.md) · 8 [Context Parallel](docs/执行与并行/08-context-parallel.md) · 9 [ZeRO、FSDP 与混合并行](docs/执行与并行/09-ZeRO、FSDP与混合并行.md) · ⚡ [速通版](docs/执行与并行/00-速通-下篇.md)
 
 ### [通信与昇腾](docs/通信与昇腾/index.md)｜通信算法与代价模型；昇腾平台与源码落地（岗位核心）
 
-- **上篇·集合通信（5 章）**：1 [Collective 语义与代价模型](docs/通信与昇腾/01-collective-semantics-cost.md) · 2 [Ring AllReduce 完整推导](docs/通信与昇腾/02-ring-allreduce.md) · 3 [Tree、RD 与算法选择](docs/通信与昇腾/03-tree-algorithms-selection.md) · 4 [AG、RS 与 AlltoAll](docs/通信与昇腾/04-gather-scatter-alltoall.md) · 5 [拓扑、分层与重叠](docs/通信与昇腾/05-topology-hierarchical-overlap.md) · ⚡ [速通版](docs/通信与昇腾/00-速通.md)
-- **下篇·昇腾平台**：0 [认识昇腾与 CANN](docs/通信与昇腾/00-ascend-cann.md) · 1 [Runtime 与任务执行](docs/通信与昇腾/01-runtime-task-execution.md) · 2 [从 PyTorch 走向 HCCL](docs/通信与昇腾/02-pytorch-to-hccl.md) · [CANN 常用命令速查](docs/通信与昇腾/cann常用命令.md) · [CANN Learning Hub](docs/通信与昇腾/cann-learning-hub.md)
-- **源码课程｜[HCCL 与 HCOMM 导学](docs/通信与昇腾/源码课程/index.md)（13 单元）**：0 [双仓全景与调用链](docs/通信与昇腾/源码课程/00-repo-map.md) · 1 [软件架构与六族 API](docs/通信与昇腾/源码课程/01-architecture-layering.md) · 2 [控制面：通信域的一生](docs/通信与昇腾/源码课程/02-control-plane.md) · 3 [数据面：原语与资源](docs/通信与昇腾/源码课程/03-data-plane.md) · 4 [通信引擎与三引擎编排](docs/通信与昇腾/源码课程/04-comm-engines.md) · 5 [算法与 selector](docs/通信与昇腾/源码课程/05-coll-algorithms.md) · 6 [AllReduce 调用链走读](docs/通信与昇腾/源码课程/06-allreduce-call-chain.md) · 7 [executor 与 template](docs/通信与昇腾/源码课程/07-executor-template.md) · 8 [资源地基与 dlsym](docs/通信与昇腾/源码课程/08-resources-dlsym.md) · 9 [自定义算子七步流程](docs/通信与昇腾/源码课程/09-custom-op-dev.md) · 10 [MC2 框架与官方样例](docs/通信与昇腾/源码课程/10-mc2-custom-ops.md) · 11 [实战与第一个算子](docs/通信与昇腾/源码课程/11-examples-first-op.md) · [总结｜源码阅读地图](docs/通信与昇腾/源码课程/summary.md)
+- **上篇·集合通信（5 章）**：1 [Collective 语义与代价模型](docs/通信与昇腾/01-Collective语义与代价模型.md) · 2 [Ring AllReduce 完整推导](docs/通信与昇腾/02-Ring-AllReduce推导.md) · 3 [Tree、RD 与算法选择](docs/通信与昇腾/03-Tree、RD与算法选择.md) · 4 [AG、RS 与 AlltoAll](docs/通信与昇腾/04-gather-scatter-alltoall.md) · 5 [拓扑、分层与重叠](docs/通信与昇腾/05-拓扑、分层与重叠.md) · ⚡ [速通版](docs/通信与昇腾/00-速通.md)
+- **下篇·昇腾平台**：0 [认识昇腾与 CANN](docs/通信与昇腾/00-认识昇腾与CANN.md) · 1 [Runtime 与任务执行](docs/通信与昇腾/01-Runtime与任务执行.md) · 2 [从 PyTorch 走向 HCCL](docs/通信与昇腾/02-从PyTorch走向HCCL.md) · [CANN 常用命令速查](docs/通信与昇腾/CANN常用命令.md) · [CANN Learning Hub](docs/通信与昇腾/cann-learning-hub.md)
+- **源码课程｜[HCCL 与 HCOMM 导学](docs/通信与昇腾/源码课程/index.md)（13 单元）**：0 [双仓全景与调用链](docs/通信与昇腾/源码课程/00-双仓全景与调用链旅程.md) · 1 [软件架构与六族 API](docs/通信与昇腾/源码课程/01-软件架构与六族API.md) · 2 [控制面：通信域的一生](docs/通信与昇腾/源码课程/02-控制面-通信域的一生.md) · 3 [数据面：原语与资源](docs/通信与昇腾/源码课程/03-数据面-原语与资源.md) · 4 [通信引擎与三引擎编排](docs/通信与昇腾/源码课程/04-通信引擎与三引擎编排.md) · 5 [算法与 selector](docs/通信与昇腾/源码课程/05-算法与selector.md) · 6 [AllReduce 调用链走读](docs/通信与昇腾/源码课程/06-AllReduce调用链走读.md) · 7 [executor 与 template](docs/通信与昇腾/源码课程/07-executor-template.md) · 8 [资源地基与 dlsym](docs/通信与昇腾/源码课程/08-资源地基与dlsym.md) · 9 [自定义算子七步流程](docs/通信与昇腾/源码课程/09-自定义算子七步流程.md) · 10 [MC2 框架与官方样例](docs/通信与昇腾/源码课程/10-MC2框架与官方样例.md) · 11 [实战与第一个算子](docs/通信与昇腾/源码课程/11-实战与第一个算子.md) · [总结｜源码阅读地图](docs/通信与昇腾/源码课程/总结-源码阅读地图.md)
 
 ## 参考手册｜HCCL 知识库（80 篇）
 
 [总导读](docs/通信与昇腾/参考手册/index.md)，12 大类按需检索：
 
-[总览](docs/通信与昇腾/参考手册/总览/hccl-overview.md) · [算子参考](docs/通信与昇腾/参考手册/算子参考/index.md) · [算法参考](docs/通信与昇腾/参考手册/算法参考/index.md) · [组网形态](docs/通信与昇腾/参考手册/组网形态/index.md) · [协议与传输](docs/通信与昇腾/参考手册/协议与传输/index.md) · [通信域](docs/通信与昇腾/参考手册/通信域/index.md) · [通信引擎](docs/通信与昇腾/参考手册/通信引擎/index.md) · [执行模式](docs/通信与昇腾/参考手册/执行模式/index.md) · [排障手册](docs/通信与昇腾/参考手册/排障手册/index.md) · [性能分析](docs/通信与昇腾/参考手册/性能分析/index.md) · [运行与约束](docs/通信与昇腾/参考手册/运行与约束/index.md) · [扩展机制](docs/通信与昇腾/参考手册/扩展机制/index.md)
+[总览](docs/通信与昇腾/参考手册/总览/HCCL概述.md) · [算子参考](docs/通信与昇腾/参考手册/算子参考/index.md) · [算法参考](docs/通信与昇腾/参考手册/算法参考/index.md) · [组网形态](docs/通信与昇腾/参考手册/组网形态/index.md) · [协议与传输](docs/通信与昇腾/参考手册/协议与传输/index.md) · [通信域](docs/通信与昇腾/参考手册/通信域/index.md) · [通信引擎](docs/通信与昇腾/参考手册/通信引擎/index.md) · [执行模式](docs/通信与昇腾/参考手册/执行模式/index.md) · [排障手册](docs/通信与昇腾/参考手册/排障手册/index.md) · [性能分析](docs/通信与昇腾/参考手册/性能分析/index.md) · [运行与约束](docs/通信与昇腾/参考手册/运行与约束/index.md) · [扩展机制](docs/通信与昇腾/参考手册/扩展机制/index.md)
 
 ## 实战复盘｜四个子专栏
 
@@ -74,7 +74,7 @@ my-lib/
 
 | 材料 | 说明 |
 | --- | --- |
-| [复盘写作模板](docs/实战复盘/00-模板与方法论/template.md) | 复盘手记骨架与完稿自检清单 |
+| [复盘写作模板](docs/实战复盘/00-模板与方法论/复盘写作模板.md) | 复盘手记骨架与完稿自检清单 |
 | [SRS/SD 文档模板](docs/实战复盘/00-模板与方法论/01-SRS_SD文档模板.md) | 文档模板（评审 / STC / 代码评审 / 用例模板 xlsx 同目录） |
 | [需求实验方法论参考](docs/实战复盘/00-模板与方法论/需求实验方法论参考.md) | 远程仿真实验全链路经验（环境/工具/观测/实验设计/踩坑） |
 | [实验用例设计与脚本写法经验参考](docs/实战复盘/00-模板与方法论/实验用例设计与脚本写法经验参考.md) | UT / ST / 真机三层用例设计与脚本写法经验 |
@@ -117,7 +117,7 @@ my-lib/
 
 | 篇 | 主题 |
 | ---: | --- |
-| 1 | [UBOE/UB_RTP 建链端口注入：从 Issue 到合入](docs/实战复盘/02-问题修复/01-uboe-ubrtp-port-injection.md) |
+| 1 | [UBOE/UB_RTP 建链端口注入：从 Issue 到合入](docs/实战复盘/02-问题修复/01-UBOE与UB_RTP建链端口注入实战.md) |
 | 2 | [HCCL aclgraph 模式零拷贝方案](docs/实战复盘/02-问题修复/02-HCCL-aclgraph模式零拷贝方案/03-SE设计.md)（进行中，SE 设计） |
 
 ### 研讨笔记｜AllGather Selector 算法选择策略研究（`docs/实战复盘/03-研讨笔记/`）
@@ -128,8 +128,8 @@ my-lib/
 
 ## 杂项
 
-- **[工具与效率](docs/工具与效率/index.md)**：[VS Code + SSH + Jupyter](docs/工具与效率/vscode-remote-ssh-jupyter.md) · [Linux 服务器常用命令速查](docs/工具与效率/linux-server-commands.md) · [Git 实用速查](docs/工具与效率/git-cheatsheet.md) · [VS Code 快捷键速查](docs/工具与效率/vscode-shortcuts.md) · [opencode 使用教程](docs/工具与效率/opencode-tutorial.md) · [Ghostty 快捷键速查](docs/工具与效率/ghostty-shortcuts.md) · [macOS 快捷键速查](docs/工具与效率/macos-shortcuts.md) · [Vim 常用按键与技巧](docs/工具与效率/vim-essentials.md)
-- **[个人杂谈](docs/个人杂谈/index.md)**：读书笔记（[《金刚经》研读笔记](docs/个人杂谈/《金刚经》研读笔记.md) · [《金字塔原理》读书笔记](docs/个人杂谈/《金字塔原理》读书笔记.md) · [《认知觉醒》读书笔记](docs/个人杂谈/《认知觉醒》读书笔记.md) · [《当下的力量》读书笔记](docs/个人杂谈/《当下的力量》读书笔记.md)）｜AI 观察（[2026 热门 AI Agent 产品地图](docs/个人杂谈/01-popular-agents.md) · [AI Agent 工程化知识树](docs/个人杂谈/agent-engineering-knowledge-tree.md) · [AI Coding：从代码补全到智能体协作](docs/个人杂谈/ai-coding-codearts.md) · [实用提示词收集](docs/个人杂谈/实用提示词收集.md)）｜生活健康（[《健身解剖完全手册》学习笔记](docs/个人杂谈/《健身解剖完全手册》学习笔记.md) · [ADHD 日常管理指南](docs/个人杂谈/ADHD日常管理指南.md)）
+- **[工具与效率](docs/工具与效率/index.md)**：[VS Code + SSH + Jupyter](docs/工具与效率/vscode-remote-ssh-jupyter.md) · [Linux 服务器常用命令速查](docs/工具与效率/Linux服务器常用命令速查.md) · [Git 实用速查](docs/工具与效率/Git实用速查.md) · [VS Code 快捷键速查](docs/工具与效率/VSCode快捷键速查.md) · [opencode 使用教程](docs/工具与效率/opencode使用教程.md) · [Ghostty 快捷键速查](docs/工具与效率/Ghostty快捷键速查.md) · [macOS 快捷键速查](docs/工具与效率/macOS快捷键速查.md) · [Vim 常用按键与技巧](docs/工具与效率/Vim常用按键与技巧.md)
+- **[个人杂谈](docs/个人杂谈/index.md)**：读书笔记（[《金刚经》研读笔记](docs/个人杂谈/《金刚经》研读笔记.md) · [《金字塔原理》读书笔记](docs/个人杂谈/《金字塔原理》读书笔记.md) · [《认知觉醒》读书笔记](docs/个人杂谈/《认知觉醒》读书笔记.md) · [《当下的力量》读书笔记](docs/个人杂谈/《当下的力量》读书笔记.md)）｜AI 观察（[2026 热门 AI Agent 产品地图](docs/个人杂谈/01-2026热门AIAgent产品地图.md) · [AI Agent 工程化知识树](docs/个人杂谈/AIAgent工程化知识树.md) · [AI Coding：从代码补全到智能体协作](docs/个人杂谈/AICoding-从代码补全到智能体协作.md) · [实用提示词收集](docs/个人杂谈/实用提示词收集.md)）｜生活健康（[《健身解剖完全手册》学习笔记](docs/个人杂谈/《健身解剖完全手册》学习笔记.md) · [ADHD 日常管理指南](docs/个人杂谈/ADHD日常管理指南.md)）
 - **[后端知识](docs/后端知识/index.md)**：目录
 
 ## 交付物命名约定

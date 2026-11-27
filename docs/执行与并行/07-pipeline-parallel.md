@@ -38,7 +38,7 @@
 第 8 章 CP / 第 9 章 ZeRO 与混合并行收口
 ```
 
-PP 的通信原语是 **Send/Recv（P2P）而非集合通信**——[《集合通信》01 章](/通信与昇腾/01-collective-semantics-cost.md#_01-2-六个核心原语的语义卡片)的原语家族在 HCCL 中同样包含这对兄弟（[HCCL 源码 3](/通信与昇腾/源码课程/03-data-plane.md)）；而激活内存的问题在 [《训练与推理系统》02-2](/模型与系统/02-training-memory-compute.md#_02-2-activation-checkpointing-用时间换显存) 已有铺垫。
+PP 的通信原语是 **Send/Recv（P2P）而非集合通信**——[《集合通信》01 章](/通信与昇腾/01-Collective语义与代价模型.md#_01-2-六个核心原语的语义卡片)的原语家族在 HCCL 中同样包含这对兄弟（[HCCL 源码 3](/通信与昇腾/源码课程/03-数据面-原语与资源.md)）；而激活内存的问题在 [《训练与推理系统》02-2](/模型与系统/02-训练显存与计算优化.md#_02-2-activation-checkpointing-用时间换显存) 已有铺垫。
 
 ---
 
@@ -76,7 +76,7 @@ Layer 0-7     →      Layer 8-15    →     Layer 16-23    →    Layer 24-31 +
 
 PP 的三个结构性优势：
 
-1. **P2P 而非集合**：Send/Recv 只发生在相邻 stage 之间——没有全员集合、没有规约（[HCCL 源码 3](/通信与昇腾/源码课程/03-data-plane.md) 的 P2P 原语正是干这个的）；
+1. **P2P 而非集合**：Send/Recv 只发生在相邻 stage 之间——没有全员集合、没有规约（[HCCL 源码 3](/通信与昇腾/源码课程/03-数据面-原语与资源.md) 的 P2P 原语正是干这个的）；
 2. **通信量小**：只传一个 micro-batch 的边界激活（B×S×h×2，MB 级），与模型大小**无关**——模型再大，传的还是那层输出；
 3. **跨机友好**：相邻机器间点对点走网卡，不需要机内全互联的带宽——**PP 段天然横跨多机**，恰好补上 TP"只能住机内"的短板。
 
@@ -138,7 +138,7 @@ $$
 | 64 | 3/67 ≈ **4.5%** |
 
 ::: warning 公式里的矛盾
-M 越大 Bubble 越小——但 GPipe 要**暂存全部 M 个 micro-batch 的激活**等反向（回扣 [《训练与推理系统》02-1](/模型与系统/02-training-memory-compute.md#_02-1-训练显存账本-四个大件) 的激活账）：M=64 的激活内存是 M=4 的 16 倍。**"用大 M 压 Bubble" 撞上 "激活放不下"**——这个矛盾正是 1F1B 的出场理由（下一单元）。
+M 越大 Bubble 越小——但 GPipe 要**暂存全部 M 个 micro-batch 的激活**等反向（回扣 [《训练与推理系统》02-1](/模型与系统/02-训练显存与计算优化.md#_02-1-训练显存账本-四个大件) 的激活账）：M=64 的激活内存是 M=4 的 16 倍。**"用大 M 压 Bubble" 撞上 "激活放不下"**——这个矛盾正是 1F1B 的出场理由（下一单元）。
 :::
 
 ## 07-3｜1F1B：解内存，不解时间
@@ -192,7 +192,7 @@ Megatron 的改进：每个 stage 把自己的层再切成 $v$ 个**虚拟段**�
 
 **通信账** ✅ 最省：相邻 stage 间 P2P 边界激活，MB 级、与模型大小无关、跨机走网卡即可。
 
-**显存账**：三大件 ÷S（每 stage 只存自己那段层）；激活经 1F1B 后只需 O(S) 个 micro-batch 在途——必要时还能叠加 Activation Checkpointing（[《训练与推理系统》02-2](/模型与系统/02-training-memory-compute.md#_02-2-activation-checkpointing-用时间换显存)）再省一档。
+**显存账**：三大件 ÷S（每 stage 只存自己那段层）；激活经 1F1B 后只需 O(S) 个 micro-batch 在途——必要时还能叠加 Activation Checkpointing（[《训练与推理系统》02-2](/模型与系统/02-训练显存与计算优化.md#_02-2-activation-checkpointing-用时间换显存)）再省一档。
 
 **负载均衡账** ⚠️ PP 独有的软肋：流水线的节拍由**最慢的 stage** 决定——Transformer 层数均匀时好切，但 embedding 只在首段、loss 只在尾段，**首尾 stage 常被有意少放几层**来配平；切分不均 = 全流水线陪最慢的 stage 空转。
 
@@ -206,7 +206,7 @@ TP（机内 8 卡）    → 层内高速通信贴 HCCS
     × DP（数据复制）→ 剩余卡组做吞吐扩展
 ```
 
-回扣 [第 4 章](04-distributed-basics.md#_04-2-通信域-谁和谁是一伙的)的身份系统：每个 rank 同时属于三个组——`tp_group`（机内 8 卡）、`pp_group`（相邻机器的同位卡）、`dp_group`（其余机器的对应卡）。
+回扣 [第 4 章](04-分布式基础.md#_04-2-通信域-谁和谁是一伙的)的身份系统：每个 rank 同时属于三个组——`tp_group`（机内 8 卡）、`pp_group`（相邻机器的同位卡）、`dp_group`（其余机器的对应卡）。
 
 三种并行的**通信性格**至此凑成完整光谱：
 
@@ -272,10 +272,10 @@ S=8，单 micro-batch 前向 40 ms、反向 80 ms。M=32 时一步的流水线�
 ### 参考资料
 
 - [GPipe 论文](https://arxiv.org/abs/1811.06965) 与 [PipeDream-Flush / Megatron 1F1B](https://arxiv.org/abs/2104.04473)
-- [《集合通信》01-2：原语家族（含 P2P）](/通信与昇腾/01-collective-semantics-cost.md#_01-2-六个核心原语的语义卡片)
-- [《训练与推理系统》02-1/02-2：显存账与 Activation Checkpointing](/模型与系统/02-training-memory-compute.md#_02-2-activation-checkpointing-用时间换显存)
-- [HCCL 源码 3：通信原语与同步](/通信与昇腾/源码课程/03-data-plane.md)
-- [第 4 章：Process Group 与三重组身份](04-distributed-basics.md#_04-2-通信域-谁和谁是一伙的)
+- [《集合通信》01-2：原语家族（含 P2P）](/通信与昇腾/01-Collective语义与代价模型.md#_01-2-六个核心原语的语义卡片)
+- [《训练与推理系统》02-1/02-2：显存账与 Activation Checkpointing](/模型与系统/02-训练显存与计算优化.md#_02-2-activation-checkpointing-用时间换显存)
+- [HCCL 源码 3：通信原语与同步](/通信与昇腾/源码课程/03-数据面-原语与资源.md)
+- [第 4 章：Process Group 与三重组身份](04-分布式基础.md#_04-2-通信域-谁和谁是一伙的)
 
 下一章 **Context Parallel**：长序列把最后一个维度也逼到墙角——单层激活沿序列维放不下，Attention 里 K/V 要交换、Load-Balanced 切分怎么挑最重的活——序列维的并行攻略。
 

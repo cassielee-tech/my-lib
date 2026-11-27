@@ -1,6 +1,6 @@
 # AHC（Asymmetric Hierarchical Concatenate，非对称层次化拼接）
 
-> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-ring-allreduce.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-Ring-AllReduce推导.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > HCCL 通信算法解析。枚举：`HCCL_ALGO_TYPE_AHC` / `HCCL_ALGO_TYPE_AHC_BROKE`（`hccl/src/common/alg_type.h:32-33`）；层级枚举 `ALG_LEVEL1_AHC`、`ALG_LEVEL1_AHC_BROKE`（名称映射 `"AHC"` / `"AHC_BROKE"`）。
 > 权威描述：`hccl/docs/zh/user_guide/coll_algo_intro/AHC.md`。
@@ -123,7 +123,7 @@ flowchart LR
 | `hccl/src/common/alg_env_config.cc` / `.h` | `HCCL_ALGO` 中 AHC / AHC_BROKE 解析与 L2 联动逻辑 |
 | `hccl/src/ops/scatter/scatter.cc` | `SetAlgoLevel1` 中按 `HCCL_ALGO_TYPE_AHC(AHC_BROKE)` 映射（Scatter 本身不支持 AHC，会重定向为 Ring） |
 
-> **注意**：`hccl/src/ops/*/algorithm/template/` 下**没有 AHC 模板文件**——AHC 仅在层级枚举与环境变量解析层出现，实际实现全部在 `hcomm/src/legacy/ascend910/`。这与其"仅 Atlas A3 支持"的产品约束一致。
+> **注意**：`hccl/src/ops/*/algorithm/复盘写作模板.md/` 下**没有 AHC 模板文件**——AHC 仅在层级枚举与环境变量解析层出现，实际实现全部在 `hcomm/src/legacy/ascend910/`。这与其"仅 Atlas A3 支持"的产品约束一致。
 
 ## 9. 配置
 
@@ -143,6 +143,6 @@ export HCCL_ALGO="allreduce=level0:NA;level1:AHC"
 - `hccl/docs/zh/user_guide/hccl_env/inter_server_algo_support.md`：仅 Atlas A3 支持
 - `hcomm/src/legacy/ascend910/algorithm/base/alg_template/asymmetric_hierarchical_concatenate_base.h`：AHC 基类实现
 - [nhr.md](/通信与昇腾/参考手册/算法参考/nhr.md)、[nb.md](/通信与昇腾/参考手册/算法参考/nb.md)：AHC 内部可选的拼接算法
-- [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/algo_level_matrix.md)：L1/L2 联动与产品支持度
-- [../networking/ub_superpod.md](/通信与昇腾/参考手册/组网形态/ub_superpod.md)：非对称超节点组网（AHC 的目标场景）
+- [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/分层矩阵.md)：L1/L2 联动与产品支持度
+- [../networking/UB超节点.md](/通信与昇腾/参考手册/组网形态/UB超节点.md)：非对称超节点组网（AHC 的目标场景）
 

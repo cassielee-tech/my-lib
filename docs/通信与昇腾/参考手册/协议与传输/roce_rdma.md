@@ -1,6 +1,6 @@
 # RoCE / RDMA：以太网络语义通信
 
-> **深度参考** · 前置阅读：[源码课程单元 3｜数据面：原语与资源](/通信与昇腾/源码课程/03-data-plane.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 3｜数据面：原语与资源](/通信与昇腾/源码课程/03-数据面-原语与资源.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > **网络语义**通信方式（`COMM_PROTOCOL_ROCE = 1`）。RoCE（RDMA over Converged Ethernet，v2）承载在融合以太网上，经交换机 CLOS 胖树互联，是 **L1（Server 间）/ L2（超节点间）的主力**。核心对象是 **Channel（关联 1~N 个 QP）**，操作方式为 **Write / Read / Notify**，数据以 **WQE 下发到 RDMA 网卡**搬运。
 >
@@ -146,7 +146,7 @@ flowchart LR
 
 ## 6. Profiling 实测形态
 
-L1 数据面在 Profiling 中表现为 **RDMASend + notify 组合**（`typical_op_behavior.md`，详见 [../03_L0L1L2分级通信实现原理.md §5](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)）：
+L1 数据面在 Profiling 中表现为 **RDMASend + notify 组合**（`typical_op_behavior.md`，详见 [../03_L0L1L2分级通信实现原理.md §5](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)）：
 
 ![节点间 AllReduce](/images/cann/hccl/wiki/hierarchical/inter_allreduce.png)
 
@@ -162,11 +162,11 @@ L1 数据面在 Profiling 中表现为 **RDMASend + notify 组合**（`typical_o
 
 ## 7. CLOS 软件适配
 
-RoCE 经交换机 CLOS 组网，软件需适配（详见 [../networking/roce_cluster.md](/通信与昇腾/参考手册/组网形态/roce_cluster.md)）：
+RoCE 经交换机 CLOS 组网，软件需适配（详见 [../networking/RoCE集群.md](/通信与昇腾/参考手册/组网形态/RoCE集群.md)）：
 
 | 适配 | 说明 |
 | --- | --- |
-| **多端口 / 多 Jetty** | 每卡多网口，`MultiJetty`/`MultiLink` 算法名后缀（见 [../networking/multi_plane.md](/通信与昇腾/参考手册/组网形态/multi_plane.md)） |
+| **多端口 / 多 Jetty** | 每卡多网口，`MultiJetty`/`MultiLink` 算法名后缀（见 [../networking/多平面网络.md](/通信与昇腾/参考手册/组网形态/多平面网络.md)） |
 | **Z 轴绕路** | 交换机拥塞时绕路：`detour_rules.cc`/`detour_service.cc`（hcomm rank_graph_builder）+ `*_Z_axis_detour` 模板 |
 | **多 QP** | `HCCL_RDMA_QPS_PER_CONNECTION`、`HCCL_MULTI_QP_THRESHOLD` 控制每连接 QP 数 |
 | **负载均衡** | `QpInfo.lbValue`（支持负载均衡 lbmax>0 的网卡才更新） |
@@ -212,5 +212,5 @@ RoCE 经交换机 CLOS 组网，软件需适配（详见 [../networking/roce_clu
 - `hccl/docs/zh/user_guide/perf_analysis/typical_op_behavior.md`：RDMASend Profiling 形态
 - `hccl/docs/zh/user_guide/hccl_env/`：`HCCL_RDMA_*` 系列调优环境变量
 - `hccl/docs/zh/user_guide/fault_diagnosis/`：RDMA 建链/链路故障诊断错误码
-- 关联：[README.md](/通信与昇腾/参考手册/协议与传输/)（通信方式总览）、[ub_network.md](/通信与昇腾/参考手册/协议与传输/ub_network.md)（UB 网络语义对比）、[../networking/roce_cluster.md](/通信与昇腾/参考手册/组网形态/roce_cluster.md)（RoCE 组网）、[../engine/aicpu_ts.md](/通信与昇腾/参考手册/通信引擎/aicpu_ts.md)
+- 关联：[README.md](/通信与昇腾/参考手册/协议与传输/)（通信方式总览）、[ub_network.md](/通信与昇腾/参考手册/协议与传输/UB网络.md)（UB 网络语义对比）、[../networking/RoCE集群.md](/通信与昇腾/参考手册/组网形态/RoCE集群.md)（RoCE 组网）、[../engine/aicpu_ts.md](/通信与昇腾/参考手册/通信引擎/aicpu_ts.md)
 

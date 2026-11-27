@@ -33,7 +33,7 @@ flowchart TB
 
 ## 3. 集群心跳机制（单点故障定位）
 
-HCCL 与邻近 rank 建立独立维测链路，提供集群**单点故障广播扩散**能力，使任意 rank 的 plog 均含故障根节点信息（机制详见 [../localization_flow.md §3.1](/通信与昇腾/参考手册/排障手册/localization_flow.md)）：
+HCCL 与邻近 rank 建立独立维测链路，提供集群**单点故障广播扩散**能力，使任意 rank 的 plog 均含故障根节点信息（机制详见 [../定位流程.md §3.1](/通信与昇腾/参考手册/排障手册/定位流程.md)）：
 
 | 优先级 | 异常类型 | status | 判断标准 |
 | --- | --- | --- | --- |
@@ -88,8 +88,8 @@ flowchart LR
 
 | 问题 | 现象 | 定位 | 文档 |
 | --- | --- | --- | --- |
-| **快慢卡** | notify wait 被计入算子耗时 | 分析前置计算波动/下发瓶颈 | [../../profiling/slowfast_congestion.md](/通信与昇腾/参考手册/性能分析/slowfast_congestion.md) |
-| **交换机拥塞丢包** | ~4s 的 notify wait 任务 | `hccn_tool -stat -g` 查 `roce_new_pkt_rty_num` | [../../profiling/slowfast_congestion.md](/通信与昇腾/参考手册/性能分析/slowfast_congestion.md) |
+| **快慢卡** | notify wait 被计入算子耗时 | 分析前置计算波动/下发瓶颈 | [../../profiling/慢快与拥塞.md](/通信与昇腾/参考手册/性能分析/慢快与拥塞.md) |
+| **交换机拥塞丢包** | ~4s 的 notify wait 任务 | `hccn_tool -stat -g` 查 `roce_new_pkt_rty_num` | [../../profiling/慢快与拥塞.md](/通信与昇腾/参考手册/性能分析/慢快与拥塞.md) |
 | **重执行性能影响** | 开启重执行后整网性能变化 | 评估重执行对整网性能影响 | `comm_retry_perf_impact.md` |
 
 ---
@@ -126,5 +126,5 @@ flowchart LR
 - `hccl/docs/zh/user_guide/fault_diagnosis/param_link_stage_troubleshooting.md`：行为一致性、tag 推算
 - `hccl/docs/zh/user_guide/fault_diagnosis/debug_thinking.md`：全量日志收集、超时配置
 - `hccl/docs/zh/user_guide/hccl_env/comm_retry_perf_impact.md`：重执行对整网性能影响
-- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[coredump](/通信与昇腾/参考手册/排障手册/案例/coredump/)（进程崩溃）、[link](/通信与昇腾/参考手册/排障手册/案例/建链/)（建链）、[../../profiling/](/通信与昇腾/参考手册/性能分析/)（性能分析）、[../localization_flow.md](/通信与昇腾/参考手册/排障手册/localization_flow.md)（心跳机制）
+- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[coredump](/通信与昇腾/参考手册/排障手册/案例/coredump/)（进程崩溃）、[link](/通信与昇腾/参考手册/排障手册/案例/建链/)（建链）、[../../profiling/](/通信与昇腾/参考手册/性能分析/)（性能分析）、[../定位流程.md](/通信与昇腾/参考手册/排障手册/定位流程.md)（心跳机制）
 

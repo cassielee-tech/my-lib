@@ -1,6 +1,6 @@
 # MC2 自定义算子框架与 RFC 设计演进
 
-> **深度参考** · 前置阅读：[源码课程单元 10｜MC2 框架与官方样例](/通信与昇腾/源码课程/10-mc2-custom-ops.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 10｜MC2 框架与官方样例](/通信与昇腾/源码课程/10-MC2框架与官方样例.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > 本文两部分：**① MC2 自定义通信算子框架**（`hccl_mc2.h`，开发通算融合自定义算子的接口）；**② RFC 设计演进**（HCCL 重大架构提案 0001/0002/0003）。
 >
@@ -36,7 +36,7 @@ flowchart LR
     D --> E["HcclKfcFreeOpArgs<br/>释放"]
 ```
 
-> MC2 模式下算法选择仅用**优先级 18** 的选择器（见 [algo_plugin.md §2](/通信与昇腾/参考手册/扩展机制/algo_plugin.md)）。MC2 算子清单（MatmulAllReduce、AllGatherMatmul、AlltoAll 融合族等）详见 ../../mc2/。
+> MC2 模式下算法选择仅用**优先级 18** 的选择器（见 [algo_plugin.md §2](/通信与昇腾/参考手册/扩展机制/算法插件.md)）。MC2 算子清单（MatmulAllReduce、AllGatherMatmul、AlltoAll 融合族等）详见 ../../mc2/。
 
 ---
 
@@ -47,7 +47,7 @@ flowchart LR
 | 编号 | 标题 | 状态 | 领域 |
 | --- | --- | --- | --- |
 | **0001** | BIRS（Batchsize Invariant ReduceScatter）for A3 | accepted | 确定性算法 |
-| **0002** | HCCL-ALGO-Plugin | — | 扩展框架（见 [algo_plugin.md](/通信与昇腾/参考手册/扩展机制/algo_plugin.md)） |
+| **0002** | HCCL-ALGO-Plugin | — | 扩展框架（见 [algo_plugin.md](/通信与昇腾/参考手册/扩展机制/算法插件.md)） |
 | **0003** | 集合通信 Executor 统一算法结构方案 | — | 架构重构 |
 
 ---
@@ -77,13 +77,13 @@ flowchart TB
 | **RL/RLHF/PPO** | verl 提供 `full_determinism` 并设 `HCCL_DETERMINISTIC=1`；DeepSpeed-Chat 要求确定性归约 |
 | **推理 Batch 不变性** | vLLM 指出非确定性 all-reduce（如 NCCL）导致同一 prompt 因 batch 邻居不同产生不同 logits；SGLang 提供 `--enable-deterministic-inference` |
 
-> BIRS 与确定性计算（`HCCL_DETERMINISTIC=2` 保序）配合，详见 [../reference/reliability_security.md](/通信与昇腾/参考手册/运行与约束/reliability_security.md)。
+> BIRS 与确定性计算（`HCCL_DETERMINISTIC=2` 保序）配合，详见 [../reference/可靠性与安全.md](/通信与昇腾/参考手册/运行与约束/可靠性与安全.md)。
 
 ---
 
 ### 2.2 RFC 0002：HCCL-ALGO-Plugin
 
-自定义算法扩展框架（dlopen 动态库、零侵入接入选择/执行流程）。**完整内容见 [algo_plugin.md](/通信与昇腾/参考手册/扩展机制/algo_plugin.md)**。
+自定义算法扩展框架（dlopen 动态库、零侵入接入选择/执行流程）。**完整内容见 [algo_plugin.md](/通信与昇腾/参考手册/扩展机制/算法插件.md)**。
 
 ---
 
@@ -145,5 +145,5 @@ flowchart LR
 - `hccl/docs/zh/rfcs/0002-HCCL-ALGO-Plugin.md`：算法插件框架
 - `hccl/docs/zh/rfcs/0003-executor-template-refactor.md`：Executor 统一算法结构方案
 - `hccl/docs/zh/rfcs/INDEX.md`、`README.md`：RFC 登记索引与流程
-- 关联：[README.md](/通信与昇腾/参考手册/扩展机制/)（扩展机制总览）、[algo_plugin.md](/通信与昇腾/参考手册/扩展机制/algo_plugin.md)、../../mc2/（通算融合算子）、[../algorithms/combination.md](/通信与昇腾/参考手册/算法参考/combination.md)（执行器编排）、[../reference/reliability_security.md](/通信与昇腾/参考手册/运行与约束/reliability_security.md)（确定性计算）
+- 关联：[README.md](/通信与昇腾/参考手册/扩展机制/)（扩展机制总览）、[algo_plugin.md](/通信与昇腾/参考手册/扩展机制/算法插件.md)、../../mc2/（通算融合算子）、[../algorithms/算法组合.md](/通信与昇腾/参考手册/算法参考/算法组合.md)（执行器编排）、[../reference/可靠性与安全.md](/通信与昇腾/参考手册/运行与约束/可靠性与安全.md)（确定性计算）
 

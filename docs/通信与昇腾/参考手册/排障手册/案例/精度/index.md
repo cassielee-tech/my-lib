@@ -91,5 +91,5 @@ flowchart TB
 - `hccl/docs/zh/user_guide/hccl_env/HCCL_DETERMINISTIC.md`：确定性计算/保序配置（本文主要来源）
 - `hcomm/docs/zh/api_ref/comm_mgr_c/data_type_definition/HcclCommConfig.md`：hcclDeterministic 字段
 - `hccl/docs/zh/rfcs/0001-add-batch-invariant-reducescatter.md`：BIRS 批大小不变 ReduceScatter
-- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)（案例索引）、[../../reference/reliability_security.md](/通信与昇腾/参考手册/运行与约束/reliability_security.md)（确定性计算）、[../../extension/mc2_and_rfc.md](/通信与昇腾/参考手册/扩展机制/mc2_and_rfc.md)（BIRS）、[../../operators/reduce_scatter.md](/通信与昇腾/参考手册/算子参考/reduce_scatter.md)（保序算子）
+- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)（案例索引）、[../../reference/可靠性与安全.md](/通信与昇腾/参考手册/运行与约束/可靠性与安全.md)（确定性计算）、[../../extension/mc2_and_rfc.md](/通信与昇腾/参考手册/扩展机制/mc2_and_rfc.md)（BIRS）、[../../operators/reduce_scatter.md](/通信与昇腾/参考手册/算子参考/reduce_scatter.md)（保序算子）
 

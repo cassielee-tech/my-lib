@@ -1,6 +1,6 @@
 # profiling：性能分析
 
-> **深度参考** · 前置阅读：[CANN 常用命令速查（Profiling 节）](/通信与昇腾/cann常用命令.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[CANN 常用命令速查（Profiling 节）](/通信与昇腾/CANN常用命令.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > 集群性能受 AI 处理器类型、网络、通信算法、通信配置等多方面因素影响。HCCL 性能问题通过 **Profiling 工具**分析：采集**全量 rank** 的 Profiling 数据 → 判断整网瓶颈点 → 按通信算子**下发/执行**不同阶段做进一步分析优化。
 >
@@ -22,8 +22,8 @@ flowchart LR
 
 | 步骤 | 说明 | 详见 |
 | --- | --- | --- |
-| ① 采集 | 采集全量 rank 的 Profiling 数据 | [collect_analyze.md](/通信与昇腾/参考手册/性能分析/collect_analyze.md) |
-| ② 判断瓶颈 | 根据通信算子下发、执行的不同阶段判断整网瓶颈 | [collect_analyze.md](/通信与昇腾/参考手册/性能分析/collect_analyze.md) |
+| ① 采集 | 采集全量 rank 的 Profiling 数据 | [collect_analyze.md](/通信与昇腾/参考手册/性能分析/采集与分析.md) |
+| ② 判断瓶颈 | 根据通信算子下发、执行的不同阶段判断整网瓶颈 | [collect_analyze.md](/通信与昇腾/参考手册/性能分析/采集与分析.md) |
 | ③ 分析优化 | 识别 HCCL Profiling 信息、常见案例分析 | 本目录各篇 |
 
 ---
@@ -100,7 +100,7 @@ Communication(HCCL) 层的结构：
 
 ## 4. 典型算子行为（AllReduce 端到端）
 
-AllReduce 的完整 Profiling 任务对应（usermem→hcclbuffer、L0 RS、L1 AR、L0 AG、hcclbuffer→usermem）已在 [../03_L0L1L2分级通信实现原理.md §5](/通信与昇腾/参考手册/总览/l0l1l2-principle.md) 详述，此处不重复。相关图见 ../assets/hierarchical/（图库）。
+AllReduce 的完整 Profiling 任务对应（usermem→hcclbuffer、L0 RS、L1 AR、L0 AG、hcclbuffer→usermem）已在 [../03_L0L1L2分级通信实现原理.md §5](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md) 详述，此处不重复。相关图见 ../assets/层次化混合组网.md/（图库）。
 
 ---
 
@@ -108,8 +108,8 @@ AllReduce 的完整 Profiling 任务对应（usermem→hcclbuffer、L0 RS、L1 A
 
 | 文档 | 内容 |
 | --- | --- |
-| [collect_analyze.md](/通信与昇腾/参考手册/性能分析/collect_analyze.md) | **数据采集与分析**：两种采集方式（Profiling 工具 / HCCL Test）、`HCCL_TEST_PROFILING`、msprof 解析、分析流程 |
-| [slowfast_congestion.md](/通信与昇腾/参考手册/性能分析/slowfast_congestion.md) | **快慢卡分析**（notify wait 被统计算子耗时、前置计算波动、下发瓶颈）+ **交换机拥塞丢包**（4s notify wait、`roce_new_pkt_rty_num`、hccn_tool） |
+| [collect_analyze.md](/通信与昇腾/参考手册/性能分析/采集与分析.md) | **数据采集与分析**：两种采集方式（Profiling 工具 / HCCL Test）、`HCCL_TEST_PROFILING`、msprof 解析、分析流程 |
+| [slowfast_congestion.md](/通信与昇腾/参考手册/性能分析/慢快与拥塞.md) | **快慢卡分析**（notify wait 被统计算子耗时、前置计算波动、下发瓶颈）+ **交换机拥塞丢包**（4s notify wait、`roce_new_pkt_rty_num`、hccn_tool） |
 
 ---
 
@@ -118,5 +118,5 @@ AllReduce 的完整 Profiling 任务对应（usermem→hcclbuffer、L0 RS、L1 A
 - `hccl/docs/zh/user_guide/perf_analysis/`：`analysis_flow.md`、`perf_data_collect.md`、`perf_data_analysis.md`、`profiling_op_behavior.md`（本文主要来源）、`typical_op_behavior.md`、`slow_fast_card_analysis.md`、`switch_congestion_loss.md`
 - 《性能调优工具用户指南》（msprof）、《MindStudio Insight 工具用户指南》、《性能问题通用定位指南》（TopN 性能问题 > 通信问题优化方案）
 - 《HCCL 性能测试工具用户指南》（cann/oam-tools 仓 hccl_test）
-- 关联：[README.md](/通信与昇腾/参考手册/性能分析/)、[../03_L0L1L2分级通信实现原理.md §5](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)（AllReduce 端到端 Profiling）、[../debug/](/通信与昇腾/参考手册/排障手册/)（故障诊断）、[../engine/aicpu_ts.md](/通信与昇腾/参考手册/通信引擎/aicpu_ts.md)（下发段静态开销）
+- 关联：[README.md](/通信与昇腾/参考手册/性能分析/)、[../03_L0L1L2分级通信实现原理.md §5](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)（AllReduce 端到端 Profiling）、[../debug/](/通信与昇腾/参考手册/排障手册/)（故障诊断）、[../engine/aicpu_ts.md](/通信与昇腾/参考手册/通信引擎/aicpu_ts.md)（下发段静态开销）
 

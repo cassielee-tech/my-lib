@@ -1,6 +1,6 @@
 # NHR（Nonuniform Hierarchical Ring，非均衡层次环）
 
-> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-ring-allreduce.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-Ring-AllReduce推导.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > HCCL 通信算法解析。枚举：`HCCL_ALGO_TYPE_NHR` / `HCCL_ALGO_TYPE_NHR_V1`（`hccl/src/common/alg_type.h:27-28`）；层级枚举 `ALG_LEVEL1_NHR`、`ALG_LEVEL1_NHR_V1`、`ALG_LEVEL2_NHR`（名称映射 `"NHR"` / `"NHR_V1"`）。
 > 权威描述：`hccl/docs/zh/user_guide/coll_algo_intro/NHR.md`。
@@ -133,7 +133,7 @@ flowchart TB
 
 | 文件 | 内容 |
 | --- | --- |
-| `*/algorithm/template/aicpu/ins_temp_all_gather_nhr.cc`、`ins_temp_all_gather_nhr_dpu.cc` | AllGather NHR（AICPU / DPU 框间） |
+| `*/algorithm/复盘写作模板.md/aicpu/ins_temp_all_gather_nhr.cc`、`ins_temp_all_gather_nhr_dpu.cc` | AllGather NHR（AICPU / DPU 框间） |
 | `*/aicpu/ins_temp_all_reduce_nhr.cc`、`ins_temp_all_reduce_aicpu_reduce_nhr.cc` | AllReduce NHR（含 AICPU 归约） |
 | `*/aicpu/ins_temp_reduce_scatter_nhr.cc`、`ins_temp_reduce_scatter_aicpu_reduce_nhr.cc`（+`_pcie`） | ReduceScatter NHR（含 PCIe 变体） |
 | `*/aicpu/ins_temp_scatter_nhr.cc`、`ins_temp_scatter_nhr_dpu_inter_node.cc` | Scatter NHR（跨节点 DPU） |
@@ -142,8 +142,8 @@ flowchart TB
 | `*/aicpu/ins_temp_*_omnipipe_nhr*.cc` | NHR 的 OmniPipe 流水变体 |
 | `*/ccu/ccu_temp_*_nhr_1D_mem2mem.cc`、`*_nhr_mem2mem_1D_multi_jetty.cc` + `*/ccu/kernel/ccu_kernel_*_nhr1d*.cc` | CCU 引擎 NHR（mem2mem / 多 Jetty） |
 | `*/ccu/ccu_temp_*_concurrent_mesh_nhr.cc` | **Mesh + NHR 并发**模板（Concur 编排） |
-| `scatter/algorithm/template/scatter_nhr.cc`、`nhr_base.cc` | 950 Scatter NHR 与基类 |
-| `op_common/algorithm/template/wrapper/dpu_alg_nhr_opt_wrapper.cc` | **NHR 优化包装器**（DPU 路径） |
+| `scatter/algorithm/复盘写作模板.md/scatter_nhr.cc`、`nhr_base.cc` | 950 Scatter NHR 与基类 |
+| `op_common/algorithm/复盘写作模板.md/wrapper/dpu_alg_nhr_opt_wrapper.cc` | **NHR 优化包装器**（DPU 路径） |
 | `*/selector/*_auto_selector.cc` | `Aicpu*SoleNHR`、`*SoleNHRMultiLink`、`*ParallelMeshNHR`、`*PipeLineMeshNHR`、`*ConcurMeshNHRMultiLink`、`*SequenceMeshConcurNHR(NHR)` 等算法名 |
 
 > 实测：`hccl/src/ops` 下含 `nhr` 的文件 **110 个**——NHR 是 950 路径与 Mesh 并列的两大主力算法。
@@ -179,7 +179,7 @@ export HCCL_ALGO="not(parallel{mesh,nhr})"    # 禁用该组合
 - `hccl/docs/zh/user_guide/coll_algo_intro/algo_intro.md`：适用场景与 NHR-HCF 特殊说明
 - `hccl/docs/zh/user_guide/hccl_env/HCCL_ALGO.md`、`inter_server_algo_support.md`、`inter_superpod_algo_support.md`
 - `hcomm/src/legacy/ascend910/algorithm/base/alg_template/nonuniform_hierarchical_ring_base.h`：NHR 基类实现
-- `hccl/src/ops/op_common/algorithm/template/wrapper/dpu_alg_nhr_opt_wrapper.cc`：950 NHR 优化
-- [hdr.md](/通信与昇腾/参考手册/算法参考/hdr.md)：NHR 改进的对象；[nb.md](/通信与昇腾/参考手册/算法参考/nb.md)：同为对数复杂度的另一自研路线
-- [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/algo_level_matrix.md)：L1/L2 默认选择与产品支持度
+- `hccl/src/ops/op_common/algorithm/复盘写作模板.md/wrapper/dpu_alg_nhr_opt_wrapper.cc`：950 NHR 优化
+- [hdr.md](/通信与昇腾/参考手册/算法参考/RHD递归倍增.md)：NHR 改进的对象；[nb.md](/通信与昇腾/参考手册/算法参考/nb.md)：同为对数复杂度的另一自研路线
+- [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/分层矩阵.md)：L1/L2 默认选择与产品支持度
 

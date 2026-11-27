@@ -4,12 +4,12 @@
 
 > HCCL 集合通信是通信域内**全局协同行为**——某节点的异常报错往往是因等待某对端超时。故障定位需收集**集群下所有节点**的 CANN 日志（debug + run 目录），结合错误码与多级检索关键字定位根因。本目录是排障总入口，含**定位流程**、**错误码体系**与**按问题类型分类的定位案例**。
 >
-> - **定位流程**（[localization_flow.md](/通信与昇腾/参考手册/排障手册/localization_flow.md)）：三阶段排障 + 建链根节点定位 + 集群心跳 + task exception 机制
-> - **错误码全表**（[error_codes.md](/通信与昇腾/参考手册/排障手册/error_codes.md)）：EI0001~EI0020
+> - **定位流程**（[localization_flow.md](/通信与昇腾/参考手册/排障手册/定位流程.md)）：三阶段排障 + 建链根节点定位 + 集群心跳 + task exception 机制
+> - **错误码全表**（[error_codes.md](/通信与昇腾/参考手册/排障手册/EI错误码全表.md)）：EI0001~EI0020
 > - **问题定位案例**（[cases/](/通信与昇腾/参考手册/排障手册/案例/)）：精度 / coredump / AIC / AIV / 资料 / 拦截 / 整网 / 建链
 >
 > 事实来源（可信度：代码 > 仓内文档 > 社区资料）：
-> `hccl/docs/zh/user_guide/fault_diagnosis/`（42 篇诊断文档）、`hcomm/docs/zh/error_codes/`（EI0001~EI0020 错误码定义）、`hccl/docs/zh/user_guide/fault_diagnosis/debug_thinking.md`（定位思路权威）。
+> `hccl/docs/zh/user_guide/fault_diagnosis/`（42 篇诊断文档）、`hcomm/docs/zh/EI错误码全表.md/`（EI0001~EI0020 错误码定义）、`hccl/docs/zh/user_guide/fault_diagnosis/debug_thinking.md`（定位思路权威）。
 
 ---
 
@@ -86,7 +86,7 @@ HCCL 在 run/plog 日志中提供关键信息检索字：
 | `LocalRank Key Info` | 本端：`userRank`、`hostIp`、`devicePhyId`、`server`、`deviceIp`、`superPodId`、`useSuperPodMode`、`isStandardCard` |
 | `LinkInfo` | 链路：`userRank`、`remoteRank`、`localProtocol`、`remoteProtocol`、`engine`、`channel[当前/总数]` |
 | `HCCL_ENV` | 各环境变量实际生效值与来源（环境变量/默认值） |
-| `HeartbeatAbnormal` | 心跳异常事件（见 [localization_flow.md](/通信与昇腾/参考手册/排障手册/localization_flow.md)） |
+| `HeartbeatAbnormal` | 心跳异常事件（见 [localization_flow.md](/通信与昇腾/参考手册/排障手册/定位流程.md)） |
 
 > 通信域初始化/析构默认打印；通信算子下发需开启 `HCCL_ENTRY_LOG_ENABLE`。
 
@@ -107,7 +107,7 @@ HCCL 在 run/plog 日志中提供关键信息检索字：
 
 ## 6. 错误码体系（EI0001~EI0020）
 
-完整错误码清单见 [error_codes.md](/通信与昇腾/参考手册/排障手册/error_codes.md)。速览：
+完整错误码清单见 [error_codes.md](/通信与昇腾/参考手册/排障手册/EI错误码全表.md)。速览：
 
 | 阶段 | 错误码 |
 | --- | --- |
@@ -153,8 +153,8 @@ flowchart TB
 
 | 文档 | 内容 |
 | --- | --- |
-| [localization_flow.md](/通信与昇腾/参考手册/排障手册/localization_flow.md) | **定位流程**：三阶段排障（初始化/建链/执行）、快速定位定界、**建链根节点定位机制**、**集群心跳机制**、**task exception 机制**、典型案例 |
-| [error_codes.md](/通信与昇腾/参考手册/排障手册/error_codes.md) | **EI0001~EI0020 错误码全表**（编号/英文名/中文含义/典型触发场景/对应诊断文档）+ 950 与 A3/A2 故障码对照 |
+| [localization_flow.md](/通信与昇腾/参考手册/排障手册/定位流程.md) | **定位流程**：三阶段排障（初始化/建链/执行）、快速定位定界、**建链根节点定位机制**、**集群心跳机制**、**task exception 机制**、典型案例 |
+| [error_codes.md](/通信与昇腾/参考手册/排障手册/EI错误码全表.md) | **EI0001~EI0020 错误码全表**（编号/英文名/中文含义/典型触发场景/对应诊断文档）+ 950 与 A3/A2 故障码对照 |
 | [cases/](/通信与昇腾/参考手册/排障手册/案例/) | **问题定位案例**（8 类）：精度 / coredump / AIC / AIV / 资料 / 拦截 / 整网 / 建链 |
 
 ---
@@ -162,7 +162,7 @@ flowchart TB
 ## 9. 参考资料
 
 - `hccl/docs/zh/user_guide/fault_diagnosis/`：`README.md`（诊断目录）、`debug_thinking.md`（定位思路）、`comm_domain_init_stage.md`/`comm_domain_init_flow.md`（初始化）、`param_link_stage_troubleshooting.md`（建链）、`task_exec_stage_troubleshooting.md`（执行）、`cluster_heartbeat_mechanism_troubleshooting.md`（心跳）、`task_exception_mechanism_troubleshooting.md`（任务异常）、`aiv_comm_op_exec_fail.md`（AIV 执行失败）、各 `*_EI00xx.md`（错误码场景）
-- `hcomm/docs/zh/error_codes/`：EI0001~EI0020 错误码定义（现象/原因/解决方法）
+- `hcomm/docs/zh/EI错误码全表.md/`：EI0001~EI0020 错误码定义（现象/原因/解决方法）
 - `hccl/docs/zh/user_guide/hccl_env/`：`HCCL_CONNECT_TIMEOUT`、`HCCL_EXEC_TIMEOUT`、`HCCL_ENTRY_LOG_ENABLE`、`HCCL_DEBUG_CONFIG`、`HCCL_DFS_CONFIG`、`HCCL_DIAGNOSE_ENABLE`、`HCCL_DETERMINISTIC`
-- 关联：[README.md](/通信与昇腾/参考手册/排障手册/)、[../communicator/creation.md](/通信与昇腾/参考手册/通信域/creation.md)（通信域创建）、[../profiling/](/通信与昇腾/参考手册/性能分析/)（性能问题定位）、[../reference/env_vars.md](/通信与昇腾/参考手册/运行与约束/env_vars.md)（环境变量）、[../reference/reliability_security.md](/通信与昇腾/参考手册/运行与约束/reliability_security.md)（可靠性/确定性）
+- 关联：[README.md](/通信与昇腾/参考手册/排障手册/)、[../communicator/创建方式.md](/通信与昇腾/参考手册/通信域/创建方式.md)（通信域创建）、[../profiling/](/通信与昇腾/参考手册/性能分析/)（性能问题定位）、[../reference/环境变量.md](/通信与昇腾/参考手册/运行与约束/环境变量.md)（环境变量）、[../reference/可靠性与安全.md](/通信与昇腾/参考手册/运行与约束/可靠性与安全.md)（可靠性/确定性）
 

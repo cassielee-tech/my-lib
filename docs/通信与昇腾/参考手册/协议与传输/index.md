@@ -1,10 +1,10 @@
 # comm：通信方式
 
-> **深度参考** · 前置阅读：[源码课程单元 3｜数据面：原语与资源](/通信与昇腾/源码课程/03-data-plane.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 3｜数据面：原语与资源](/通信与昇腾/源码课程/03-数据面-原语与资源.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > **数据怎么搬**。通信方式（协议 + 传输实现）决定了通信实体之间**以何种语义、经何种硬件通路**搬运数据与同步。本目录与 [networking/](/通信与昇腾/参考手册/组网形态/)（卡怎么连）、[engine/](/通信与昇腾/参考手册/通信引擎/)（谁在搬数据）平级，三者共同构成集群基础设施层。
 >
-> 通信方式与引擎正交：同一引擎可走多种协议（如 AICPU_TS 可走 RoCE 或 UB），同一协议也可被多引擎使用（如 URMA 被 CCU 与 AIV 使用）。协议在**组网中的层级落点**见 [../04_昇腾集群组网总览.md §6](/通信与昇腾/参考手册/总览/cluster-topology.md)，协议在**分级通信中的差异**见 [../03_L0L1L2分级通信实现原理.md §2](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)。
+> 通信方式与引擎正交：同一引擎可走多种协议（如 AICPU_TS 可走 RoCE 或 UB），同一协议也可被多引擎使用（如 URMA 被 CCU 与 AIV 使用）。协议在**组网中的层级落点**见 [../04_昇腾集群组网总览.md §6](/通信与昇腾/参考手册/总览/集群组网总览.md)，协议在**分级通信中的差异**见 [../03_L0L1L2分级通信实现原理.md §2](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)。
 >
 > 事实来源（可信度：代码 > 仓内文档 > 社区资料）：
 > `hcomm/include/hcomm_res_defs.h`（`CommProtocol` 枚举）、`hcomm/include/hcomm_channel.h`（Channel 接口）、`hcomm/src/legacy/ascend950/unified_platform/resource/transport/`（传输实现）、`hcomm/src/legacy/ascend950/unified_platform/external_system/orion_adapter_hccp.h`（HCCP/Jetty/QP 适配）、`hcomm/src/legacy/ascend910/platform/remote_access/`（RoCE 远端访问）、`hcomm/docs/zh/comm_op_dev_guide/prog_models_concepts/comm_model.md`（通信模型权威）、`shmem/docs/glossary.md`（对称内存术语）。
@@ -23,7 +23,7 @@ HCCL 的通信模型分为**网络语义**与**内存语义**两类（`comm_mode
 | **适用协议** | RoCE、UB（CTP/RTP/UBoE） | UB_MEM、HCCS、PCIe、SIO |
 | **Channel 含义** | 真正的数据通道，关联 1~N 个 QP/Jetty，建链时 QP 建链 | 仅表示"两对象间内存映射已启用"，**不承载数据** |
 | **典型层级** | L1 / L2（Server 间 / 超节点间） | L0（Server 内） |
-| **详见** | [roce_rdma.md](/通信与昇腾/参考手册/协议与传输/roce_rdma.md)、[ub_network.md](/通信与昇腾/参考手册/协议与传输/ub_network.md) | [ub_mem.md](/通信与昇腾/参考手册/协议与传输/ub_mem.md)、[hccs_pcie.md](/通信与昇腾/参考手册/协议与传输/hccs_pcie.md) |
+| **详见** | [roce_rdma.md](/通信与昇腾/参考手册/协议与传输/roce_rdma.md)、[ub_network.md](/通信与昇腾/参考手册/协议与传输/UB网络.md) | [ub_mem.md](/通信与昇腾/参考手册/协议与传输/ub_mem.md)、[hccs_pcie.md](/通信与昇腾/参考手册/协议与传输/hccs_pcie.md) |
 
 ![网络语义模型](/images/cann/hccl/wiki/architecture/semantic_communication.png) ![内存语义模型](/images/cann/hccl/wiki/architecture/memory_semantic_model.png)
 
@@ -41,12 +41,12 @@ HCCL 的通信模型分为**网络语义**与**内存语义**两类（`comm_mode
 | 1 | `COMM_PROTOCOL_ROCE` | RDMA over Converged Ethernet（v2） | **网络语义** | L1 / L2 | [roce_rdma.md](/通信与昇腾/参考手册/协议与传输/roce_rdma.md) |
 | 2 | `COMM_PROTOCOL_PCIE` | PCIe 主机链路（标卡卡间唯一通路） | 内存语义 | L0 | [hccs_pcie.md](/通信与昇腾/参考手册/协议与传输/hccs_pcie.md) |
 | 3 | `COMM_PROTOCOL_SIO` | SIO 链路（910_93 场景，A3 片内双 Die 互联） | 内存语义 | L0 | [hccs_pcie.md](/通信与昇腾/参考手册/协议与传输/hccs_pcie.md) |
-| 4 | `COMM_PROTOCOL_UB_CTP` | 灵衢统一总线 CTP（旧名 `UBC_CTP`/`UBC_TP`） | 网络语义 | L0 / L1 | [ub_network.md](/通信与昇腾/参考手册/协议与传输/ub_network.md) |
-| 5 | `COMM_PROTOCOL_UBC_TP` | 华为统一总线 UBC_TP | 网络语义 | L0 / L1 | [ub_network.md](/通信与昇腾/参考手册/协议与传输/ub_network.md) |
+| 4 | `COMM_PROTOCOL_UB_CTP` | 灵衢统一总线 CTP（旧名 `UBC_CTP`/`UBC_TP`） | 网络语义 | L0 / L1 | [ub_network.md](/通信与昇腾/参考手册/协议与传输/UB网络.md) |
+| 5 | `COMM_PROTOCOL_UBC_TP` | 华为统一总线 UBC_TP | 网络语义 | L0 / L1 | [ub_network.md](/通信与昇腾/参考手册/协议与传输/UB网络.md) |
 | 6 | `COMM_PROTOCOL_UB_MEM` | UB 内存语义 | **内存语义** | L0 | [ub_mem.md](/通信与昇腾/参考手册/协议与传输/ub_mem.md) |
-| 7 | `COMM_PROTOCOL_UBOE` | UB over Ethernet | 网络语义 | L1 / L2 | [ub_network.md](/通信与昇腾/参考手册/协议与传输/ub_network.md) |
+| 7 | `COMM_PROTOCOL_UBOE` | UB over Ethernet | 网络语义 | L1 / L2 | [ub_network.md](/通信与昇腾/参考手册/协议与传输/UB网络.md) |
 | 8 | `COMM_PROTOCOL_HCCS_ONLY` | 一卡双 Die 使用 HCCS | 内存语义 | L0（Die 间） | [hccs_pcie.md](/通信与昇腾/参考手册/协议与传输/hccs_pcie.md) |
-| 9 | `COMM_PROTOCOL_UB_RTP` | 灵衢统一总线 RTP（旧名 `UBG`） | 网络语义 | L1 / L2 | [ub_network.md](/通信与昇腾/参考手册/协议与传输/ub_network.md) |
+| 9 | `COMM_PROTOCOL_UB_RTP` | 灵衢统一总线 RTP（旧名 `UBG`） | 网络语义 | L1 / L2 | [ub_network.md](/通信与昇腾/参考手册/协议与传输/UB网络.md) |
 
 > 拓扑文件 `protocols` 字段可取值：`UB_CTP`、`UB_RTP`、`ROCE`、`HCCS`、`TCP`、`UB_MEM`、`UBOE`（`rank_table_config_a5.md:74`）。
 
@@ -55,7 +55,7 @@ HCCL 的通信模型分为**网络语义**与**内存语义**两类（`comm_mode
 | 名称 | 说明 | 详见 |
 | --- | --- | --- |
 | **URMA** | Unified Remote Memory Access，统一远端内存访问——基于 UB 总线的硬件数据通路，CCU/AIV 经其搬运 | [urma.md](/通信与昇腾/参考手册/协议与传输/urma.md) |
-| **对称内存** | Symmetric Memory，各 rank 全局可见、无需显式地址交换的内存模型（shmem / SymWin） | [symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md) |
+| **对称内存** | Symmetric Memory，各 rank 全局可见、无需显式地址交换的内存模型（shmem / SymWin） | [symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/对称内存.md) |
 
 ---
 
@@ -142,7 +142,7 @@ flowchart TB
 | **950** | `orion_adapter_hccp.{h,cc}` | `hcomm/src/legacy/ascend950/unified_platform/external_system/` |
 | **910** | `adapter_hccp.cc` | `hcomm/src/legacy/ascend910/platform/common/adapter/` |
 
-HCCP 统一管理 RoCE 的 QP/CQ/MR 与 UB 的 Jetty/JFC/TP，向上层传输提供一致的建链、内存注册、WQE 下发接口（详见 [roce_rdma.md](/通信与昇腾/参考手册/协议与传输/roce_rdma.md)、[ub_network.md](/通信与昇腾/参考手册/协议与传输/ub_network.md)）。
+HCCP 统一管理 RoCE 的 QP/CQ/MR 与 UB 的 Jetty/JFC/TP，向上层传输提供一致的建链、内存注册、WQE 下发接口（详见 [roce_rdma.md](/通信与昇腾/参考手册/协议与传输/roce_rdma.md)、[ub_network.md](/通信与昇腾/参考手册/协议与传输/UB网络.md)）。
 
 ---
 
@@ -156,8 +156,8 @@ HCCP 统一管理 RoCE 的 QP/CQ/MR 与 UB 的 Jetty/JFC/TP，向上层传输提
 | UB_MEM | 内存 | L0 | 映射内存（token） | UB 引擎 | AIV、AICPU_TS | [ub_mem.md](/通信与昇腾/参考手册/协议与传输/ub_mem.md) |
 | URMA | 内存 | L0 / L1 | WQE + token | UB 引擎（硬化） | CCU、AIV | [urma.md](/通信与昇腾/参考手册/协议与传输/urma.md) |
 | RoCE(v2) | 网络 | L1 / L2 | QP | RDMA 网卡 | AICPU_TS、Host CPU_TS | [roce_rdma.md](/通信与昇腾/参考手册/协议与传输/roce_rdma.md) |
-| UB_CTP / UB_RTP / UBoE | 网络 | L0 / L1 / L2 | Jetty | UB 网卡 | AICPU_TS、CCU | [ub_network.md](/通信与昇腾/参考手册/协议与传输/ub_network.md) |
-| 对称内存 | 内存（全局可见） | L0 / L1 | SymWin / 对称堆 | URMA/UB_MEM/HCCS/RDMA | AIV、AICPU | [symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md) |
+| UB_CTP / UB_RTP / UBoE | 网络 | L0 / L1 / L2 | Jetty | UB 网卡 | AICPU_TS、CCU | [ub_network.md](/通信与昇腾/参考手册/协议与传输/UB网络.md) |
+| 对称内存 | 内存（全局可见） | L0 / L1 | SymWin / 对称堆 | URMA/UB_MEM/HCCS/RDMA | AIV、AICPU | [symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/对称内存.md) |
 
 ---
 
@@ -169,8 +169,8 @@ HCCP 统一管理 RoCE 的 QP/CQ/MR 与 UB 的 Jetty/JFC/TP，向上层传输提
 | [urma.md](/通信与昇腾/参考手册/协议与传输/urma.md) | **URMA** | 统一远端内存访问：基于 UB 总线的硬化数据通路，CCU/AIV 直接组装 WQE 搬运；token 移位、AiRMAWQ/CQ |
 | [roce_rdma.md](/通信与昇腾/参考手册/协议与传输/roce_rdma.md) | **RoCE / RDMA** | 以太 RDMA(v2) 网络语义：QP/CQ/MR/WR，WQE 下发 + notify；L1/L2 主力，AICPU_TS/Host CPU_TS |
 | [hccs_pcie.md](/通信与昇腾/参考手册/协议与传输/hccs_pcie.md) | **HCCS / PCIe / SIO** | 片间直连内存语义：P2P transport、IPC notify、enable p2p、SDMA 搬运；L0，含一卡双 Die HCCS_ONLY |
-| [ub_network.md](/通信与昇腾/参考手册/协议与传输/ub_network.md) | **UB_CTP / UB_RTP / UBoE** | UB 网络语义：Jetty/JFC/TP，HCCP 适配，EID 寻址；L0/L1/L2，AICPU_TS/CCU |
-| [symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md) | **对称内存** | 各 rank 全局可见、无需地址交换的内存模型：shmem 库（PE/team/RMA/AMO）+ HCCL SymWin；零拷贝 |
+| [ub_network.md](/通信与昇腾/参考手册/协议与传输/UB网络.md) | **UB_CTP / UB_RTP / UBoE** | UB 网络语义：Jetty/JFC/TP，HCCP 适配，EID 寻址；L0/L1/L2，AICPU_TS/CCU |
+| [symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/对称内存.md) | **对称内存** | 各 rank 全局可见、无需地址交换的内存模型：shmem 库（PE/team/RMA/AMO）+ HCCL SymWin；零拷贝 |
 
 ---
 

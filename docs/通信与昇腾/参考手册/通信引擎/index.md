@@ -1,10 +1,10 @@
 # engine：通信引擎
 
-> **深度参考** · 前置阅读：[源码课程单元 4｜通信引擎与三引擎编排](/通信与昇腾/源码课程/04-comm-engines.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 4｜通信引擎与三引擎编排](/通信与昇腾/源码课程/04-通信引擎与三引擎编排.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > **谁在真正搬数据**。通信引擎是通信实体中**执行通信任务的核心模块**：向上接收通信资源（Endpoint/Channel/CommMem）与算法编排下发的任务，向下通过**线程执行调度器**驱动**通信硬件**完成数据搬移。
 >
-> 本目录与 [networking/](/通信与昇腾/参考手册/组网形态/)（卡怎么连）、[comm/](/通信与昇腾/参考手册/协议与传输/)（数据怎么搬）平级，三者共同构成集群基础设施层。引擎的**选择与回退规则**见 [../algorithms/algo_selector.md](/通信与昇腾/参考手册/算法参考/algo_selector.md)，引擎在**分级通信中的落点**见 [../03_L0L1L2分级通信实现原理.md §4](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)。
+> 本目录与 [networking/](/通信与昇腾/参考手册/组网形态/)（卡怎么连）、[comm/](/通信与昇腾/参考手册/协议与传输/)（数据怎么搬）平级，三者共同构成集群基础设施层。引擎的**选择与回退规则**见 [../algorithms/algo_selector.md](/通信与昇腾/参考手册/算法参考/algo_selector.md)，引擎在**分级通信中的落点**见 [../03_L0L1L2分级通信实现原理.md §4](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)。
 >
 > 事实来源（可信度：代码 > 仓内文档 > 社区资料）：
 > `hcomm/include/hcomm_res_defs.h`（`CommEngine` 枚举）、`hcomm/include/ccu/`（CCU 编程接口）、`hcomm/include/hcomm_primitives.h`（数据面原语）、`hcomm/src/base_comm/primitives/`（原语实现）、`hcomm/src/legacy/ascend950/unified_platform/{aiv,ccu}/`（AIV/CCU 实现）、`hccl/src/ops/op_common/inc/alg_param.h`（`OpExecuteConfig` 加速模式）、`hcomm/docs/zh/comm_op_dev_guide/prog_models_concepts/`（`comm_engine.md`/`concurrency_model.md`/`CCU_models_concepts.md`）、`hccl/docs/zh/user_guide/hccl_env/HCCL_OP_EXPANSION_MODE.md`。
@@ -87,7 +87,7 @@ flowchart TB
 
 > `Thread` 是对"并发实体 + 同步资源"的统一封装抽象——**这是 HCCL 能用同一套算法模板跑在四种引擎上的关键**。并发单元间无资源冲突即可并行执行，通信任务与 Thread 绑定。
 
-同步机制的两种场景（详见 [../03_L0L1L2分级通信实现原理.md §3.2](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)）：
+同步机制的两种场景（详见 [../03_L0L1L2分级通信实现原理.md §3.2](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)）：
 
 | 同步方式 | 场景 | 接口 |
 | --- | --- | --- |
@@ -173,8 +173,8 @@ flowchart LR
 | 引擎 | 主力层级 | 典型通信方式 | 数据面原语入口 |
 | --- | --- | --- | --- |
 | **AIV** | L0（Server 内） | [UB_MEM](/通信与昇腾/参考手册/协议与传输/ub_mem.md)、[URMA](/通信与昇腾/参考手册/协议与传输/urma.md)、[HCCS](/通信与昇腾/参考手册/协议与传输/hccs_pcie.md) | Ascend C `DataCopy`/`SetFlag`/`WaitFlag` |
-| **AICPU_TS** | L1/L2（Server 间/超节点间） | [RoCE/RDMA](/通信与昇腾/参考手册/协议与传输/roce_rdma.md)、[UB 网络语义](/通信与昇腾/参考手册/协议与传输/ub_network.md)、[URMA](/通信与昇腾/参考手册/协议与传输/urma.md) | `hcomm_primitives.h`（`HcommWrite/Read*OnThread`） |
-| **CCU** | L0/L1（950 硬化） | [URMA](/通信与昇腾/参考手册/协议与传输/urma.md)、[UB 网络语义](/通信与昇腾/参考手册/协议与传输/ub_network.md) | `ccu/ccu_primitives.hpp`（`ccu::Write/Read/LocalCopy`） |
+| **AICPU_TS** | L1/L2（Server 间/超节点间） | [RoCE/RDMA](/通信与昇腾/参考手册/协议与传输/roce_rdma.md)、[UB 网络语义](/通信与昇腾/参考手册/协议与传输/UB网络.md)、[URMA](/通信与昇腾/参考手册/协议与传输/urma.md) | `hcomm_primitives.h`（`HcommWrite/Read*OnThread`） |
+| **CCU** | L0/L1（950 硬化） | [URMA](/通信与昇腾/参考手册/协议与传输/urma.md)、[UB 网络语义](/通信与昇腾/参考手册/协议与传输/UB网络.md) | `ccu/ccu_primitives.hpp`（`ccu::Write/Read/LocalCopy`） |
 | **Host CPU_TS** | L0/L1（A2） | [RoCE/RDMA](/通信与昇腾/参考手册/协议与传输/roce_rdma.md)、[HCCS](/通信与昇腾/参考手册/协议与传输/hccs_pcie.md) | `hcomm_primitives.h` |
 
 ---

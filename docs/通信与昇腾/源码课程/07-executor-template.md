@@ -1,7 +1,7 @@
 # 单元 7｜executor 与 template：执行机制
 
 > 所属课程：[HCCL 与 HCOMM 源码学习](../源码课程/index.md) · 第 7 单元（共 12 单元）
-> 精读对象：`src/ops/op_common/executor/`（registry + base + HcclExecOp 总控）、`src/ops/all_reduce/executor/`（13 个执行器）、`src/ops/op_common/template/`（基类 + 数据结构 + wrapper）与 `src/ops/all_reduce/template/{aicpu,aiv,ccu}/`
+> 精读对象：`src/ops/op_common/executor/`（registry + base + HcclExecOp 总控）、`src/ops/all_reduce/executor/`（13 个执行器）、`src/ops/op_common/复盘写作模板.md/`（基类 + 数据结构 + wrapper）与 `src/ops/all_reduce/复盘写作模板.md/{aicpu,aiv,ccu}/`
 
 ::: info 本单元目标
 单元 6 结束在 `HcclExecOp()`——selector 选出的算法名怎么变成一次真实通信？本单元读完，你能够说清 **executor 的组合公式（算法名 = 执行骨架 ×（拓扑匹配器 + N 个算法模板））**、**总控 `HcclExecOp` 的回退记忆与资源复用**，并逐段精读一个具体模板（Mesh RS）看它如何落到 Hcomm 原语。
@@ -174,7 +174,7 @@ for (u64 loop = 0; loop < loopTimes; loop++) {
 
 ## 第二部分｜template 模板
 
-### 8. 类体系（op_common/template/）
+### 8. 类体系（op_common/复盘写作模板.md/）
 
 ```text
 CommonAlgTemplateBase                      common_alg_template_base.h
@@ -191,7 +191,7 @@ InsAlgTemplateBase                         alg_v2_template_base.h:18
  ├─ enableRemoteMemAccess_ / supportSymmetricMemory_  远端直访/对称内存能力位
  └─ DPUKernelRun(...)                      DPU 变体入口
       ↑
-InsTempReduceScatterMesh1DIntra 等          all_reduce/template/aicpu/
+InsTempReduceScatterMesh1DIntra 等          all_reduce/复盘写作模板.md/aicpu/
 ```
 
 （注：`alg_template_base.h` 里的 `AlgTemplateBase` 是旧框架 v1 遗留，v2 执行器体系用的是上面这条链。）
@@ -299,7 +299,7 @@ p−1 次 `LocalReduce` 完成最终归约。"数据量为 0 的数据片无需 
 
 ### 11. wrapper 层：模板与 dlsym 之间的缓冲垫
 
-`op_common/template/wrapper/alg_data_trans_wrapper.cc`（模板 include 的 `alg_data_trans_wrapper.h`）：
+`op_common/复盘写作模板.md/wrapper/alg_data_trans_wrapper.cc`（模板 include 的 `alg_data_trans_wrapper.h`）：
 
 ```c
 SendRecvWrite(sendRecvInfo, thread)                     // 模板视角：语义化收发
@@ -372,6 +372,6 @@ InsTempReduceScatterMesh1DIntra::KernelRun
 
 ---
 
-下一单元进入 **[8｜资源地基与 dlsym 解耦](08-resources-dlsym.md)**。
+下一单元进入 **[8｜资源地基与 dlsym 解耦](08-资源地基与dlsym.md)**。
 
 [返回课程导学 →](../源码课程/index.md)

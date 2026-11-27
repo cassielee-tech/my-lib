@@ -1,6 +1,6 @@
 # Pairwise（逐对通信算法）
 
-> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-ring-allreduce.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-Ring-AllReduce推导.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > HCCL 通信算法解析。枚举：`HCCL_ALGO_TYPE_PAIRWISE`（`hccl/src/common/alg_type.h:26`）；层级枚举 `ALG_LEVEL0_PAIRWISE`（名称映射 `"pairwise"`）。
 > 权威描述：`hccl/docs/zh/user_guide/coll_algo_intro/Pairwise.md`。
@@ -109,7 +109,7 @@ Pairwise 的耗时公式与其他算法不同——它显式建模了**每对 ra
 
 | 路径 | 内容 |
 | --- | --- |
-| `hccl/src/ops/all_to_all_v/algorithm/template/aicpu/ins_temp_all_to_all_v_pairwise.cc` / `.h` | **950/A5 路径 AlltoAllV Pairwise 模板**（hccl 仓唯一 Pairwise 模板） |
+| `hccl/src/ops/all_to_all_v/algorithm/复盘写作模板.md/aicpu/ins_temp_all_to_all_v_pairwise.cc` / `.h` | **950/A5 路径 AlltoAllV Pairwise 模板**（hccl 仓唯一 Pairwise 模板） |
 | `hcomm/src/legacy/ascend910/algorithm/base/alg_template/temp_alltoallv/alltoallv_pairwise.cc` | AlltoAllV Pairwise（910/A2/A3 路径） |
 | `.../temp_alltoallv/alltoallv_staged_pairwise.cc` | **AlltoAllV 分级 Pairwise**（staged = 经 CCL Buffer 中转） |
 | `.../temp_alltoall/allltoall_pipeline_mesh_pairwise_ccl_enough.cc` | **Mesh + Pairwise 流水（CCL Buffer 充足）** |
@@ -142,7 +142,7 @@ export HCCL_ALGO="alltoallv=level0:pairwise"
 - `hccl/docs/zh/user_guide/coll_algo_intro/Pairwise.md`：算法描述、"多打多"动机与 $n_{ij}$ 耗时表（本文主要来源）
 - `hccl/docs/zh/user_guide/coll_algo_intro/algo_intro.md`：适用算子约束（仅 AlltoAll 族）与分组 Full Mesh 特殊说明
 - `hccl/docs/zh/user_guide/hccl_env/inter_server_algo_support.md`：A2/A3 的 AlltoAll 族支持 Pairwise；CP 算法回退 Pairwise
-- `hccl/src/ops/all_to_all_v/algorithm/template/aicpu/ins_temp_all_to_all_v_pairwise.cc`：950 路径实现
+- `hccl/src/ops/all_to_all_v/algorithm/复盘写作模板.md/aicpu/ins_temp_all_to_all_v_pairwise.cc`：950 路径实现
 - [fullmesh.md](/通信与昇腾/参考手册/算法参考/fullmesh.md)：Pairwise 是 Mesh 的分步执行版本
 - [../operators/all_to_all_v.md](/通信与昇腾/参考手册/算子参考/all_to_all_v.md)：AlltoAll/V/VC 算子解析
 - ../ep/01_专家并行通信概述.md：EP Dispatch/Combine 的 AlltoAllv 通信内核

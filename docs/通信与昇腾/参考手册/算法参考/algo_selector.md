@@ -1,6 +1,6 @@
 # 算法选择器与算法族总览
 
-> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-ring-allreduce.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-Ring-AllReduce推导.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > HCCL 通信算法解析。枚举来源：`hccl/src/common/alg_type.h`；选择器来源：`hccl/src/ops/*/selector/`、`hccl/src/ops/op_common/selector/`。
 
@@ -14,7 +14,7 @@
 | 1 | `HCCL_ALGO_TYPE_RING` | 环算法 | [ring.md](/通信与昇腾/参考手册/算法参考/ring.md) |
 | 2 | `HCCL_ALGO_TYPE_PIPELINE` | 分级流水算法 | [pipeline.md](/通信与昇腾/参考手册/算法参考/pipeline.md) |
 | 3 | `HCCL_ALGO_TYPE_FULLMESH` | 全互联 Mesh | [fullmesh.md](/通信与昇腾/参考手册/算法参考/fullmesh.md) |
-| 4 | `HCCL_ALGO_TYPE_HDR` | 递归二分-倍增（官方文档称 RHD，配置串 `H-D`） | [hdr.md](/通信与昇腾/参考手册/算法参考/hdr.md) |
+| 4 | `HCCL_ALGO_TYPE_HDR` | 递归二分-倍增（官方文档称 RHD，配置串 `H-D`） | [hdr.md](/通信与昇腾/参考手册/算法参考/RHD递归倍增.md) |
 | 5 | `HCCL_ALGO_TYPE_PAIRWISE` | 逐对通信（仅 AlltoAll 族） | [pairwise.md](/通信与昇腾/参考手册/算法参考/pairwise.md) |
 | 6 | `HCCL_ALGO_TYPE_NHR` | 非均衡层次环（自研） | [nhr.md](/通信与昇腾/参考手册/算法参考/nhr.md) |
 | 7 | `HCCL_ALGO_TYPE_NHR_V1` | NHR 上一代（逐步停用） | [nhr.md](/通信与昇腾/参考手册/算法参考/nhr.md) |
@@ -38,9 +38,9 @@ flowchart TD
 
 | 维度 | 权威文档 |
 | --- | --- |
-| 算法分类（执行器编排） | [combination.md](/通信与昇腾/参考手册/算法参考/combination.md) |
-| 算法类型（拓扑算法） | 各算法篇（[ring](/通信与昇腾/参考手册/算法参考/ring.md) / [fullmesh](/通信与昇腾/参考手册/算法参考/fullmesh.md) / [hdr](/通信与昇腾/参考手册/算法参考/hdr.md) / [star](/通信与昇腾/参考手册/算法参考/star.md) / [nhr](/通信与昇腾/参考手册/算法参考/nhr.md) / [nb](/通信与昇腾/参考手册/算法参考/nb.md) / [ahc](/通信与昇腾/参考手册/算法参考/ahc.md) / [pipeline](/通信与昇腾/参考手册/算法参考/pipeline.md) / [pairwise](/通信与昇腾/参考手册/算法参考/pairwise.md)） |
-| 层级（L0/L1/L2） | [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/algo_level_matrix.md)、[../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/l0l1l2-principle.md) |
+| 算法分类（执行器编排） | [combination.md](/通信与昇腾/参考手册/算法参考/算法组合.md) |
+| 算法类型（拓扑算法） | 各算法篇（[ring](/通信与昇腾/参考手册/算法参考/ring.md) / [fullmesh](/通信与昇腾/参考手册/算法参考/fullmesh.md) / [hdr](/通信与昇腾/参考手册/算法参考/RHD递归倍增.md) / [star](/通信与昇腾/参考手册/算法参考/star.md) / [nhr](/通信与昇腾/参考手册/算法参考/nhr.md) / [nb](/通信与昇腾/参考手册/算法参考/nb.md) / [ahc](/通信与昇腾/参考手册/算法参考/ahc.md) / [pipeline](/通信与昇腾/参考手册/算法参考/pipeline.md) / [pairwise](/通信与昇腾/参考手册/算法参考/pairwise.md)） |
+| 层级（L0/L1/L2） | [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/分层矩阵.md)、[../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md) |
 
 ## 3. 选择机制全流程
 
@@ -66,7 +66,7 @@ flowchart TB
 | **1（最高）** | `HcclCommConfig` 的 `hcclAlgo` 参数 | **通信域粒度**，优先于环境变量 |
 | 2 | 环境变量 `HCCL_ALGO` | 经 `alg_env_config` / `alg_parse` 解析 |
 | 3 | `HCCL_ALGO_TYPE_DEFAULT` | 走 auto_selector 自适应选择 |
-| — | `src/algo_plugin/`（RFC 0002） | 算法插件机制，可注入自定义选择逻辑 |
+| — | `src/算法插件.md/`（RFC 0002） | 算法插件机制，可注入自定义选择逻辑 |
 
 ### 3.2 引擎回退规则（selector 内置）
 
@@ -132,7 +132,7 @@ CcuSched AllReduce Parallel Mesh NHR
 | `alltoallv_for_310p.cc` | AlltoAllV | Atlas 300I Duo 专用 |
 | `send_receive.cc` | Send/Recv | 点对点 |
 
-### 5.2 950/A5 路径（`hccl/src/ops/*/algorithm/template/`）
+### 5.2 950/A5 路径（`hccl/src/ops/*/algorithm/复盘写作模板.md/`）
 
 | 算法/形态 | 文件数（实测） | 说明 |
 | --- | --- | --- |
@@ -176,7 +176,7 @@ CcuSched AllReduce Parallel Mesh NHR
 | `hccl_algo_dims.h` | 算法维度定义 |
 | `inc/hccl_tuner_plugin.h` | **Tuner 插件接口**（RFC 0002 算法插件机制） |
 
-配套：`hccl/src/common/alg_parse.cc`（`HCCL_ALGO` 字符串解析，7 种 ExecutorType）、`alg_env_config.cc`（环境变量）、`hccl/src/ops/op_common/algorithm/executor/registry/coll_alg_v2_exec_registry.cc`（执行器注册）、`algorithm/template/registry/alg_v2_template_register.cc`（模板注册）。
+配套：`hccl/src/common/alg_parse.cc`（`HCCL_ALGO` 字符串解析，7 种 ExecutorType）、`alg_env_config.cc`（环境变量）、`hccl/src/ops/op_common/algorithm/executor/registry/coll_alg_v2_exec_registry.cc`（执行器注册）、`algorithm/复盘写作模板.md/registry/alg_v2_template_register.cc`（模板注册）。
 
 ## 7. 代码位置
 
@@ -189,7 +189,7 @@ CcuSched AllReduce Parallel Mesh NHR
 | `hccl/src/ops/op_common/selector/` | 公共选择组件（见 §6） |
 | `hccl/src/ops/op_common/algorithm/topo_match/` | 15 个文件：13 个层级拓扑匹配器 + 2 个基类 |
 | `hccl/src/ops/op_common/topo_info/` | `topo.cc`、`topo_host.cc`、`physical_level*.cc`（拓扑信息生成与层级归一化） |
-| `hccl/src/algo_plugin/` | 算法插件机制（RFC 0002） |
+| `hccl/src/算法插件.md/` | 算法插件机制（RFC 0002） |
 | `hcomm/src/legacy/ascend910/algorithm/impl/alg_configurator.cc` | 910 系列层级算法配置（`SetAlgoLevel0StandardCard` 等） |
 | `hcomm/src/legacy/ascend910/algorithm/impl/topo_matcher.cc` / `.h` | 910 系列拓扑匹配 |
 
@@ -203,7 +203,7 @@ CcuSched AllReduce Parallel Mesh NHR
 - `hccl/docs/zh/rfcs/0002-HCCL-ALGO-Plugin.md`：算法插件机制与拓扑感知选择
 - `hccl/docs/zh/rfcs/0003-executor-template-refactor.md`：执行器编排与算法树重构
 - `hccl/docs/zh/architecture/architecture-brief.md`：算法/协议/执行模式总览
-- [combination.md](/通信与昇腾/参考手册/算法参考/combination.md)：执行器编排详解
-- [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/algo_level_matrix.md)：L0/L1/L2 分层选择矩阵
-- [../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)：层级实现原理与引擎/协议映射
+- [combination.md](/通信与昇腾/参考手册/算法参考/算法组合.md)：执行器编排详解
+- [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/分层矩阵.md)：L0/L1/L2 分层选择矩阵
+- [../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)：层级实现原理与引擎/协议映射
 

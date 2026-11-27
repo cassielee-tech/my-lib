@@ -1,6 +1,6 @@
 # AICPU_TS 通信引擎
 
-> **深度参考** · 前置阅读：[源码课程单元 4｜通信引擎与三引擎编排](/通信与昇腾/源码课程/04-comm-engines.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 4｜通信引擎与三引擎编排](/通信与昇腾/源码课程/04-通信引擎与三引擎编排.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > **大数据高带宽场景的主力引擎**（L1/L2）。AICPU 运行通信 Kernel 并向任务调度系统（TS，Task Scheduler）提交通信 Task 描述符，由 TS 调度到执行器执行——**不占用计算核**（AI Core/Vector Core），通信效率高。
 >
@@ -69,7 +69,7 @@ AICPU_TS 与 CPU_TS 共用同一套 L3-prim 数据面原语（`hcomm/include/hco
 | **批处理模式** | `HcommBatchModeStart/End`、`HcommAcquireComm`/`HcommReleaseComm` | 批量下发窗口，降低下发开销 |
 | **Task Cache** | `HcommAicpuTsTaskCacheLookup/Start/End/Execute/Clear` | 复用首次展开结果，省展开开销 |
 
-> 原语的完整分类与三层（L0/L1/L2）用法见 [../03_L0L1L2分级通信实现原理.md §3](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)。
+> 原语的完整分类与三层（L0/L1/L2）用法见 [../03_L0L1L2分级通信实现原理.md §3](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)。
 
 ---
 
@@ -141,7 +141,7 @@ AICPU_TS 算子的 Profiling 分为**下发**与**执行**两段——静态开�
 
 ![通信算子执行](/images/cann/hccl/wiki/hierarchical/comm_op_execution.png)
 
-> 图源：`hccl/docs/zh/user_guide/perf_analysis/figures/comm_op_dispatch.png`、`comm_op_execution.png`。这正是 AICPU Task Cache 与 `AICPU_CacheDisable` 开关存在的原因。端到端 Profiling 任务对应见 [../03_L0L1L2分级通信实现原理.md §5](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)。
+> 图源：`hccl/docs/zh/user_guide/perf_analysis/figures/comm_op_dispatch.png`、`comm_op_execution.png`。这正是 AICPU Task Cache 与 `AICPU_CacheDisable` 开关存在的原因。端到端 Profiling 任务对应见 [../03_L0L1L2分级通信实现原理.md §5](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)。
 
 ---
 
@@ -151,7 +151,7 @@ AICPU_TS 算子的 Profiling 分为**下发**与**执行**两段——静态开�
 
 > 图源：`hcomm/docs/zh/comm_op_dev_guide/aicpu_comm_op_dev/figures/algo_select_new.png`
 
-AICPU_TS 承载**全部 13 个算子**，是 L1/L2 的默认引擎。各算子的分级编排与可选算法名见 [../operators/](/通信与昇腾/参考手册/算子参考/) 与 [../algorithms/algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/algo_level_matrix.md)。
+AICPU_TS 承载**全部 13 个算子**，是 L1/L2 的默认引擎。各算子的分级编排与可选算法名见 [../operators/](/通信与昇腾/参考手册/算子参考/) 与 [../algorithms/分层矩阵.md](/通信与昇腾/参考手册/算法参考/分层矩阵.md)。
 
 ---
 
@@ -188,5 +188,5 @@ AICPU_TS 承载**全部 13 个算子**，是 L1/L2 的默认引擎。各算子�
 - `hcomm/docs/zh/api_ref/comm_opdev/data_plane_api/cpu-cpu_ts-aicpu_ts/`：数据面原语 API（communication_operations / local_operations / others）
 - `hccl/docs/zh/user_guide/hccl_env/HCCL_OP_EXPANSION_MODE.md`：展开模式与约束
 - `hccl/docs/zh/user_guide/perf_analysis/typical_op_behavior.md`：Profiling 任务对应
-- 关联：[README.md](/通信与昇腾/参考手册/通信引擎/)（引擎总览）、[ccu.md](/通信与昇腾/参考手册/通信引擎/ccu.md)、[aiv.md](/通信与昇腾/参考手册/通信引擎/aiv.md)、[../comm/roce_rdma.md](/通信与昇腾/参考手册/协议与传输/roce_rdma.md)、[../comm/ub_network.md](/通信与昇腾/参考手册/协议与传输/ub_network.md)
+- 关联：[README.md](/通信与昇腾/参考手册/通信引擎/)（引擎总览）、[ccu.md](/通信与昇腾/参考手册/通信引擎/ccu.md)、[aiv.md](/通信与昇腾/参考手册/通信引擎/aiv.md)、[../comm/roce_rdma.md](/通信与昇腾/参考手册/协议与传输/roce_rdma.md)、[../comm/UB网络.md](/通信与昇腾/参考手册/协议与传输/UB网络.md)
 

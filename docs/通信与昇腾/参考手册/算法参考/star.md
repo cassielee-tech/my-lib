@@ -1,6 +1,6 @@
 # Star（星型算法）
 
-> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-ring-allreduce.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-Ring-AllReduce推导.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > HCCL 通信算法解析。枚举：`ALG_LEVEL0_NP_STAR`（`hccl/src/common/alg_type.h:48`，名称映射 `"star"`）、`ALG_LEVEL1_STAR`（`alg_type.h:58`）。
 > 权威描述：`hccl/docs/zh/user_guide/coll_algo_intro/Star.md`。
@@ -72,7 +72,7 @@ $$\alpha + \beta n$$
 
 > **实现现状（代码实测）**：
 > - `hccl/src/ops/*/selector/` 输出的算法名中**没有 Star 组合**（950/A5 路径以 Mesh1D + NHR 为主）
-> - `hccl/src/ops/*/algorithm/template/` 下**没有 Star 模板文件**
+> - `hccl/src/ops/*/algorithm/复盘写作模板.md/` 下**没有 Star 模板文件**
 > - **Star 的实际实现在 `hcomm/src/legacy/ascend910/`**，且**仅覆盖 Broadcast 与 Gather 两个算子**（含专用 `comm_star` 通信器）
 >
 > 因此准确表述是：**Star 是官方 4 种基础拓扑算法之一，在 910/A2/A3 路径中为 Broadcast/Gather 提供实现；在 950/A5 路径中层级枚举保留但 selector 未选用。**
@@ -113,5 +113,5 @@ Reduce 算子的三阶段编排（`algo_intro.md` 权威表）中，第三阶段
 - `hccl/src/common/alg_type.h`：`ALG_LEVEL0_NP_STAR` / `ALG_LEVEL1_STAR` 枚举与名称映射
 - [fullmesh.md](/通信与昇腾/参考手册/算法参考/fullmesh.md)：Star 可视为全连接拓扑下的一步直达特例
 - [../operators/broadcast.md](/通信与昇腾/参考手册/算子参考/broadcast.md)、[../operators/reduce.md](/通信与昇腾/参考手册/算子参考/reduce.md)：使用 Star 的算子
-- [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/algo_level_matrix.md)：L0 默认选择规则
+- [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/分层矩阵.md)：L0 默认选择规则
 

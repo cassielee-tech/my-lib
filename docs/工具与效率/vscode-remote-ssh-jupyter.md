@@ -68,7 +68,7 @@ ssh username@server.example.com
 编辑本地文件：
 
 ```text
-~/.ssh/config
+~/.ssh/配置.md
 ```
 
 加入：

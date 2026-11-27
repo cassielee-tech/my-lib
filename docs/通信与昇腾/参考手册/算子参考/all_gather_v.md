@@ -1,6 +1,6 @@
 # HcclAllGatherV 算子解析
 
-> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-collective-semantics-cost.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-Collective语义与代价模型.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > 代码基线：`hccl/src/ops/all_gather_v/`（950/A5 路径）+ `hcomm/src/legacy/ascend910/algorithm/base/alg_template/temp_all_gather/all_gather_v_*.cc`（910/A2/A3 路径）。
 > 参数与约束以 `hccl/docs/zh/api_ref/comm_op_interface/HcclAllGatherV.md` 为准。
@@ -145,5 +145,5 @@ all_gather_v/
 - `hccl/src/ops/all_gather_v/`：950/A5 路径实现
 - `hcomm/src/legacy/ascend910/algorithm/base/alg_template/temp_all_gather/all_gather_v_pipeline.cc`、`all_gather_v_graph_pipeline.cc`：A2 的 AGV Pipeline
 - [all_gather.md](/通信与昇腾/参考手册/算子参考/all_gather.md)：定长版本（实现丰富得多）；[reduce_scatter_v.md](/通信与昇腾/参考手册/算子参考/reduce_scatter_v.md)：变长归约散布
-- 算法详解：[../algorithms/](/通信与昇腾/参考手册/算法参考/)；层级原理：[../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)
+- 算法详解：[../algorithms/](/通信与昇腾/参考手册/算法参考/)；层级原理：[../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)
 

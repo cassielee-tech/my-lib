@@ -1,13 +1,13 @@
 # operators：通信算子解析
 
-> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-collective-semantics-cost.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-Collective语义与代价模型.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > **算子做什么**（语义层）。本目录逐一解析 HCCL 的 13 个通信算子：准确的功能描述与函数原型、产品支持与数据类型、约束说明、分级通信编排、差异化实现流程、实测文件清单、可选算法名。
 >
-> 算子是通信能力的**对外语义入口**（L1，`hccl.h`），向下经 [../algorithms/](/通信与昇腾/参考手册/算法参考/) 选择算法、由 [../engine/](/通信与昇腾/参考手册/通信引擎/) 执行、经 [../comm/](/通信与昇腾/参考手册/协议与传输/) 搬运。算子全景对比见 [../02_HCCL算子与算法总览.md](/通信与昇腾/参考手册/总览/ops-algos-overview.md)。
+> 算子是通信能力的**对外语义入口**（L1，`hccl.h`），向下经 [../algorithms/](/通信与昇腾/参考手册/算法参考/) 选择算法、由 [../engine/](/通信与昇腾/参考手册/通信引擎/) 执行、经 [../comm/](/通信与昇腾/参考手册/协议与传输/) 搬运。算子全景对比见 [../02_HCCL算子与算法总览.md](/通信与昇腾/参考手册/总览/算子与算法总览.md)。
 >
 > 事实来源（可信度：代码 > 仓内文档 > 社区资料）：
-> `hccl/include/hccl.h`（算子 API）、`hccl/src/ops/<op>/`（13 个算子的 selector/executor/template/op_graph 实测）、`hccl/docs/zh/api_ref/comm_op_interface/`（16 个 API 文档 + 官方语义图）、`hccl/docs/zh/user_guide/api_comm_impl.md`（集合/点对点通信语义）。
+> `hccl/include/hccl.h`（算子 API）、`hccl/src/ops/<op>/`（13 个算子的 selector/executor/复盘写作模板.md/op_graph 实测）、`hccl/docs/zh/api_ref/comm_op_interface/`（16 个 API 文档 + 官方语义图）、`hccl/docs/zh/user_guide/api_comm_impl.md`（集合/点对点通信语义）。
 
 ---
 
@@ -117,7 +117,7 @@ flowchart TB
 - `hccl/docs/zh/api_ref/comm_op_interface/`：16 个算子 API 文档（`HcclAllReduce.md` 等）+ 官方语义图 + `collective_comm.md`/`p2p_comm.md`
 - `hccl/docs/zh/user_guide/api_comm_impl.md`：集合通信与点对点通信语义
 - `hccl/include/hccl.h`：算子 API 原型
-- `hccl/src/ops/<op>/`：13 个算子的 selector/executor/template/op_graph 实测
-- `hccl/docs/zh/user_guide/comm_ops_support_list/`：各产品算子支持度（见 [../reference/support_build.md](/通信与昇腾/参考手册/运行与约束/support_build.md)）
-- 关联：[../02_HCCL算子与算法总览.md](/通信与昇腾/参考手册/总览/ops-algos-overview.md)（算子全景对比）、[../algorithms/](/通信与昇腾/参考手册/算法参考/)（算法编排）、[../engine/](/通信与昇腾/参考手册/通信引擎/)（引擎执行）、[../communicator/](/通信与昇腾/参考手册/通信域/)（通信域）
+- `hccl/src/ops/<op>/`：13 个算子的 selector/executor/复盘写作模板.md/op_graph 实测
+- `hccl/docs/zh/user_guide/comm_ops_support_list/`：各产品算子支持度（见 [../reference/支持与构建.md](/通信与昇腾/参考手册/运行与约束/支持与构建.md)）
+- 关联：[../02_HCCL算子与算法总览.md](/通信与昇腾/参考手册/总览/算子与算法总览.md)（算子全景对比）、[../algorithms/](/通信与昇腾/参考手册/算法参考/)（算法编排）、[../engine/](/通信与昇腾/参考手册/通信引擎/)（引擎执行）、[../communicator/](/通信与昇腾/参考手册/通信域/)（通信域）
 

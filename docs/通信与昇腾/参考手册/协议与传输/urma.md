@@ -1,6 +1,6 @@
 # URMA：统一远端内存访问
 
-> **深度参考** · 前置阅读：[源码课程单元 3｜数据面：原语与资源](/通信与昇腾/源码课程/03-data-plane.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 3｜数据面：原语与资源](/通信与昇腾/源码课程/03-数据面-原语与资源.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > **URMA（Unified Remote Memory Access，统一远端内存访问）**——基于 UB 总线的**硬化数据通路**，提供类似本地访问语义的远程内存操作能力。CCU 执行指令流、AIV 直接组装 WQE，均经 URMA 完成跨 NPU 数据搬运。它是 [UB_MEM](/通信与昇腾/参考手册/协议与传输/ub_mem.md)（软件地址映射）之外的另一条内存语义通路：**由设备侧直接构造 WQE 交给 UB 引擎执行 RMA**，而非把远端内存映射进本地地址空间。
 >
@@ -59,7 +59,7 @@ URMA 的核心是 **WQ（Work Queue）** 与 **CQ（Completion Queue）**。设�
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
-| `jettyId` | u32 | UB Jetty ID（见 [ub_network.md](/通信与昇腾/参考手册/协议与传输/ub_network.md)） |
+| `jettyId` | u32 | UB Jetty ID（见 [ub_network.md](/通信与昇腾/参考手册/协议与传输/UB网络.md)） |
 | `sqVA` | u64 | Send Queue 虚拟地址 |
 | `wqeSize` | u32 | WQE 大小（`WQE_SIZE = 64`） |
 | `sqDepth` | u32 | SQ 深度 |
@@ -161,7 +161,7 @@ CCU 的数据搬运能力（本地内存↔CcuBuffer↔远端内存）底层即 
 
 ## 8. URMA 与对称内存
 
-URMA 是对称内存（[symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md)）的关键支撑通路。`hccl_sym_win.h:36`：
+URMA 是对称内存（[symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/对称内存.md)）的关键支撑通路。`hccl_sym_win.h:36`：
 
 ```c
 // Get remote symmetric memory pointer (for URMA).
@@ -199,5 +199,5 @@ extern HcclResult HcclSymWinGetRemoteAddr(HcclCommSymWindow winHandle, size_t of
 - `hcomm/docs/zh/comm_op_dev_guide/prog_models_concepts/CCU_models_concepts.md`：CCU 数据搬运能力
 - `hcomm/docs/zh/api_ref/comm_mgr_c/HcclCommSymWinRegister.md`：URMA 对称内存场景
 - `shmem/docs/glossary.md`：URMA / UBMEM / SDMA / UDMA / RDMA 术语
-- 关联：[README.md](/通信与昇腾/参考手册/协议与传输/)（通信方式总览）、[ub_mem.md](/通信与昇腾/参考手册/协议与传输/ub_mem.md)、[ub_network.md](/通信与昇腾/参考手册/协议与传输/ub_network.md)（Jetty/JFC）、[symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md)、[../engine/ccu.md](/通信与昇腾/参考手册/通信引擎/ccu.md)、[../engine/aiv.md](/通信与昇腾/参考手册/通信引擎/aiv.md)
+- 关联：[README.md](/通信与昇腾/参考手册/协议与传输/)（通信方式总览）、[ub_mem.md](/通信与昇腾/参考手册/协议与传输/ub_mem.md)、[ub_network.md](/通信与昇腾/参考手册/协议与传输/UB网络.md)（Jetty/JFC）、[symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/对称内存.md)、[../engine/ccu.md](/通信与昇腾/参考手册/通信引擎/ccu.md)、[../engine/aiv.md](/通信与昇腾/参考手册/通信引擎/aiv.md)
 

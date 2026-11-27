@@ -1,6 +1,6 @@
 # HcclBroadcast 算子解析
 
-> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-collective-semantics-cost.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-Collective语义与代价模型.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > 代码基线：`hccl/src/ops/broadcast/`（950/A5 路径）+ `hcomm/src/legacy/ascend910/algorithm/base/alg_template/temp_broadcast/`（910/A2/A3 路径，9 个模板）。
 > 参数与约束以 `hccl/docs/zh/api_ref/comm_op_interface/HcclBroadcast.md` 为准。
@@ -163,5 +163,5 @@ broadcast/
 - `hccl/src/ops/broadcast/`：950/A5 路径实现
 - `hcomm/src/legacy/ascend910/algorithm/base/alg_template/temp_broadcast/`：910/A2/A3 路径 9 个模板
 - [scatter.md](/通信与昇腾/参考手册/算子参考/scatter.md)：镜像算子；[../algorithms/star.md](/通信与昇腾/参考手册/算法参考/star.md)
-- 算法详解：[../algorithms/](/通信与昇腾/参考手册/算法参考/)；层级原理：[../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)
+- 算法详解：[../algorithms/](/通信与昇腾/参考手册/算法参考/)；层级原理：[../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)
 

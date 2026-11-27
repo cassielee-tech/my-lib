@@ -18,11 +18,11 @@
 先用"热门产品地图"建立直觉，再用"工程化知识树"理解系统。知识树较长，请按五层分开阅读，不要求一次完成。
 :::
 
-[2026 热门 AI Agent 产品地图](01-popular-agents.md)
+[2026 热门 AI Agent 产品地图](01-2026热门AIAgent产品地图.md)
 
-[AI Agent 工程化知识树](agent-engineering-knowledge-tree.md)
+[AI Agent 工程化知识树](AIAgent工程化知识树.md)
 
-[AI Coding：从代码补全到智能体协作](ai-coding-codearts.md)
+[AI Coding：从代码补全到智能体协作](AICoding-从代码补全到智能体协作.md)
 
 [实用提示词收集](实用提示词收集.md)
 

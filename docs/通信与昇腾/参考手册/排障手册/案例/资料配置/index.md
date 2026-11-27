@@ -74,7 +74,7 @@ flowchart TB
 | **A3 多超节点** | 同一超节点内 AI Server 信息须配置在一起，不支持交叉配置 |
 | **net_layer 升序** | `net_layer` 须从 0 开始升序排列 |
 
-> rank table 字段 ↔ RankGraph 概念映射、五套版本对比详见 [../../04_昇腾集群组网总览.md §4](/通信与昇腾/参考手册/总览/cluster-topology.md)。
+> rank table 字段 ↔ RankGraph 概念映射、五套版本对比详见 [../../04_昇腾集群组网总览.md §4](/通信与昇腾/参考手册/总览/集群组网总览.md)。
 
 ---
 
@@ -106,5 +106,5 @@ flowchart TB
 
 - `hccl/docs/zh/user_guide/fault_diagnosis/`：`rank_table_load_fail_troubleshooting.md`、`env_config_error_EI0001_troubleshooting.md`、`cluster_info_nego_troubleshooting.md`、`cluster_info_verify_fail_troubleshooting.md`、各 `*_EI00xx.md`
 - `hccl/docs/zh/user_guide/cluster_info_config/`：rank table 配置（A2/A3/A5/910/300I Duo）
-- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[link](/通信与昇腾/参考手册/排障手册/案例/建链/)（建链阶段一致性校验）、[../error_codes.md](/通信与昇腾/参考手册/排障手册/error_codes.md)、[../../communicator/creation.md](/通信与昇腾/参考手册/通信域/creation.md)（通信域创建）、[../../04_昇腾集群组网总览.md](/通信与昇腾/参考手册/总览/cluster-topology.md)（rank table 配置）
+- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[link](/通信与昇腾/参考手册/排障手册/案例/建链/)（建链阶段一致性校验）、[../EI错误码全表.md](/通信与昇腾/参考手册/排障手册/EI错误码全表.md)、[../../communicator/创建方式.md](/通信与昇腾/参考手册/通信域/创建方式.md)（通信域创建）、[../../04_昇腾集群组网总览.md](/通信与昇腾/参考手册/总览/集群组网总览.md)（rank table 配置）
 

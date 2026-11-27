@@ -1,6 +1,6 @@
 # Host CPU_TS 通信引擎
 
-> **深度参考** · 前置阅读：[源码课程单元 4｜通信引擎与三引擎编排](/通信与昇腾/源码课程/04-comm-engines.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 4｜通信引擎与三引擎编排](/通信与昇腾/源码课程/04-通信引擎与三引擎编排.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > **Atlas A2 系列专用的历史路径**。由 **Host CPU** 展开通信逻辑，向 Device 侧的任务调度系统（TS，Task Scheduler）提交通信操作相关任务，TS 调度到执行器执行。**不占用计算核**，但下发开销大、随任务数线性增加。
 >
@@ -52,7 +52,7 @@ flowchart LR
 
 Host CPU_TS 与 AICPU_TS **共用同一套** L3-prim 数据面原语（`hcomm/include/hcomm_primitives.h`）：`HcommLocalCopyOnThread`、`HcommWrite/ReadOnThread`、`HcommThreadNotify*`、`HcommChannelNotify*` 等。差异仅在**展开位置**（Host vs Device AICPU）与 **C 接口适配**（`cpu_primitives_c_adpt.cc` vs `aicpu_ts_primitives_c_adpt.cc`）。
 
-原语分类详见 [aicpu_ts.md §3](/通信与昇腾/参考手册/通信引擎/aicpu_ts.md) 与 [../03_L0L1L2分级通信实现原理.md §3](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)。
+原语分类详见 [aicpu_ts.md §3](/通信与昇腾/参考手册/通信引擎/aicpu_ts.md) 与 [../03_L0L1L2分级通信实现原理.md §3](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)。
 
 ---
 
@@ -84,5 +84,5 @@ Host CPU_TS 与 AICPU_TS **共用同一套** L3-prim 数据面原语（`hcomm/in
 - `hcomm/docs/zh/comm_op_dev_guide/prog_models_concepts/comm_engine.md`：Host CPU+TS 执行流程
 - `hcomm/docs/zh/comm_op_dev_guide/prog_models_concepts/concurrency_model.md`：Stream + NPU Notify 寄存器
 - `hccl/docs/zh/user_guide/hccl_env/HCCL_OP_EXPANSION_MODE.md`：A2 的 HOST/HOST_TS 配置
-- 关联：[README.md](/通信与昇腾/参考手册/通信引擎/)（引擎总览）、[aicpu_ts.md](/通信与昇腾/参考手册/通信引擎/aicpu_ts.md)（共用数据面原语）、[../networking/roce_cluster.md](/通信与昇腾/参考手册/组网形态/roce_cluster.md)（A2 的 L1 组网）
+- 关联：[README.md](/通信与昇腾/参考手册/通信引擎/)（引擎总览）、[aicpu_ts.md](/通信与昇腾/参考手册/通信引擎/aicpu_ts.md)（共用数据面原语）、[../networking/RoCE集群.md](/通信与昇腾/参考手册/组网形态/RoCE集群.md)（A2 的 L1 组网）
 

@@ -1,6 +1,6 @@
 # HcclAllReduce 算子解析
 
-> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-collective-semantics-cost.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-Collective语义与代价模型.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > 代码基线：`hccl/src/ops/all_reduce/`（950/A5 路径）+ `hcomm/src/legacy/ascend910/algorithm/base/alg_template/temp_all_reduce/`（910/A2/A3 路径）。
 > 参数与约束以 `hccl/docs/zh/api_ref/comm_op_interface/HcclAllReduce.md` 为准。
@@ -76,7 +76,7 @@ flowchart LR
     S4 --> OUT["user output"]
 ```
 
-端到端数据流与 Profiling 任务对应详见 [../03_L0L1L2分级通信实现原理.md §5](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)。
+端到端数据流与 Profiling 任务对应详见 [../03_L0L1L2分级通信实现原理.md §5](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)。
 
 ## 5. 实现流程图（真实代码路径）
 
@@ -215,6 +215,6 @@ MC2 通算融合算子在 GE 图模式中消费 AllReduce 能力：
 - `hccl/docs/zh/user_guide/perf_analysis/typical_op_behavior.md`：AllReduce Profiling 任务对应
 - `hccl/src/ops/all_reduce/`：950/A5 路径实现
 - `hcomm/src/legacy/ascend910/algorithm/base/alg_template/temp_all_reduce/`：910/A2/A3 路径 21 个模板
-- 算法详解：[../algorithms/](/通信与昇腾/参考手册/算法参考/)；层级原理：[../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)
+- 算法详解：[../algorithms/](/通信与昇腾/参考手册/算法参考/)；层级原理：[../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)
 - 上层消费方：../../mc2/、../../ep/
 

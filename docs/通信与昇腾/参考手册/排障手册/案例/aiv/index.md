@@ -71,7 +71,7 @@ AIV 模式支持控核，核数不足会报错（`HCCL_OP_EXPANSION_MODE.md`）�
 | `Aicore kernel execute failed` | AICore kernel 执行失败 |
 | `TaskExecStage` / `Task run failed` | task exception 上报（三级关键字 `AIV`） |
 
-> 950 的三级关键字含 `AIV`：`[TaskExecStage][RunFailed][AIV]` 表示 AIV 执行异常（见 [../error_codes.md §3](/通信与昇腾/参考手册/排障手册/error_codes.md)）。
+> 950 的三级关键字含 `AIV`：`[TaskExecStage][RunFailed][AIV]` 表示 AIV 执行异常（见 [../EI错误码全表.md §3](/通信与昇腾/参考手册/排障手册/EI错误码全表.md)）。
 
 ---
 
@@ -93,5 +93,5 @@ AIV 模式支持控核，核数不足会报错（`HCCL_OP_EXPANSION_MODE.md`）�
 - `hccl/docs/zh/user_guide/hccl_env/HCCL_OP_EXPANSION_MODE.md`：AIV 约束、控核、数据类型、数据量回退
 - `hccl/docs/zh/user_guide/fault_diagnosis/notify_wait_timeout_EI0002.md`：notify wait 超时排查
 - `hcomm/src/legacy/ascend950/unified_platform/aiv/`：`ub_memory_transport.*`、`urma_direct_transport.*`
-- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[aic](/通信与昇腾/参考手册/排障手册/案例/aic/)（Cube 核问题）、[../../engine/aiv.md](/通信与昇腾/参考手册/通信引擎/aiv.md)（AIV 引擎）、[precision](/通信与昇腾/参考手册/排障手册/案例/精度/)（确定性优先级）、[../localization_flow.md](/通信与昇腾/参考手册/排障手册/localization_flow.md)（task exception）
+- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[aic](/通信与昇腾/参考手册/排障手册/案例/aic/)（Cube 核问题）、[../../engine/aiv.md](/通信与昇腾/参考手册/通信引擎/aiv.md)（AIV 引擎）、[precision](/通信与昇腾/参考手册/排障手册/案例/精度/)（确定性优先级）、[../定位流程.md](/通信与昇腾/参考手册/排障手册/定位流程.md)（task exception）
 

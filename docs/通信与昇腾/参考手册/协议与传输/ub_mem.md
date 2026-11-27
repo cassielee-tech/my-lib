@@ -1,6 +1,6 @@
 # UB_MEM：UB 内存语义通信
 
-> **深度参考** · 前置阅读：[源码课程单元 3｜数据面：原语与资源](/通信与昇腾/源码课程/03-data-plane.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 3｜数据面：原语与资源](/通信与昇腾/源码课程/03-数据面-原语与资源.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > **内存语义**通信方式（`COMM_PROTOCOL_UB_MEM = 6`）。远端对象的通信内存经 **token/memKey 导入**映射到本地进程地址空间，通信算子开发者**直接使用本地内存拷贝操作**访问远端通信内存——像操作本地内存一样访问邻居卡。**L0（Server 内）主力**之一。
 >
@@ -146,13 +146,13 @@ MAKE_ENUM(UBTransportStatus, INIT, SOCKET_OK, SEND_MEM_INFO, RECV_MEM_INFO,
 | `GetRmtHandshakeMsg()` / `GetLocalHandshakeMsg()` | 握手消息 |
 | `GetRmtOpAcceState()` / `GetLocalOpAcceState()` | 对端/本端加速状态（默认 `AcceleratorState::AIV`） |
 
-> AIV 侧 UB_MEM 通过**提前预留相同大小、相同布局的虚拟地址**实现对称内存（见 [symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md) 的 AIV + UB Memory 场景）。
+> AIV 侧 UB_MEM 通过**提前预留相同大小、相同布局的虚拟地址**实现对称内存（见 [symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/对称内存.md) 的 AIV + UB Memory 场景）。
 
 ---
 
 ## 6. 与其他通信方式的关系
 
-| 对比项 | UB_MEM | [URMA](/通信与昇腾/参考手册/协议与传输/urma.md) | [UB 网络语义](/通信与昇腾/参考手册/协议与传输/ub_network.md) |
+| 对比项 | UB_MEM | [URMA](/通信与昇腾/参考手册/协议与传输/urma.md) | [UB 网络语义](/通信与昇腾/参考手册/协议与传输/UB网络.md) |
 | --- | --- | --- | --- |
 | **语义** | 内存语义 | 内存语义（硬化） | 网络语义 |
 | **协议** | `UB_MEM=6` | 基于 UB 总线 | `UB_CTP=4`/`UB_RTP=9`/`UBOE=7` |
@@ -182,5 +182,5 @@ MAKE_ENUM(UBTransportStatus, INIT, SOCKET_OK, SEND_MEM_INFO, RECV_MEM_INFO,
 - `hcomm/docs/zh/architecture/architecture-brief.md` §2.3.1：内存语义原语 vs 网络语义原语
 - `hccl/docs/zh/user_guide/cluster_info_config/rank_table_config_a5.md`：拓扑文件 `protocols=UB_MEM`
 - `shmem/docs/glossary.md`：`UBMEM`/`UBmem` 术语（华为新一代互联协议，提供内存语义通信）
-- 关联：[README.md](/通信与昇腾/参考手册/协议与传输/)（通信方式总览）、[urma.md](/通信与昇腾/参考手册/协议与传输/urma.md)、[hccs_pcie.md](/通信与昇腾/参考手册/协议与传输/hccs_pcie.md)、[symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md)、[../engine/aiv.md](/通信与昇腾/参考手册/通信引擎/aiv.md)
+- 关联：[README.md](/通信与昇腾/参考手册/协议与传输/)（通信方式总览）、[urma.md](/通信与昇腾/参考手册/协议与传输/urma.md)、[hccs_pcie.md](/通信与昇腾/参考手册/协议与传输/hccs_pcie.md)、[symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/对称内存.md)、[../engine/aiv.md](/通信与昇腾/参考手册/通信引擎/aiv.md)
 

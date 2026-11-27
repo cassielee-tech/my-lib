@@ -1,6 +1,6 @@
 # Mesh / FullMesh（全互联算法）
 
-> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-ring-allreduce.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-Ring-AllReduce推导.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > HCCL 通信算法解析。枚举：`HCCL_ALGO_TYPE_FULLMESH`（`hccl/src/common/alg_type.h:24`）；层级枚举 `ALG_LEVEL0_1P_MESH` / `2P_MESH` / `4P_MESH` / `NP_MESH`（名称映射为 `"fullmesh"`）。
 > 权威描述：`hccl/docs/zh/user_guide/coll_algo_intro/Mesh.md`。
@@ -58,7 +58,7 @@ flowchart LR
 ## 4. 适用场景
 
 - **L0（Server 内）小数据量、低时延**首选——官方口径：Server 内支持 Mesh、Ring、Double-Ring、Star，按硬件拓扑自动选择，**用户无须配置也不支持配置**
-- 规模增大后（如 4K rank）Mesh 无法组成全连接，需换 RHD/NHR/NB（见 [hdr.md](/通信与昇腾/参考手册/算法参考/hdr.md)、[nhr.md](/通信与昇腾/参考手册/算法参考/nhr.md)）
+- 规模增大后（如 4K rank）Mesh 无法组成全连接，需换 RHD/NHR/NB（见 [hdr.md](/通信与昇腾/参考手册/算法参考/RHD递归倍增.md)、[nhr.md](/通信与昇腾/参考手册/算法参考/nhr.md)）
 - **分组 Full Mesh**（特殊算法）：仅 Atlas A3 的 AlltoAll/AlltoAllV/AlltoAllVC，集群规模较大时以一定并发度分多组完成——超节点内并发度高、时延小，超节点间并发度低（规避"一打多"）。**不支持 HCCL_ALGO 配置**
 
 ## 5. 层级与算子支持
@@ -77,7 +77,7 @@ enum class Level0MeshType { NOT_MESH = 0, SINGLE_DIE = 1, TWO_DIE_REGULAR = 2, T
 
 ## 6. 950/A5 路径的 Mesh 算法名（selector 实测）
 
-950 系列 selector 按拓扑与数据量输出 Mesh 系算法名（前缀即引擎，见 [../03_L0L1L2分级通信实现原理.md §7.4](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)）：
+950 系列 selector 按拓扑与数据量输出 Mesh 系算法名（前缀即引擎，见 [../03_L0L1L2分级通信实现原理.md §7.4](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)）：
 
 | 算法名 | 编排 | 选择条件 |
 | --- | --- | --- |
@@ -104,11 +104,11 @@ enum class Level0MeshType { NOT_MESH = 0, SINGLE_DIE = 1, TWO_DIE_REGULAR = 2, T
 | `temp_all_gather/all_gather_mesh.cc`、`_mesh_direct.cc`、`_mesh_atomic.cc`、`_mesh_mix.cc`、`_hccs_sio.cc` | AllGather Mesh 族 |
 | `temp_scatter/scatter_mesh.cc`、`temp_gather/gather_mesh.cc` | Scatter / Gather Mesh |
 | `temp_alltoallv/alltoallv_direct_fullmesh.cc`、`alltoallv_staged_mesh.cc` | AlltoAllV 直连全互联 / 分级 Mesh |
-| **950/A5 路径**（`hccl/src/ops/*/algorithm/template/`） | |
+| **950/A5 路径**（`hccl/src/ops/*/algorithm/复盘写作模板.md/`） | |
 | `*/aicpu/ins_temp_*_mesh_1D*.cc`（含 `_Z_axis_detour`、`_meshchunk`、`_dpu`、`_intra`、`_one_shot`、`_two_shot`） | AICPU 引擎 Mesh1D 模板 |
 | `*/aiv/aiv_temp_*_mesh_1D*.cc` + `*/aiv/kernel/aiv_*_mesh_1d*.h`（含 `_superkernel.h`、`_hif8.h`） | AIV 引擎 Mesh1D 模板与 Vector Core kernel |
 | `*/ccu/ccu_temp_*_mesh_1D*.cc`（含 `_mem2mem`、`_2die`、`_multi_jetty`）+ `*/ccu/kernel/ccu_kernel_*_mesh1d*.cc` | CCU 引擎 Mesh1D 模板与 CCU kernel |
-| `hccl/src/ops/scatter/algorithm/template/scatter_mesh.cc`、`nhr_base.cc` | 950 Scatter Mesh / NHR 基类 |
+| `hccl/src/ops/scatter/algorithm/复盘写作模板.md/scatter_mesh.cc`、`nhr_base.cc` | 950 Scatter Mesh / NHR 基类 |
 | `hccl/src/ops/op_common/algorithm/topo_match/topo_match_1d.cc`、`topo_match_ubx_1d.cc` | 1D Mesh 拓扑匹配 |
 
 > 实测：`hccl/src/ops` 下含 `mesh_1D` 的文件 **120 个**、`mem2mem` **114 个**、`2die` **36 个**、`multi_jetty` **20 个**——Mesh 是 950 路径的绝对主力。
@@ -119,6 +119,6 @@ enum class Level0MeshType { NOT_MESH = 0, SINGLE_DIE = 1, TWO_DIE_REGULAR = 2, T
 - `hccl/docs/zh/user_guide/coll_algo_intro/algo_intro.md`：Server 内算法与分组 Full Mesh 特殊说明
 - `hccl/docs/zh/user_guide/coll_algo_intro/RHD.md`：Mesh 在大规模下的局限与 RHD 的动机
 - `hccl/src/common/alg_type.h`：`ALG_LEVEL0_*_MESH` 枚举与 `"fullmesh"` 名称映射
-- [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/algo_level_matrix.md)：L0 默认选择规则
-- [combination.md](/通信与昇腾/参考手册/算法参考/combination.md)：Mesh 与各执行器编排的组合
+- [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/分层矩阵.md)：L0 默认选择规则
+- [combination.md](/通信与昇腾/参考手册/算法参考/算法组合.md)：Mesh 与各执行器编排的组合
 

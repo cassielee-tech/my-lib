@@ -1,11 +1,11 @@
 # execution：执行模式与框架集成
 
-> **深度参考** · 前置阅读：[源码课程单元 11｜实战与第一个算子](/通信与昇腾/源码课程/11-examples-first-op.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 11｜实战与第一个算子](/通信与昇腾/源码课程/11-实战与第一个算子.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > HCCL 向上对接 AI 框架，向下使能昇腾 NPU。AI 框架有**三种编程执行形态**——单算子模式、图模式（Ascend IR）、图捕获模式（aclgraph），HCCL 提供对应的工作方式。本目录描述这三种执行模式与主流框架（PyTorch/MindSpore/TensorFlow）的集成。
 >
 > 事实来源（可信度：代码 > 仓内文档 > 社区资料）：
-> `hccl/docs/zh/user_guide/framework_integration.md`（框架集成权威）、`hcomm/docs/zh/aclgraph/aclgraph_introduction.md`（ACL Graph 原理）、`hccl/src/ops/interface_graph_mode/`（图模式资源计算）、`hccl/src/common/framework/tf_plugin/`（TensorFlow 插件）、`hccl/docs/zh/user_guide/api_comm_impl.md`（C/Python 接口分工）。
+> `hccl/docs/zh/user_guide/框架集成.md`（框架集成权威）、`hcomm/docs/zh/ACL-Graph图捕获.md/aclgraph_introduction.md`（ACL Graph 原理）、`hccl/src/ops/interface_graph_mode/`（图模式资源计算）、`hccl/src/common/framework/tf_plugin/`（TensorFlow 插件）、`hccl/docs/zh/user_guide/api_comm_impl.md`（C/Python 接口分工）。
 
 ---
 
@@ -63,13 +63,13 @@ flowchart TB
 | **MindSpore** | 集成到 **MindSpore 框架代码** | 指定 HCCL 为分布式后端，用框架原生通信 API |
 | **TensorFlow** | 经 **TF Adapter** 适配插件对接 | 详见《TensorFlow 模型迁移指南》 |
 
-> 针对 PyTorch/MindSpore，HCCL 调用已集成到框架代码中，开发者**无需直接调用 HCCL API**，指定 HCCL 后端即可。详见 [framework_integration.md](/通信与昇腾/参考手册/执行模式/framework_integration.md)。
+> 针对 PyTorch/MindSpore，HCCL 调用已集成到框架代码中，开发者**无需直接调用 HCCL API**，指定 HCCL 后端即可。详见 [framework_integration.md](/通信与昇腾/参考手册/执行模式/框架集成.md)。
 
 ---
 
 ## 5. 图捕获模式（aclgraph）要点
 
-aclgraph 是 CANN Runtime 提供的"**捕获—重放**"机制（对应 CUDA Graph），把"一次下发一次执行"变为"一次捕获多次重放"，摊销 Host 调度开销。详见 [aclgraph.md](/通信与昇腾/参考手册/执行模式/aclgraph.md)。
+aclgraph 是 CANN Runtime 提供的"**捕获—重放**"机制（对应 CUDA Graph），把"一次下发一次执行"变为"一次捕获多次重放"，摊销 Host 调度开销。详见 [aclgraph.md](/通信与昇腾/参考手册/执行模式/ACL-Graph图捕获.md)。
 
 ```mermaid
 flowchart LR
@@ -87,15 +87,15 @@ flowchart LR
 
 | 文档 | 内容 |
 | --- | --- |
-| [aclgraph.md](/通信与昇腾/参考手册/执行模式/aclgraph.md) | **ACL Graph 图捕获**：捕获生命周期、HCCL 协同约束（跨流捕获/同步原语/销毁顺序）、任务更新（原地/重捕获）、**多 stream 拓扑**（model_ri 只含控制面 3 层）、已知失败模式 |
-| [framework_integration.md](/通信与昇腾/参考手册/执行模式/framework_integration.md) | **框架集成**：PyTorch(TorchNPU)/MindSpore/TensorFlow(TF Adapter) 对接方式、GE 图模式下发、示例代码 |
+| [aclgraph.md](/通信与昇腾/参考手册/执行模式/ACL-Graph图捕获.md) | **ACL Graph 图捕获**：捕获生命周期、HCCL 协同约束（跨流捕获/同步原语/销毁顺序）、任务更新（原地/重捕获）、**多 stream 拓扑**（model_ri 只含控制面 3 层）、已知失败模式 |
+| [framework_integration.md](/通信与昇腾/参考手册/执行模式/框架集成.md) | **框架集成**：PyTorch(TorchNPU)/MindSpore/TensorFlow(TF Adapter) 对接方式、GE 图模式下发、示例代码 |
 
 ---
 
 ## 7. 参考资料
 
-- `hccl/docs/zh/user_guide/framework_integration.md`：主流框架集成（本文主要来源）
-- `hcomm/docs/zh/aclgraph/aclgraph_introduction.md`：ACL Graph 介绍（捕获生命周期、多 stream 拓扑、失败模式）
+- `hccl/docs/zh/user_guide/框架集成.md`：主流框架集成（本文主要来源）
+- `hcomm/docs/zh/ACL-Graph图捕获.md/aclgraph_introduction.md`：ACL Graph 介绍（捕获生命周期、多 stream 拓扑、失败模式）
 - `hccl/docs/zh/user_guide/api_comm_impl.md`：C/Python 接口分工
 - `hccl/src/ops/interface_graph_mode/`：图模式资源计算（`calc_resource_graph_mode.cc`）
 - `hccl/src/common/framework/tf_plugin/`：TensorFlow 适配插件

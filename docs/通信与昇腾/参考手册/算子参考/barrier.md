@@ -1,6 +1,6 @@
 # HcclBarrier 算子解析
 
-> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-collective-semantics-cost.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-Collective语义与代价模型.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > 代码基线：`hccl/src/ops/barrier/`（950/A5 路径）。
 > 参数与约束以 **`hcomm/docs/zh/api_ref/comm_mgr_c/HcclBarrier.md`** 为准——⚠️ Barrier 的 API 文档在 **hcomm 仓的通信域管理接口**下，而非 hccl 仓的集合通信算子接口下。
@@ -133,7 +133,7 @@ barrier/
 | `Aicpu` | `AicpuBarrierSoleNHR` | **Sole** | `ins_v2_barrier_sole_executor` | 单级（纯 L0 或扁平 NHR） |
 | `Dpu` | `DpuBarrierSequenceMeshNHR` | **Sequence** | `ins_v2_barrier_sequence_executor` | 两级（**L0 Mesh → L1 NHR**） |
 
-> **算法名直接暴露分级结构**：`SequenceMeshNHR` = Sequence 编排 + L0 Mesh + L1 NHR——与 AllReduce 的 `SequenceMeshConcurNHR` 同一命名规则，见 [../algorithms/combination.md](/通信与昇腾/参考手册/算法参考/combination.md)。
+> **算法名直接暴露分级结构**：`SequenceMeshNHR` = Sequence 编排 + L0 Mesh + L1 NHR——与 AllReduce 的 `SequenceMeshConcurNHR` 同一命名规则，见 [../algorithms/算法组合.md](/通信与昇腾/参考手册/算法参考/算法组合.md)。
 
 ## 8. 实现要点
 
@@ -156,7 +156,7 @@ barrier/
 - `hcomm/include/hcomm_primitives.h`：`HcommThreadNotifyRecordOnThread`/`WaitOnThread`、`HcommChannelNotifyRecord`/`Wait`、`HcommAclrtNotifyRecordOnThread`/`WaitOnThread`、`HcommFenceOnThread`、`HcommChannelDrainOnThread`
 - `hccl/src/ops/barrier/`：实现（2 执行器 + 3 AICPU 模板）
 - `hccl/src/common/alg_parse.cc:894`：`Dpu` → `OpExecuteConfig::HOSTCPU` 映射
-- [../algorithms/combination.md](/通信与昇腾/参考手册/算法参考/combination.md)：Sequence 编排详解；[../algorithms/nhr.md](/通信与昇腾/参考手册/算法参考/nhr.md)、[../algorithms/fullmesh.md](/通信与昇腾/参考手册/算法参考/fullmesh.md)
-- [../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/l0l1l2-principle.md) §3.2：同步机制的层级差异
+- [../algorithms/算法组合.md](/通信与昇腾/参考手册/算法参考/算法组合.md)：Sequence 编排详解；[../algorithms/nhr.md](/通信与昇腾/参考手册/算法参考/nhr.md)、[../algorithms/fullmesh.md](/通信与昇腾/参考手册/算法参考/fullmesh.md)
+- [../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md) §3.2：同步机制的层级差异
 - ../../mc2/operators/distribute_barrier.md：通算融合场景的屏障算子
 

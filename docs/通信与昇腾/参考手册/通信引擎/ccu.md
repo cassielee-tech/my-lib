@@ -1,6 +1,6 @@
 # CCU 通信引擎
 
-> **深度参考** · 前置阅读：[源码课程单元 4｜通信引擎与三引擎编排](/通信与昇腾/源码课程/04-comm-engines.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 4｜通信引擎与三引擎编排](/通信与昇腾/源码课程/04-通信引擎与三引擎编排.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > **集合通信加速单元（Collective Communication Unit）**——昇腾 NPU 中位于 **IO Die** 上的专用集合通信协处理器。CCU 接收 NPU 调度器下发的集合通信任务，执行通信算法指令流，完成跨 NPU 的同步、地址交换、数据传输与归约（Reduce），**经 URMA（Unified Remote Memory Access）搬运数据**。高带宽、低时延，且少占计算核与访存带宽。
 >
@@ -377,5 +377,5 @@ CCU 内存类型位图（`orion_adapter_hccp.h:773-794`，`CcuMemTypeBitmap`）�
 - `hcomm/docs/zh/api_ref/comm_opdev/data_plane_api/ccu/`：CCU 数据面 API（arg_load_store / data_movement / execution_control / resource_allocation_operation / synchronization）
 - `hcomm/docs/zh/api_ref/comm_opdev/control_plane_api/ccu_resource_mgmt/`、`ccu_kernel_launch_execution/`：CCU 控制面 API
 - `hccl/docs/zh/user_guide/hccl_env/HCCL_OP_EXPANSION_MODE.md`：CCU_MS/CCU_SCHED 模式与回退
-- 关联：[README.md](/通信与昇腾/参考手册/通信引擎/)（引擎总览）、[../comm/urma.md](/通信与昇腾/参考手册/协议与传输/urma.md)（URMA 数据通路）、[../comm/ub_network.md](/通信与昇腾/参考手册/协议与传输/ub_network.md)（UB Jetty/HCCP）、[../algorithms/algo_selector.md](/通信与昇腾/参考手册/算法参考/algo_selector.md)（引擎回退规则）
+- 关联：[README.md](/通信与昇腾/参考手册/通信引擎/)（引擎总览）、[../comm/urma.md](/通信与昇腾/参考手册/协议与传输/urma.md)（URMA 数据通路）、[../comm/UB网络.md](/通信与昇腾/参考手册/协议与传输/UB网络.md)（UB Jetty/HCCP）、[../algorithms/algo_selector.md](/通信与昇腾/参考手册/算法参考/algo_selector.md)（引擎回退规则）
 

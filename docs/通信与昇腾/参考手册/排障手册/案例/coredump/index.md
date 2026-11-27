@@ -66,7 +66,7 @@ flowchart TB
 | `HeartbeatAbnormal` + `STUCK` | 心跳检测到进程卡死（每隔 1/3 `HCCL_EXEC_TIMEOUT` 轮询算子入/出次数） |
 | `crimer rank[IP/ID]` | 心跳日志中的**故障根节点**信息 |
 
-心跳异常日志格式（详见 [../localization_flow.md §3.1](/通信与昇腾/参考手册/排障手册/localization_flow.md)）：
+心跳异常日志格式（详见 [../定位流程.md §3.1](/通信与昇腾/参考手册/排障手册/定位流程.md)）：
 
 ```text
 [HeartbeatAbnormal]local rank[IP/ID]: crimer rank[IP/ID] status[LOST] by informer rank[IP/ID]
@@ -81,7 +81,7 @@ flowchart TB
 | **定位崩溃根因** | 在 crimer rank 节点查 core dump 文件、业务日志，排查训练脚本、自定义算子、版本兼容性 |
 | **区分本端/远端** | 建议 `HCCL_CONNECT_TIMEOUT` < `HCCL_EXEC_TIMEOUT`，以正确上报首报错、区分阻塞原因在本端还是远端 |
 | **task 级跟踪** | A3/A2 开启 `HCCL_DIAGNOSE_ENABLE` 跟踪 task 级信息 |
-| **容错恢复** | A3 可配合算子重执行（`HCCL_OP_RETRY_ENABLE`）+ 通信域挂起恢复（`HcclCommSuspend/Resume`）提升容错，见 [../../reference/reliability_security.md](/通信与昇腾/参考手册/运行与约束/reliability_security.md) |
+| **容错恢复** | A3 可配合算子重执行（`HCCL_OP_RETRY_ENABLE`）+ 通信域挂起恢复（`HcclCommSuspend/Resume`）提升容错，见 [../../reference/可靠性与安全.md](/通信与昇腾/参考手册/运行与约束/可靠性与安全.md) |
 
 ---
 
@@ -92,5 +92,5 @@ flowchart TB
 - `hccl/docs/zh/user_guide/fault_diagnosis/cluster_heartbeat_mechanism_troubleshooting.md`：STUCK/LOST 心跳检测
 - `hccl/docs/zh/user_guide/fault_diagnosis/process_hang_or_peer_heartbeat_loss_example.md`：进程卡死/心跳丢失案例
 - `hccl/docs/zh/user_guide/fault_diagnosis/sdma_error_EI0012.md`：SDMA 异常
-- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[whole_network](/通信与昇腾/参考手册/排障手册/案例/整网/)（整网心跳）、[../localization_flow.md](/通信与昇腾/参考手册/排障手册/localization_flow.md)（task exception 机制）、[../error_codes.md](/通信与昇腾/参考手册/排障手册/error_codes.md)
+- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[whole_network](/通信与昇腾/参考手册/排障手册/案例/整网/)（整网心跳）、[../定位流程.md](/通信与昇腾/参考手册/排障手册/定位流程.md)（task exception 机制）、[../EI错误码全表.md](/通信与昇腾/参考手册/排障手册/EI错误码全表.md)
 

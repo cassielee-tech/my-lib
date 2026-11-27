@@ -1,11 +1,11 @@
 # extension：扩展机制与设计演进
 
-> **深度参考** · 前置阅读：[源码课程单元 10｜MC2 框架与官方样例](/通信与昇腾/源码课程/10-mc2-custom-ops.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 10｜MC2 框架与官方样例](/通信与昇腾/源码课程/10-MC2框架与官方样例.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > HCCL 提供两类扩展能力：**① 算法插件机制**（不改 HCCL 源码，以动态库形式为已有算子添加自定义算法）与 **② MC2 自定义通信算子框架**（开发通算融合的自定义通信算子）。本目录还收录 **RFC 设计演进**（HCCL 的重大架构提案）。
 >
 > 事实来源（可信度：代码 > 仓内文档 > 社区资料）：
-> `hccl/docs/zh/rfcs/`（0001 BIRS、0002 ALGO Plugin、0003 executor-template-refactor）、`hccl/src/algo_plugin/`（插件管理器）、`hccl/src/common/tuner/`（调优器）、`hccl/include/hccl_mc2.h`（MC2 框架）、`hccl/experimental/`（试验性代码）。
+> `hccl/docs/zh/rfcs/`（0001 BIRS、0002 ALGO Plugin、0003 executor-template-refactor）、`hccl/src/算法插件.md/`（插件管理器）、`hccl/src/common/tuner/`（调优器）、`hccl/include/hccl_mc2.h`（MC2 框架）、`hccl/experimental/`（试验性代码）。
 
 ---
 
@@ -29,7 +29,7 @@ flowchart TB
 
 | 扩展方式 | 目标 | 载体 | 是否改 HCCL 源码 | 详见 |
 | --- | --- | --- | --- | --- |
-| **算法插件** | 为已有算子（AllReduce/AllGather 等）添加自定义算法 | 动态库（`.so`）+ dlopen | **否** | [algo_plugin.md](/通信与昇腾/参考手册/扩展机制/algo_plugin.md) |
+| **算法插件** | 为已有算子（AllReduce/AllGather 等）添加自定义算法 | 动态库（`.so`）+ dlopen | **否** | [algo_plugin.md](/通信与昇腾/参考手册/扩展机制/算法插件.md) |
 | **MC2 框架** | 开发通算融合的自定义通信算子 | `hccl_mc2.h`（KfcOpArgs/OpResCtx） | 否（用框架接口） | [mc2_and_rfc.md](/通信与昇腾/参考手册/扩展机制/mc2_and_rfc.md) |
 
 ---
@@ -49,7 +49,7 @@ flowchart TB
 | **发布依赖** | 更新算法只需替换对应 `.so`，无需重新编译/发布整个 HCCL |
 | **选择逻辑封闭** | 在原有算法选择流程入口插入优先匹配逻辑，未命中自动回退，两套机制互不干扰 |
 
-> 详见 [algo_plugin.md](/通信与昇腾/参考手册/扩展机制/algo_plugin.md)（三部分架构、调用时序、目录组织、接口设计、兼容性）。
+> 详见 [algo_plugin.md](/通信与昇腾/参考手册/扩展机制/算法插件.md)（三部分架构、调用时序、目录组织、接口设计、兼容性）。
 
 ---
 
@@ -88,7 +88,7 @@ flowchart TB
 | 目录 | 内容 |
 | --- | --- |
 | `experimental/ops/` | 试验性算子（all_gather/all_reduce/reduce_scatter/op_common） |
-| `experimental/eco_system/algo_plugin/` | 算法插件生态示例 |
+| `experimental/eco_system/算法插件.md/` | 算法插件生态示例 |
 
 > RFC 0003 的 recursive_executor 即落地于 `experimental/ops/op_common/recursive_executor/`。
 
@@ -104,7 +104,7 @@ flowchart TB
 
 | 文档 | 内容 |
 | --- | --- |
-| [algo_plugin.md](/通信与昇腾/参考手册/扩展机制/algo_plugin.md) | **HCCL-ALGO-Plugin（RFC 0002）**：背景动机、算子执行流程、三部分架构、调用时序（初始化/选择/执行）、目录组织、接口设计（`HcclAlgoPlugin_t`/`HcclAlgoPluginParam`/`REGISTER_HCCL_ALGO`）、兼容性 |
+| [algo_plugin.md](/通信与昇腾/参考手册/扩展机制/算法插件.md) | **HCCL-ALGO-Plugin（RFC 0002）**：背景动机、算子执行流程、三部分架构、调用时序（初始化/选择/执行）、目录组织、接口设计（`HcclAlgoPlugin_t`/`HcclAlgoPluginParam`/`REGISTER_HCCL_ALGO`）、兼容性 |
 | [mc2_and_rfc.md](/通信与昇腾/参考手册/扩展机制/mc2_and_rfc.md) | **MC2 自定义算子框架**（`hccl_mc2.h` KfcOpArgs/OpResCtx）+ **RFC 演进**（0001 BIRS / 0002 Plugin / 0003 Executor 重构） |
 
 ---
@@ -112,9 +112,9 @@ flowchart TB
 ## 8. 参考资料
 
 - `hccl/docs/zh/rfcs/`：`INDEX.md`（RFC 登记索引）、`0001-add-batch-invariant-reducescatter.md`、`0002-HCCL-ALGO-Plugin.md`、`0003-executor-template-refactor.md`、`README.md`（RFC 流程）
-- `hccl/src/algo_plugin/`：`hccl_algo_plugin_mgr.{h,cc}`、`inc/hccl_algo_plugin_broker_api.h`、`inc/hccl_algo_plugin_common.h`
+- `hccl/src/算法插件.md/`：`hccl_algo_plugin_mgr.{h,cc}`、`inc/hccl_algo_plugin_broker_api.h`、`inc/hccl_algo_plugin_common.h`
 - `hccl/src/common/tuner/`：`tuner_host_funcs.cc`、`tuner_setup.{h,cc}`
 - `hccl/include/hccl_mc2.h`：MC2 自定义算子框架接口
-- `hccl/experimental/`：试验性代码（ops/、eco_system/algo_plugin/）
-- 关联：[README.md](/通信与昇腾/参考手册/扩展机制/)、[../algorithms/algo_selector.md](/通信与昇腾/参考手册/算法参考/algo_selector.md)（算法选择器）、../../mc2/（通算融合算子）、[../reference/reliability_security.md](/通信与昇腾/参考手册/运行与约束/reliability_security.md)（确定性计算与 BIRS）
+- `hccl/experimental/`：试验性代码（ops/、eco_system/算法插件.md/）
+- 关联：[README.md](/通信与昇腾/参考手册/扩展机制/)、[../algorithms/algo_selector.md](/通信与昇腾/参考手册/算法参考/algo_selector.md)（算法选择器）、../../mc2/（通算融合算子）、[../reference/可靠性与安全.md](/通信与昇腾/参考手册/运行与约束/可靠性与安全.md)（确定性计算与 BIRS）
 

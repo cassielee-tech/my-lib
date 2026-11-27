@@ -124,5 +124,5 @@ for i in *;do cd $i;pwd;grep -rnc "connection fail" | grep -v ":0" | wc -l; cd .
 - `hccl/docs/zh/user_guide/fault_diagnosis/link_timeout_EI0006.md`：建链超时
 - `hccl/docs/zh/user_guide/fault_diagnosis/param_consistency_check_EI0005.md`：参数一致性校验
 - `hccl/docs/zh/user_guide/fault_diagnosis/param_port_bind_fail_EI0019.md`、`qp_mem_resource_apply_EI0011.md`
-- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[config_data](/通信与昇腾/参考手册/排障手册/案例/资料配置/)（资料/一致性）、[whole_network](/通信与昇腾/参考手册/排障手册/案例/整网/)（行为一致性）、[../localization_flow.md](/通信与昇腾/参考手册/排障手册/localization_flow.md)（建链阶段）、[../error_codes.md](/通信与昇腾/参考手册/排障手册/error_codes.md)、[../../comm/roce_rdma.md](/通信与昇腾/参考手册/协议与传输/roce_rdma.md)（QP/建链）
+- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[config_data](/通信与昇腾/参考手册/排障手册/案例/资料配置/)（资料/一致性）、[whole_network](/通信与昇腾/参考手册/排障手册/案例/整网/)（行为一致性）、[../定位流程.md](/通信与昇腾/参考手册/排障手册/定位流程.md)（建链阶段）、[../EI错误码全表.md](/通信与昇腾/参考手册/排障手册/EI错误码全表.md)、[../../comm/roce_rdma.md](/通信与昇腾/参考手册/协议与传输/roce_rdma.md)（QP/建链）
 

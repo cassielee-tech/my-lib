@@ -1,12 +1,12 @@
 # Pipeline（分级流水算法）
 
-> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-ring-allreduce.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-Ring-AllReduce推导.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > HCCL 通信算法解析。枚举：`HCCL_ALGO_TYPE_PIPELINE`（`hccl/src/common/alg_type.h:23`）；层级枚举 `ALG_LEVEL1_PIPELINE`（名称映射 `"pipeline"`）。
 > 权威描述：`hccl/docs/zh/user_guide/coll_algo_intro/Pipeline.md`。
 >
-> **Pipeline 本质是一种「分层算法组合」**：它把 **L0（Server 内，通常 FullMesh）与 L1（Server 间，通常 Ring）两层子算法流水并行组合**，两层链路并发使用——因此它与 Sequence/Parallel/Concur 一样是**组合方式**的一种（流水组合），而非孤立的拓扑算法。组合视角与逐算子 L0/L1/L2 组合总表见 [combination.md §3](/通信与昇腾/参考手册/算法参考/combination.md)。
-> ⚠️ **务必区分两个同名概念**：本文是**算法类型 PIPELINE**（L0+L1 流水组合）；另有**执行器编排方式 PipeLine/OmniPipe**（更通用的流水容器，任何子算法都可编排进流水阶段），见 [combination.md §2.1.5](/通信与昇腾/参考手册/算法参考/combination.md)。
+> **Pipeline 本质是一种「分层算法组合」**：它把 **L0（Server 内，通常 FullMesh）与 L1（Server 间，通常 Ring）两层子算法流水并行组合**，两层链路并发使用——因此它与 Sequence/Parallel/Concur 一样是**组合方式**的一种（流水组合），而非孤立的拓扑算法。组合视角与逐算子 L0/L1/L2 组合总表见 [combination.md §3](/通信与昇腾/参考手册/算法参考/算法组合.md)。
+> ⚠️ **务必区分两个同名概念**：本文是**算法类型 PIPELINE**（L0+L1 流水组合）；另有**执行器编排方式 PipeLine/OmniPipe**（更通用的流水容器，任何子算法都可编排进流水阶段），见 [combination.md §2.1.5](/通信与昇腾/参考手册/算法参考/算法组合.md)。
 
 ## 1. 算法描述与动机
 
@@ -153,9 +153,9 @@ RFC 0003 将 OmniPipe 的执行策略归为 **OMNIPIPE（流水交叉）**。切
 | `op_common/omnipipe_data_slice_calc.cc` / `.h` | **流水切片统一计算**（`OmniPipeSliceParam`/`OmniPipeScratchParam`） |
 | `op_common/omnipipe_gather_data_slice_calc.cc`、`omnipipe_scatter_data_slice_calc.cc` | Gather / Scatter 专属切片计算 |
 | `op_common/algorithm/executor/omnipipe_executor_utils.h` | OmniPipe 执行器工具 |
-| `op_common/algorithm/template/omnipipe_template_utils.cc` / `.h` | OmniPipe 模板工具 |
-| `*/algorithm/template/aicpu/ins_temp_*_omnipipe_*.cc` | AICPU 引擎流水模板（mesh_1D / nhr / nhr_dpu） |
-| `*/algorithm/template/ccu/ccu_temp_*_omnipipe_*.cc` + `*/ccu/kernel/ccu_kernel_*_omnipipe_*.cc` | CCU 引擎流水模板与 kernel |
+| `op_common/algorithm/复盘写作模板.md/omnipipe_template_utils.cc` / `.h` | OmniPipe 模板工具 |
+| `*/algorithm/复盘写作模板.md/aicpu/ins_temp_*_omnipipe_*.cc` | AICPU 引擎流水模板（mesh_1D / nhr / nhr_dpu） |
+| `*/algorithm/复盘写作模板.md/ccu/ccu_temp_*_omnipipe_*.cc` + `*/ccu/kernel/ccu_kernel_*_omnipipe_*.cc` | CCU 引擎流水模板与 kernel |
 
 > 实测：`hccl/src/ops` 下含 `omnipipe` 的文件 **87 个**——流水编排是 950 路径的核心能力之一。
 
@@ -174,6 +174,6 @@ export HCCL_ALGO="pipeline{mesh,nhr}"
 - `hccl/docs/zh/rfcs/0003-executor-template-refactor.md`：OmniPipe 执行策略与切片计算重构
 - `hccl/docs/zh/user_guide/hccl_env/inter_server_algo_support.md`、`inter_superpod_algo_support.md`
 - `hccl/src/ops/op_common/omnipipe_data_slice_calc.h`：流水切片参数
-- [combination.md §2.1.5](/通信与昇腾/参考手册/算法参考/combination.md)：执行器编排 PipeLine/OmniPipe 详解
+- [combination.md §2.1.5](/通信与昇腾/参考手册/算法参考/算法组合.md)：执行器编排 PipeLine/OmniPipe 详解
 - [ring.md](/通信与昇腾/参考手册/算法参考/ring.md)、[fullmesh.md](/通信与昇腾/参考手册/算法参考/fullmesh.md)：Pipeline 的两个组成算法
 

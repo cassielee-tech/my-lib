@@ -1,6 +1,6 @@
 # HcclScatter 算子解析
 
-> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-collective-semantics-cost.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-Collective语义与代价模型.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > 代码基线：`hccl/src/ops/scatter/`（950/A5 路径）+ `hcomm/src/legacy/ascend910/algorithm/base/alg_template/temp_scatter/`（910/A2/A3 路径，8 个模板）。
 > 参数与约束以 `hccl/docs/zh/api_ref/comm_op_interface/HcclScatter.md` 为准。
@@ -159,11 +159,11 @@ scatter/
 | 要点 | 说明 |
 | --- | --- |
 | **两套执行器体系并存** | 全 HCCL 唯一：`algorithm/` 顶层的旧式执行器（`scatter_single/mesh/ring/comm_executor`，基类 `scatter_executor_base`）与 `algorithm/executor/` 的 ins_v2 执行器同时存在——反映 Scatter 从旧架构向执行器-模板架构迁移的中间态 |
-| **顶层算法模板** | 6 个模板直接放在 `algorithm/template/` 而非引擎子目录（`scatter_mesh/ring/ring_direct/nhr/nb`、`nhr_base`）——引擎无关的算法逻辑 |
-| **`SetAlgoLevel0/1/2` 源码样本** | `scatter.cc` 是理解 HCCL 三层算法映射的**最佳入口**：`GetDefaultAlgoLevel0Module`（L0 按卡数/链路形态）、`GetDefaultAlgoLevel1V1`（L1 按 Server 数/2 幂）、`SetAlgoLevel2`（L2 default→NHR）全部在此，[../algorithms/algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/algo_level_matrix.md) 的规则表即源自此文件 |
+| **顶层算法模板** | 6 个模板直接放在 `algorithm/复盘写作模板.md/` 而非引擎子目录（`scatter_mesh/ring/ring_direct/nhr/nb`、`nhr_base`）——引擎无关的算法逻辑 |
+| **`SetAlgoLevel0/1/2` 源码样本** | `scatter.cc` 是理解 HCCL 三层算法映射的**最佳入口**：`GetDefaultAlgoLevel0Module`（L0 按卡数/链路形态）、`GetDefaultAlgoLevel1V1`（L1 按 Server 数/2 幂）、`SetAlgoLevel2`（L2 default→NHR）全部在此，[../algorithms/分层矩阵.md](/通信与昇腾/参考手册/算法参考/分层矩阵.md) 的规则表即源自此文件 |
 | **无 op_graph** | Scatter 不注册进 GE 图模式——图模式下无 Scatter 算子 |
 | **910 路径含多 root 与双环** | `temp_scatter/` 8 个模板：`multi_root_scatter_ring`（**多 root** Scatter）、`scatter_double_ring_direct`、`scatter_ring_direct`、`scatter_ring_concurrent_direct`、`scatter_ring`、`scatter_mesh`、`scatter_nhr`、`scatter_nb` |
-| **NB 的 hccl 仓落点** | `scatter/algorithm/template/scatter_nb.cc` 是 NB 算法在 hccl 仓的**唯一模板文件**（其余 NB 实现均在 hcomm 910 路径） |
+| **NB 的 hccl 仓落点** | `scatter/algorithm/复盘写作模板.md/scatter_nb.cc` 是 NB 算法在 hccl 仓的**唯一模板文件**（其余 NB 实现均在 hcomm 910 路径） |
 | **AIV 支持** | Scatter 在 AIV 展开模式的支持列表内 |
 | **CCU_MS 不支持** | CCU_MS 仅支持 Broadcast/Reduce/AllReduce/ReduceScatter/AllGather——**Scatter 不在其中** |
 
@@ -189,6 +189,6 @@ scatter/
 - `hcomm/src/legacy/ascend910/algorithm/base/alg_template/temp_scatter/`：910/A2/A3 路径 8 个模板
 - `hcomm/src/legacy/ascend910/algorithm/impl/alg_configurator.cc`：`SetAlgoLevel0StandardCard`/`GetDefaultAlgoLevel0StandardCard`（标卡分支）
 - [broadcast.md](/通信与昇腾/参考手册/算子参考/broadcast.md)：镜像算子；[../algorithms/nb.md](/通信与昇腾/参考手册/算法参考/nb.md)：NB 算法
-- [../algorithms/algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/algo_level_matrix.md)：L0/L1/L2 选择矩阵（源自 scatter.cc）
-- [../networking/board_form_factor.md](/通信与昇腾/参考手册/组网形态/board_form_factor.md)：标卡场景的 L0 算法分支
+- [../algorithms/分层矩阵.md](/通信与昇腾/参考手册/算法参考/分层矩阵.md)：L0/L1/L2 选择矩阵（源自 scatter.cc）
+- [../networking/整机形态.md](/通信与昇腾/参考手册/组网形态/整机形态.md)：标卡场景的 L0 算法分支
 

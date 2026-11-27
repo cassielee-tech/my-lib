@@ -2,7 +2,7 @@
 
 > **问题类型**：HCCL 对不支持/非法的配置或场景**主动拦截**——表现为直接报错（硬拦截）或自动回退/重定向（软拦截，配置不生效）。常见于展开模式、算子入参、一致性校验、确定性计算等场景。
 >
-> 事实来源：`hccl/docs/zh/user_guide/hccl_env/HCCL_OP_EXPANSION_MODE.md`（展开模式拦截/回退）、`hccl/docs/zh/user_guide/constraints.md`（约束拦截）、`hccl/src/ops/*/selector/*_auto_selector.cc`（引擎回退/算法重定向）、`hccl/docs/zh/user_guide/fault_diagnosis/param_consistency_check_EI0005.md`（一致性校验拦截）。
+> 事实来源：`hccl/docs/zh/user_guide/hccl_env/HCCL_OP_EXPANSION_MODE.md`（展开模式拦截/回退）、`hccl/docs/zh/user_guide/约束.md`（约束拦截）、`hccl/src/ops/*/selector/*_auto_selector.cc`（引擎回退/算法重定向）、`hccl/docs/zh/user_guide/fault_diagnosis/param_consistency_check_EI0005.md`（一致性校验拦截）。
 
 ---
 
@@ -86,7 +86,7 @@ flowchart TB
 
 | 处置 | 说明 |
 | --- | --- |
-| **核对配置合法性** | 对照 [../../reference/constraints.md](/通信与昇腾/参考手册/运行与约束/constraints.md) 与 [../../engine/README.md](/通信与昇腾/参考手册/通信引擎/) 检查展开模式/算子/产品支持度 |
+| **核对配置合法性** | 对照 [../../reference/约束.md](/通信与昇腾/参考手册/运行与约束/约束.md) 与 [../../engine/README.md](/通信与昇腾/参考手册/通信引擎/) 检查展开模式/算子/产品支持度 |
 | **保证一致性** | 各 rank 算子入参、HCCL 版本、TLS 配置一致 |
 | **预期回退** | 理解确定性/资源/数据量触发的回退是保护机制；如需强制某引擎用 `AIV_ONLY`（不满足则报错而非回退） |
 | **标卡避免 CCU_MS** | 标卡环境勿配 CCU_MS（硬拦截） |
@@ -96,8 +96,8 @@ flowchart TB
 ## 6. 参考资料
 
 - `hccl/docs/zh/user_guide/hccl_env/HCCL_OP_EXPANSION_MODE.md`：展开模式拦截与回退
-- `hccl/docs/zh/user_guide/constraints.md`：系统约束（虚拟化/多进程/CCU 规格/并发图）
+- `hccl/docs/zh/user_guide/约束.md`：系统约束（虚拟化/多进程/CCU 规格/并发图）
 - `hccl/docs/zh/user_guide/fault_diagnosis/param_consistency_check_EI0005.md`：参数一致性校验
 - `hccl/src/ops/*/selector/*_auto_selector.cc`：引擎回退与算法重定向
-- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[config_data](/通信与昇腾/参考手册/排障手册/案例/资料配置/)（资料/一致性）、[../../algorithms/algo_selector.md](/通信与昇腾/参考手册/算法参考/algo_selector.md)（引擎回退规则）、[../../reference/constraints.md](/通信与昇腾/参考手册/运行与约束/constraints.md)（约束）、[../../engine/README.md](/通信与昇腾/参考手册/通信引擎/)（展开模式）
+- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[config_data](/通信与昇腾/参考手册/排障手册/案例/资料配置/)（资料/一致性）、[../../algorithms/algo_selector.md](/通信与昇腾/参考手册/算法参考/algo_selector.md)（引擎回退规则）、[../../reference/约束.md](/通信与昇腾/参考手册/运行与约束/约束.md)（约束）、[../../engine/README.md](/通信与昇腾/参考手册/通信引擎/)（展开模式）
 

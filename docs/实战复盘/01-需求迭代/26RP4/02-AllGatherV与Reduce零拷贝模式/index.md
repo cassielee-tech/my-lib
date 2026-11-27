@@ -49,7 +49,7 @@ flowchart LR
 | 注册/解注册对称窗口 | `HcclCommSymWinRegister(comm, addr, size, &win, flag)` / `HcclCommSymWinDeregister(win)` | hcomm 仓 `include/hccl/hccl_comm.h:405`、`:413`；`flag` 当前仅支持 `1` |
 | 查询本端 buffer 的对称窗口与 offset | `HcclCommSymWinGet` | host 侧 `libhcomm.so`，`dlsym` 加载 |
 | 由窗口 + offset + peer 取对端地址 | `GetSymWinRemoteMem` | device 侧 `libccl_kernel.so`，优先 `HcclSymWinGetRemoteAddr`，9.1 回退 `HcclSymWinGetPeerPointer`（`src/common/hcomm_dlsym/hccl_sym_win_dl.cc:28`） |
-| 把对端地址回填到 channel | `FillChannelSymWinPeerAddrs` | `src/ops/op_common/algorithm/template/template_utils.cc:969-1006` |
+| 把对端地址回填到 channel | `FillChannelSymWinPeerAddrs` | `src/ops/op_common/algorithm/复盘写作模板.md/template_utils.cc:969-1006` |
 
 **注册契约（用户侧）**：
 
@@ -561,4 +561,4 @@ const bool recvFromRoot = (GetRankFromMap(stepInfo.fromRank) == tempAlgParams_.r
 - 本需求全量材料：见本页头部「配套交付物」——《01-预调研》《02-前置知识》《03-SE设计》《04-SRS_SD》《05-STC.xlsx》《09-经验总结》与 `scripts/run_agv_reduce_npu_test.sh`，均与本篇同目录；
 - hccl 仓（[gitcode.com/cann/hccl](https://gitcode.com/cann/hccl)）官方文档：`docs/zh/architecture/architecture-brief.md`（分层与架构约束）、`docs/zh/api_ref/comm_op_interface/HcclAllGatherV.md` / `HcclReduce.md`（对称内存约束与注册契约）、`docs/zh/user_guide/comm_ops_support_list/comm_ops_support_a3.md`（A3 单算子零拷贝支持表）、`docs/zh/user_guide/coll_algo_intro/{README.md,NHR.md,hierarchical_comm_principle.md}`（算法与分级原理）；
 - hcomm 仓（[gitcode.com/cann/hcomm](https://gitcode.com/cann/hcomm)）API 文档：`docs/zh/api_ref/comm_mgr_c/HcclCommSymWinRegister.md`（注册契约与 A3/950 差异）、`HcclSymWinGetRemoteAddr.md` / `HcclSymWinGetPeerPointer.md`（远端地址换算与协议限制）。
-- 博客深度参考：[对称内存与零拷贝](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md)（窗口/offset/注册契约的完整参考）与 [AllGatherV 算子参考](/通信与昇腾/参考手册/算子参考/all_gather_v.md)。
+- 博客深度参考：[对称内存与零拷贝](/通信与昇腾/参考手册/协议与传输/对称内存.md)（窗口/offset/注册契约的完整参考）与 [AllGatherV 算子参考](/通信与昇腾/参考手册/算子参考/all_gather_v.md)。

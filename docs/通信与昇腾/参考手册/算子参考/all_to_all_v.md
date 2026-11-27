@@ -1,6 +1,6 @@
 # HcclAlltoAll / AlltoAllV / AlltoAllVC 算子解析
 
-> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-collective-semantics-cost.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-Collective语义与代价模型.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > 代码基线：`hccl/src/ops/all_to_all_v/`（一个目录承载三个 API）+ `hcomm/src/legacy/ascend910/algorithm/base/alg_template/temp_alltoall/`、`temp_alltoallv/`。
 > 参数与约束以 `hccl/docs/zh/api_ref/comm_op_interface/HcclAlltoAll.md`、`HcclAlltoAllV.md`、`HcclAlltoAllVC.md` 为准。

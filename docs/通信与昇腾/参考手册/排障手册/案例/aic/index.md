@@ -2,7 +2,7 @@
 
 > **问题类型**：AIC（AI Cube，立方核，负责矩阵运算）相关的执行失败。**纯 HCCL 通信算子跑在 AIV/AICPU/CCU 上，不直接使用 AIC**——AIC 问题主要出现在**通算融合（MC2）场景**（Cube 执行 matmul + 通信融合），以及 AICore kernel 执行失败、AIC/AIV 抢核等。
 >
-> 事实来源：`hccl/docs/zh/user_guide/fault_diagnosis/aiv_comm_op_exec_fail.md`（AICore kernel 执行失败机制，AIC/AIV 同源）、`hccl/include/hccl_mc2.h`（MC2 通算融合框架）、`shmem/docs/glossary.md`（AIC = Cube Core）、`hcomm/docs/zh/aclgraph/aclgraph_introduction.md`（计算 stream 与通信 stream 并行）。
+> 事实来源：`hccl/docs/zh/user_guide/fault_diagnosis/aiv_comm_op_exec_fail.md`（AICore kernel 执行失败机制，AIC/AIV 同源）、`hccl/include/hccl_mc2.h`（MC2 通算融合框架）、`shmem/docs/glossary.md`（AIC = Cube Core）、`hcomm/docs/zh/ACL-Graph图捕获.md/aclgraph_introduction.md`（计算 stream 与通信 stream 并行）。
 
 ---
 
@@ -66,9 +66,9 @@ flowchart TB
 | --- | --- | --- |
 | **Cube kernel 本身异常** | 融合算子的 matmul kernel 执行失败（非法地址、参数错误） | 查 `fault kernel_name`、device_id、program id |
 | **AIC/AIV 抢核** | 计算核与通信核资源争抢，通算融合下并发配置不当 | 检查控核配置、并发图数量（≤6） |
-| **通信 task 失败连带** | 融合算子中通信段失败（notify 超时、SDMA 异常） | 见 [../localization_flow.md §3.2](/通信与昇腾/参考手册/排障手册/localization_flow.md)（task exception） |
+| **通信 task 失败连带** | 融合算子中通信段失败（notify 超时、SDMA 异常） | 见 [../定位流程.md §3.2](/通信与昇腾/参考手册/排障手册/定位流程.md)（task exception） |
 | **对端异常** | 对端 rank 先崩溃/慢，导致本端融合算子通信段超时 | 见 [coredump](/通信与昇腾/参考手册/排障手册/案例/coredump/)、[whole_network](/通信与昇腾/参考手册/排障手册/案例/整网/) |
-| **多通信域并发** | 单卡并发图 >6 导致 AI CPU 核占满、通信阻塞 | 见 [../../reference/constraints.md](/通信与昇腾/参考手册/运行与约束/constraints.md) |
+| **多通信域并发** | 单卡并发图 >6 导致 AI CPU 核占满、通信阻塞 | 见 [../../reference/约束.md](/通信与昇腾/参考手册/运行与约束/约束.md) |
 
 ---
 
@@ -101,5 +101,5 @@ flowchart TB
 - `hccl/docs/zh/user_guide/fault_diagnosis/task_exception_mechanism_troubleshooting.md`：task exception 机制
 - `hccl/include/hccl_mc2.h`、`hccl/src/common/hccl_mc2.cc`：MC2 通算融合框架
 - `shmem/docs/glossary.md`：AIC（Cube Core）/AIV（Vector Core）术语
-- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[aiv](/通信与昇腾/参考手册/排障手册/案例/aiv/)（Vector 核问题）、../../mc2/（通算融合算子）、[../../extension/mc2_and_rfc.md](/通信与昇腾/参考手册/扩展机制/mc2_and_rfc.md)（MC2 框架）、[../localization_flow.md](/通信与昇腾/参考手册/排障手册/localization_flow.md)（task exception）
+- 关联：[README.md](/通信与昇腾/参考手册/排障手册/案例/)、[aiv](/通信与昇腾/参考手册/排障手册/案例/aiv/)（Vector 核问题）、../../mc2/（通算融合算子）、[../../extension/mc2_and_rfc.md](/通信与昇腾/参考手册/扩展机制/mc2_and_rfc.md)（MC2 框架）、[../定位流程.md](/通信与昇腾/参考手册/排障手册/定位流程.md)（task exception）
 

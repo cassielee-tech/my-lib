@@ -267,10 +267,10 @@ attrs 显式声明 `supportLevel0Topos`（MESH_1D|CLOS|MESH_1D_CLOS）、`isSupp
 | 2 | `src/ops/reduce/algorithm/executor/reduce_sequence_executor_aicpu_3level.cc` | 新增注册宏 ×2（:840-851）+ include ×2（:17/:19） |
 | 3 | `src/ops/op_common/selector/cost_model.h` | `CostModelParam.reduceCopies` 字段、`REDUCE_SEC_PER_COUNT`、`CalcHostReduceSlope()` |
 | 4 | `src/ops/op_common/selector/cost_table.cc` / `.h` | `bReduces` 逐段折算入 B（:407）；计价接口签名调整 |
-| 5 | `src/ops/reduce/algorithm/template/aicpu/reduce_aicpu_reduce_nhr.cc` | 真实 `CalcCostCoeff`（含 reduceCopies、portNum 守卫） |
-| 6 | `src/ops/reduce/algorithm/template/aicpu/reduce_mesh_1D.cc` | 补 reduceCopies=(N-1)×dataRatio |
-| 7 | `src/ops/reduce_scatter/algorithm/template/aicpu/ins_temp_reduce_scatter_aicpu_reduce_nhr_pcie.cc` / `.h` | 新增真实 `CalcCostCoeff`（原无静态系数）；isPod 不减半；portNum 守卫 |
-| 8 | `src/ops/reduce_scatter/algorithm/template/aicpu/ins_temp_reduce_scatter_mesh_1D.cc` / `ins_temp_reduce_scatter_aicpu_reduce_nhr.cc` | 补 reduceCopies；isPod 口径对齐（兜底 Sole 路径计价） |
+| 5 | `src/ops/reduce/algorithm/复盘写作模板.md/aicpu/reduce_aicpu_reduce_nhr.cc` | 真实 `CalcCostCoeff`（含 reduceCopies、portNum 守卫） |
+| 6 | `src/ops/reduce/algorithm/复盘写作模板.md/aicpu/reduce_mesh_1D.cc` | 补 reduceCopies=(N-1)×dataRatio |
+| 7 | `src/ops/reduce_scatter/algorithm/复盘写作模板.md/aicpu/ins_temp_reduce_scatter_aicpu_reduce_nhr_pcie.cc` / `.h` | 新增真实 `CalcCostCoeff`（原无静态系数）；isPod 不减半；portNum 守卫 |
+| 8 | `src/ops/reduce_scatter/algorithm/复盘写作模板.md/aicpu/ins_temp_reduce_scatter_mesh_1D.cc` / `ins_temp_reduce_scatter_aicpu_reduce_nhr.cc` | 补 reduceCopies；isPod 口径对齐（兜底 Sole 路径计价） |
 | 9 | `test/st/algorithm/testcase/CMakeLists.txt` + `reduce_aicpu_testcase.cc` | 新增 ST 套件 22 用例（`ST_TASKS=reduce_aicpu`） |
 | 10 | `test/st/algorithm/utils/src/hccl_proxy/hccl_stub.cc` | ST 桩补 `LocalReduce` 符号适配 64bit/PROD host 规约（修首条用例段错误，`a5ab8490`） |
 | 11 | `test/ut/reduce_64bit_hier/`（4 文件）+ `test/ut/CMakeLists.txt` | UT 主目标 7 用例；`alg_parse.cc` 链接序前移修复 SIOF（`714b9f68`，route 冗余目标后由 `e012c9c6` 移除） |

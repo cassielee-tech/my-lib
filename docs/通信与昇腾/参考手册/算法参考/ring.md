@@ -1,6 +1,6 @@
 # Ring（环算法）
 
-> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-ring-allreduce.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-Ring-AllReduce推导.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > HCCL 通信算法解析。枚举：`HCCL_ALGO_TYPE_RING`（`hccl/src/common/alg_type.h:22`）；层级枚举 `ALG_LEVEL0_8P_RING` / `4P_RING` / `NP_SINGLE_RING` / `NP_DOUBLE_RING` / `WHOLE_RING`、`ALG_LEVEL1_RING`、`ALG_LEVEL2_RING`。
 > 权威描述：`hccl/docs/zh/user_guide/coll_algo_intro/Ring.md`。
@@ -57,7 +57,7 @@ flowchart LR
 | AllGather | $(p-1)\alpha+\frac{p-1}{p}n\beta$ |
 | **AllReduce** | ReduceScatter + AllGather：$2(p-1)\alpha+2\frac{p-1}{p}n\beta+\frac{p-1}{p}n\gamma$ |
 
-> 变量定义见 [../03_L0L1L2分级通信实现原理.md §8](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)。
+> 变量定义见 [../03_L0L1L2分级通信实现原理.md §8](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)。
 
 ## 4. 适用场景（官方口径）
 
@@ -94,11 +94,11 @@ L1 默认选择规则（`GetDefaultAlgoLevel1V1`）：Server 数**非 2 的整�
 | `.../temp_broadcast/broadcast_ring.cc` | Broadcast Ring |
 | `.../temp_scatter/scatter_ring.cc`、`scatter_ring_direct.cc`、`scatter_ring_concurrent_direct.cc`、`scatter_double_ring_direct.cc`、`multi_root_scatter_ring.cc` | Scatter Ring 族（含多 root） |
 | `.../temp_reduce/reduce_ring.cc`、`.../temp_gather/gather_ring.cc` | Reduce / Gather Ring |
-| `hccl/src/ops/scatter/algorithm/template/scatter_ring.cc`、`scatter_ring_direct.cc` | 950/A5 路径 Scatter Ring 模板 |
+| `hccl/src/ops/scatter/algorithm/复盘写作模板.md/scatter_ring.cc`、`scatter_ring_direct.cc` | 950/A5 路径 Scatter Ring 模板 |
 | `hccl/src/common/alg_type.h:38-73` | `ALG_LEVEL0/1/2_*_RING` 枚举与名称映射（`HCCL_ALGO_LEVEL0_NAME_MAP` 中映射为 `"ring"`） |
 | `hccl/src/ops/scatter/scatter.cc` | `GetDefaultAlgoLevel0Module` / `GetDefaultAlgoLevel1V1` 默认选择逻辑 |
 
-> **两条实现路径**：910/A2/A3 走 `hcomm/src/legacy/ascend910/algorithm/`（算法模板齐全，Ring/Mesh/RHD/NHR/NB/AHC/Pipeline/Pairwise 全在此）；950/A5 走 `hccl/src/ops/*/algorithm/`（以 Mesh1D + NHR 为主，靠执行器编排组合）。详见 [../02_HCCL算子与算法总览.md](/通信与昇腾/参考手册/总览/ops-algos-overview.md)。
+> **两条实现路径**：910/A2/A3 走 `hcomm/src/legacy/ascend910/algorithm/`（算法模板齐全，Ring/Mesh/RHD/NHR/NB/AHC/Pipeline/Pairwise 全在此）；950/A5 走 `hccl/src/ops/*/algorithm/`（以 Mesh1D + NHR 为主，靠执行器编排组合）。详见 [../02_HCCL算子与算法总览.md](/通信与昇腾/参考手册/总览/算子与算法总览.md)。
 
 ## 7. 配置
 
@@ -116,6 +116,6 @@ export HCCL_ALGO="allreduce=level0:NA;level1:ring"   # 按算子配置
 - `hccl/docs/zh/user_guide/coll_algo_intro/algo_intro.md`：适用场景与分级通信
 - `hccl/docs/zh/user_guide/hccl_env/HCCL_ALGO.md`、`inter_server_algo_support.md`：配置语法与产品支持度
 - `hccl/src/common/alg_type.h`：层级 Ring 枚举
-- [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/algo_level_matrix.md)：各算子 L0/L1/L2 选择矩阵
-- [combination.md](/通信与昇腾/参考手册/算法参考/combination.md)：执行器编排 × 算法类型 × 层级
+- [algo_level_matrix.md](/通信与昇腾/参考手册/算法参考/分层矩阵.md)：各算子 L0/L1/L2 选择矩阵
+- [combination.md](/通信与昇腾/参考手册/算法参考/算法组合.md)：执行器编排 × 算法类型 × 层级
 

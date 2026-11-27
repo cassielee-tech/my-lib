@@ -1,6 +1,6 @@
 # NB（Nonuniform Bruck，非均匀数据块算法）
 
-> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-ring-allreduce.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 2 章（Ring）与第 3 章（Tree/选型）](/通信与昇腾/02-Ring-AllReduce推导.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > HCCL 通信算法解析。枚举：`HCCL_ALGO_TYPE_NB`（`hccl/src/common/alg_type.h:29`）；层级枚举 `ALG_LEVEL1_NB`、`ALG_LEVEL2_NB`（名称映射 `"NB"`）。
 > 权威描述：`hccl/docs/zh/user_guide/coll_algo_intro/NB.md`。
@@ -97,7 +97,7 @@ flowchart LR
 | `.../temp_all_gather/all_gather_nb.cc` / `.h` / `_pub.h` | AllGather NB |
 | `.../temp_broadcast/broadcast_nb.cc`、`broadcast_nb_binary.cc` | Broadcast NB（含二叉变体） |
 | `.../temp_scatter/scatter_nb.cc` | Scatter NB |
-| `hccl/src/ops/scatter/algorithm/template/scatter_nb.cc` / `.h` | **950/A5 路径 Scatter NB 模板**（NB 在 hccl 仓的唯一模板落点） |
+| `hccl/src/ops/scatter/algorithm/复盘写作模板.md/scatter_nb.cc` / `.h` | **950/A5 路径 Scatter NB 模板**（NB 在 hccl 仓的唯一模板落点） |
 | `hccl/src/common/alg_type.h:62,72` | `ALG_LEVEL1_NB`、`ALG_LEVEL2_NB`；名称映射 `{ALG_LEVEL1_NB, "NB"}`（:162,168） |
 | `hccl/src/common/alg_env_config.cc` | `HCCL_ALGO` 中 NB 的解析 |
 | `hccl/src/ops/scatter/scatter.cc` | Scatter Server 间 Ring/NHR/NB 白名单 |
@@ -119,5 +119,5 @@ export HCCL_ALGO="reducescatter=level0:NA;level1:NB"
 - `hccl/docs/zh/user_guide/hccl_env/HCCL_ALGO.md`、`inter_server_algo_support.md`、`inter_superpod_algo_support.md`
 - `hcomm/src/legacy/ascend910/algorithm/base/alg_template/nonuniform_bruck_base.h`：NB 基类实现
 - [nhr.md](/通信与昇腾/参考手册/算法参考/nhr.md)：同为对数复杂度的自研路线（生成树 vs 多重环）
-- [hdr.md](/通信与昇腾/参考手册/算法参考/hdr.md)：NB 改进的对象（非 2 幂的数据合并开销）
+- [hdr.md](/通信与昇腾/参考手册/算法参考/RHD递归倍增.md)：NB 改进的对象（非 2 幂的数据合并开销）
 

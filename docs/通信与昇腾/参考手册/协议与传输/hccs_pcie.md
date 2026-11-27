@@ -1,6 +1,6 @@
 # HCCS / PCIe / SIO：片间直连内存语义通信
 
-> **深度参考** · 前置阅读：[源码课程单元 3｜数据面：原语与资源](/通信与昇腾/源码课程/03-data-plane.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 3｜数据面：原语与资源](/通信与昇腾/源码课程/03-数据面-原语与资源.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > **内存语义**通信方式族（`COMM_PROTOCOL_HCCS=0`、`HCCS_ONLY=8`、`PCIE=2`、`SIO=3`）。Server 内 NPU 经**片间总线直连**，远端内存映射进本地地址空间，**直接本地拷贝**访问——像操作本地内存一样访问邻居卡。全部落在 **L0（Server 内）**，由 **P2P transport** 承载、**SDMA** 搬运。
 >
@@ -18,7 +18,7 @@
 | `COMM_PROTOCOL_SIO` | 3 | Serial I/O Link，昇腾 A3 片内**两个物理 Die 之间**的高速互联通路 | 内存语义 | 910_93 场景、A3 Die 间（L0） |
 | `COMM_PROTOCOL_HCCS_ONLY` | 8 | **一卡双 Die 使用 HCCS**（Die 间互联） | 内存语义 | A3 一卡双 Die（L0，Die 间） |
 
-> 全部为**内存语义**、全部落在 **L0**、拓扑类型均为 **`1DMESH`**（Device 间直连全互联）。详见 [../networking/server_internal.md](/通信与昇腾/参考手册/组网形态/server_internal.md)。
+> 全部为**内存语义**、全部落在 **L0**、拓扑类型均为 **`1DMESH`**（Device 间直连全互联）。详见 [../networking/单机内部.md](/通信与昇腾/参考手册/组网形态/单机内部.md)。
 
 ---
 
@@ -101,7 +101,7 @@ flowchart LR
 
 ## 4. 链路类型探测（DCMI）
 
-L0 算法自动选择依赖 **DCMI 驱动探测的链路类型**（`hcomm/src/legacy/ascend950/framework/topo/topo_addr_info/src/hal.h:113-125`，详见 [../networking/server_internal.md §3.2](/通信与昇腾/参考手册/组网形态/server_internal.md)）：
+L0 算法自动选择依赖 **DCMI 驱动探测的链路类型**（`hcomm/src/legacy/ascend950/framework/topo/topo_addr_info/src/hal.h:113-125`，详见 [../networking/单机内部.md §3.2](/通信与昇腾/参考手册/组网形态/单机内部.md)）：
 
 ```c
 DCMI_TOPO_TYPE_SELF = 0,   // 同一设备
@@ -126,9 +126,9 @@ DCMI_TOPO_TYPE_UB,         // 灵衢总线（网卡与 NPU 亲和）
 
 | 协议 | 组网形态 | L0 算法 | 详见 |
 | --- | --- | --- | --- |
-| **HCCS / HCCS_ONLY** | Server 内 8 卡（A3 为 16 rank）直连全互联；A3 一卡双 Die 经 HCCS_ONLY | 8 卡 `8P_RING`、910B `NP_MESH`、950 Mesh 族、A3 `SoleMesh2Die`/`SequenceMesh2Die` | [../networking/server_internal.md](/通信与昇腾/参考手册/组网形态/server_internal.md)、[../networking/ub_superpod.md](/通信与昇腾/参考手册/组网形态/ub_superpod.md) |
-| **PCIe** | 标卡卡间唯一通路 | 2 卡 `2P_MESH`（非 910B）/ 1 卡或 3~8 卡 `NP_SINGLE_RING` | [../networking/board_form_factor.md](/通信与昇腾/参考手册/组网形态/board_form_factor.md) |
-| **SIO** | 910_93 场景、A3 片内双 Die | `NP_DOUBLE_RING`（HCCS_SW=2×SIO）/ `NP_SINGLE_RING` | [../networking/server_internal.md](/通信与昇腾/参考手册/组网形态/server_internal.md) |
+| **HCCS / HCCS_ONLY** | Server 内 8 卡（A3 为 16 rank）直连全互联；A3 一卡双 Die 经 HCCS_ONLY | 8 卡 `8P_RING`、910B `NP_MESH`、950 Mesh 族、A3 `SoleMesh2Die`/`SequenceMesh2Die` | [../networking/单机内部.md](/通信与昇腾/参考手册/组网形态/单机内部.md)、[../networking/UB超节点.md](/通信与昇腾/参考手册/组网形态/UB超节点.md) |
+| **PCIe** | 标卡卡间唯一通路 | 2 卡 `2P_MESH`（非 910B）/ 1 卡或 3~8 卡 `NP_SINGLE_RING` | [../networking/整机形态.md](/通信与昇腾/参考手册/组网形态/整机形态.md) |
+| **SIO** | 910_93 场景、A3 片内双 Die | `NP_DOUBLE_RING`（HCCS_SW=2×SIO）/ `NP_SINGLE_RING` | [../networking/单机内部.md](/通信与昇腾/参考手册/组网形态/单机内部.md) |
 
 > **标卡引擎约束**：标卡（PCIe）环境配置 CCU_MS **直接拦截报错**；CCU_SCHED 遇 PCIe 链路域回退 AICPU_TS（>8 卡再回退 AIV）。详见 [../algorithms/algo_selector.md §3](/通信与昇腾/参考手册/算法参考/algo_selector.md)。
 
@@ -140,7 +140,7 @@ Atlas A3 的 HCCS 场景支持对称内存（`HcclCommSymWinRegister.md`）：�
 
 ![对称内存实现模型](/images/cann/hccl/wiki/comm/symmetric_memory.png)
 
-> 图源：`hcomm/docs/zh/api_ref/comm_mgr_c/figures/symmetric_memory.png`。仅支持超节点内 AI Server 间 **HCCS 链路 SDMA 通信**，不支持 RoCE RDMA（即不支持 `HCCL_INTER_HCCS_DISABLE=TRUE`）；仅支持 AllGather/ReduceScatter/AllReduce/AlltoAll。详见 [symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md)。
+> 图源：`hcomm/docs/zh/api_ref/comm_mgr_c/figures/symmetric_memory.png`。仅支持超节点内 AI Server 间 **HCCS 链路 SDMA 通信**，不支持 RoCE RDMA（即不支持 `HCCL_INTER_HCCS_DISABLE=TRUE`）；仅支持 AllGather/ReduceScatter/AllReduce/AlltoAll。详见 [symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/对称内存.md)。
 
 ---
 
@@ -176,5 +176,5 @@ Atlas A3 的 HCCS 场景支持对称内存（`HcclCommSymWinRegister.md`）：�
 - `hccl/docs/zh/user_guide/concepts.md`：HCCS/SDMA/PCIe/PCIe-SW 术语
 - `hccl/docs/zh/user_guide/cluster_info_config/rank_table_config_a5.md`：拓扑文件 `protocols=HCCS`、`link_type=PEER2PEER`
 - `shmem/docs/glossary.md`：HCCS / SIO / SDMA 术语
-- 关联：[README.md](/通信与昇腾/参考手册/协议与传输/)（通信方式总览）、[ub_mem.md](/通信与昇腾/参考手册/协议与传输/ub_mem.md)、[symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md)、[../networking/server_internal.md](/通信与昇腾/参考手册/组网形态/server_internal.md)、[../networking/board_form_factor.md](/通信与昇腾/参考手册/组网形态/board_form_factor.md)
+- 关联：[README.md](/通信与昇腾/参考手册/协议与传输/)（通信方式总览）、[ub_mem.md](/通信与昇腾/参考手册/协议与传输/ub_mem.md)、[symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/对称内存.md)、[../networking/单机内部.md](/通信与昇腾/参考手册/组网形态/单机内部.md)、[../networking/整机形态.md](/通信与昇腾/参考手册/组网形态/整机形态.md)
 

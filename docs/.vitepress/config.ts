@@ -41,15 +41,15 @@ export default withMermaid(defineConfig({
         text: '模型与系统',
         items: [
           { text: '专栏目录', link: '/模型与系统/' },
-          { text: '模型全景', link: '/模型与系统/01-landscape' },
-          { text: '训练与推理系统', link: '/模型与系统/01-training-loop' }
+          { text: '模型全景', link: '/模型与系统/01-从模型到集合通信' },
+          { text: '训练与推理系统', link: '/模型与系统/01-训练循环' }
         ]
       },
       {
         text: '执行与并行',
         items: [
           { text: '专栏目录', link: '/执行与并行/' },
-          { text: '单卡执行系统', link: '/执行与并行/01-landscape-performance' },
+          { text: '单卡执行系统', link: '/执行与并行/01-全景与性能分析' },
           { text: '并行策略', link: '/执行与并行/01-moe-expert-parallel' }
         ]
       },
@@ -57,8 +57,8 @@ export default withMermaid(defineConfig({
         text: '通信与昇腾',
         items: [
           { text: '专栏目录', link: '/通信与昇腾/' },
-          { text: '集合通信', link: '/通信与昇腾/01-collective-semantics-cost' },
-          { text: '昇腾与 HCCL', link: '/通信与昇腾/00-ascend-cann' },
+          { text: '集合通信', link: '/通信与昇腾/01-Collective语义与代价模型' },
+          { text: '昇腾与 HCCL', link: '/通信与昇腾/00-认识昇腾与CANN' },
           { text: '源码课程', link: '/通信与昇腾/源码课程/' }
         ]
       },
@@ -80,23 +80,23 @@ export default withMermaid(defineConfig({
             {
               text: '上篇｜模型全景（第 1-6 章）', collapsed: false,
               items: [
-                { text: '第 1 章｜从模型到集合通信', link: '/模型与系统/01-landscape' },
-                { text: '第 2 章｜张量、计算图与反向传播', link: '/模型与系统/02-tensor-autograd' },
-                { text: '第 3 章｜模型输入', link: '/模型与系统/03-tokenization-embedding' },
+                { text: '第 1 章｜从模型到集合通信', link: '/模型与系统/01-从模型到集合通信' },
+                { text: '第 2 章｜张量、计算图与反向传播', link: '/模型与系统/02-张量、计算图与反向传播' },
+                { text: '第 3 章｜模型输入', link: '/模型与系统/03-模型输入' },
                 { text: '第 4 章｜Self-Attention', link: '/模型与系统/04-self-attention' },
-                { text: '第 5 章｜完整 Decoder Block', link: '/模型与系统/05-decoder-block' },
-                { text: '第 6 章｜RoPE 与长上下文（选修）', link: '/模型与系统/06-rope-long-context' }
+                { text: '第 5 章｜完整 Decoder Block', link: '/模型与系统/05-完整Decoder-Block' },
+                { text: '第 6 章｜RoPE 与长上下文（选修）', link: '/模型与系统/06-RoPE与长上下文' }
               ]
             },
             {
               text: '下篇｜训练与推理系统（第 1-6 章）', collapsed: false,
               items: [
-                { text: '第 1 章｜训练循环', link: '/模型与系统/01-training-loop' },
-                { text: '第 2 章｜训练显存与计算优化', link: '/模型与系统/02-training-memory-compute' },
-                { text: '第 3 章｜推理与 KV Cache（选修）', link: '/模型与系统/03-inference-kv-cache' },
-                { text: '第 4 章｜后训练与对齐（选修）', link: '/模型与系统/04-post-training-alignment' },
-                { text: '第 5 章｜推理引擎与 KV Cache（选修）', link: '/模型与系统/05-inference-engine' },
-                { text: '第 6 章｜PD 调度与推理指标（选修）', link: '/模型与系统/06-pd-scheduling' }
+                { text: '第 1 章｜训练循环', link: '/模型与系统/01-训练循环' },
+                { text: '第 2 章｜训练显存与计算优化', link: '/模型与系统/02-训练显存与计算优化' },
+                { text: '第 3 章｜推理与 KV Cache（选修）', link: '/模型与系统/03-推理与KV-Cache' },
+                { text: '第 4 章｜后训练与对齐（选修）', link: '/模型与系统/04-后训练与对齐' },
+                { text: '第 5 章｜推理引擎与 KV Cache（选修）', link: '/模型与系统/05-推理引擎与KV-Cache' },
+                { text: '第 6 章｜PD 调度与推理指标（选修）', link: '/模型与系统/06-PD调度与推理指标' }
               ]
             },
           ]
@@ -112,29 +112,29 @@ export default withMermaid(defineConfig({
             {
               text: '上篇｜单卡执行系统（第 1-8 章）', collapsed: false,
               items: [
-                { text: '第 1 章｜全景与性能分析', link: '/执行与并行/01-landscape-performance' },
-                { text: '第 2 章｜GPU/NPU 执行模型', link: '/执行与并行/02-execution-model' },
-                { text: '第 3 章｜存储层次与数据搬运', link: '/执行与并行/03-memory-hierarchy' },
-                { text: '第 4 章｜Kernel、Tiling 与流水线', link: '/执行与并行/04-kernel-tiling-pipeline' },
-                { text: '第 5 章｜FLOPs、带宽与 Roofline', link: '/执行与并行/05-flops-bandwidth-roofline' },
-                { text: '第 6 章｜Eager、计算图与图编译', link: '/执行与并行/06-eager-graph-compilation' },
-                { text: '第 7 章｜Stream、Event 与异步执行', link: '/执行与并行/07-stream-event-async' },
-                { text: '第 8 章｜数据类型、布局与融合', link: '/执行与并行/08-dtype-layout-fusion' },
-                { text: '专题｜主流 AI 加速卡全景', link: '/执行与并行/accelerator-cards-2026' }
+                { text: '第 1 章｜全景与性能分析', link: '/执行与并行/01-全景与性能分析' },
+                { text: '第 2 章｜GPU/NPU 执行模型', link: '/执行与并行/02-GPU与NPU执行模型' },
+                { text: '第 3 章｜存储层次与数据搬运', link: '/执行与并行/03-存储层次与数据搬运' },
+                { text: '第 4 章｜Kernel、Tiling 与流水线', link: '/执行与并行/04-Kernel、Tiling与流水线' },
+                { text: '第 5 章｜FLOPs、带宽与 Roofline', link: '/执行与并行/05-FLOPs、带宽与Roofline' },
+                { text: '第 6 章｜Eager、计算图与图编译', link: '/执行与并行/06-Eager、计算图与图编译' },
+                { text: '第 7 章｜Stream、Event 与异步执行', link: '/执行与并行/07-Stream、Event与异步执行' },
+                { text: '第 8 章｜数据类型、布局与融合', link: '/执行与并行/08-数据类型、布局与融合' },
+                { text: '专题｜主流 AI 加速卡全景', link: '/执行与并行/主流AI加速卡全景' }
               ]
             },
             {
               text: '下篇｜并行策略（第 1-9 章）', collapsed: false,
               items: [
                 { text: '第 1 章｜MoE 与 Expert Parallel', link: '/执行与并行/01-moe-expert-parallel' },
-                { text: '第 2 章｜效率设计（选修）', link: '/执行与并行/02-efficient-llm-design' },
-                { text: '第 3 章｜系统分析', link: '/执行与并行/03-llm-systems-analysis' },
-                { text: '第 4 章｜分布式基础', link: '/执行与并行/04-distributed-basics' },
-                { text: '第 5 章｜数据并行与 DDP', link: '/执行与并行/05-ddp' },
+                { text: '第 2 章｜效率设计（选修）', link: '/执行与并行/02-效率设计' },
+                { text: '第 3 章｜系统分析', link: '/执行与并行/03-大模型系统拆解' },
+                { text: '第 4 章｜分布式基础', link: '/执行与并行/04-分布式基础' },
+                { text: '第 5 章｜数据并行与 DDP', link: '/执行与并行/05-数据并行与DDP' },
                 { text: '第 6 章｜Tensor Parallel', link: '/执行与并行/06-tensor-parallel' },
                 { text: '第 7 章｜Pipeline Parallel', link: '/执行与并行/07-pipeline-parallel' },
                 { text: '第 8 章｜Context Parallel', link: '/执行与并行/08-context-parallel' },
-                { text: '第 9 章｜ZeRO、FSDP 与混合并行', link: '/执行与并行/09-zero-fsdp' }
+                { text: '第 9 章｜ZeRO、FSDP 与混合并行', link: '/执行与并行/09-ZeRO、FSDP与混合并行' }
               ]
             },
           ]
@@ -149,20 +149,20 @@ export default withMermaid(defineConfig({
             {
               text: '上篇｜集合通信（岗位核心）', collapsed: false,
               items: [
-                { text: '第 1 章｜Collective 语义与代价模型', link: '/通信与昇腾/01-collective-semantics-cost' },
-                { text: '第 2 章｜Ring AllReduce 推导', link: '/通信与昇腾/02-ring-allreduce' },
-                { text: '第 3 章｜Tree、RD 与算法选择', link: '/通信与昇腾/03-tree-algorithms-selection' },
+                { text: '第 1 章｜Collective 语义与代价模型', link: '/通信与昇腾/01-Collective语义与代价模型' },
+                { text: '第 2 章｜Ring AllReduce 推导', link: '/通信与昇腾/02-Ring-AllReduce推导' },
+                { text: '第 3 章｜Tree、RD 与算法选择', link: '/通信与昇腾/03-Tree、RD与算法选择' },
                 { text: '第 4 章｜AG、RS 与 AlltoAll', link: '/通信与昇腾/04-gather-scatter-alltoall' },
-                { text: '第 5 章｜拓扑、分层与重叠', link: '/通信与昇腾/05-topology-hierarchical-overlap' }
+                { text: '第 5 章｜拓扑、分层与重叠', link: '/通信与昇腾/05-拓扑、分层与重叠' }
               ]
             },
             {
               text: '下篇｜昇腾平台', collapsed: false,
               items: [
-                { text: '第 0 章｜认识昇腾与 CANN', link: '/通信与昇腾/00-ascend-cann' },
-                { text: '第 1 章｜Runtime 与任务执行', link: '/通信与昇腾/01-runtime-task-execution' },
-                { text: '第 2 章｜从 PyTorch 走向 HCCL', link: '/通信与昇腾/02-pytorch-to-hccl' },
-                { text: '速查｜CANN 常用命令', link: '/通信与昇腾/cann常用命令' },
+                { text: '第 0 章｜认识昇腾与 CANN', link: '/通信与昇腾/00-认识昇腾与CANN' },
+                { text: '第 1 章｜Runtime 与任务执行', link: '/通信与昇腾/01-Runtime与任务执行' },
+                { text: '第 2 章｜从 PyTorch 走向 HCCL', link: '/通信与昇腾/02-从PyTorch走向HCCL' },
+                { text: '速查｜CANN 常用命令', link: '/通信与昇腾/CANN常用命令' },
                 { text: '笔记｜CANN Learning Hub', link: '/通信与昇腾/cann-learning-hub' }
               ]
             },
@@ -170,19 +170,19 @@ export default withMermaid(defineConfig({
               text: '源码课程｜HCCL 与 HCOMM', collapsed: false,
               items: [
                 { text: '课程导学｜HCCL 与 HCOMM 源码学习', link: '/通信与昇腾/源码课程/' },
-                { text: '0｜双仓全景与调用链旅程', link: '/通信与昇腾/源码课程/00-repo-map' },
-                { text: '1｜软件架构与六族 API', link: '/通信与昇腾/源码课程/01-architecture-layering' },
-                { text: '2｜控制面：通信域的一生', link: '/通信与昇腾/源码课程/02-control-plane' },
-                { text: '3｜数据面：原语与资源', link: '/通信与昇腾/源码课程/03-data-plane' },
-                { text: '4｜通信引擎与三引擎编排', link: '/通信与昇腾/源码课程/04-comm-engines' },
-                { text: '5｜算法与 selector', link: '/通信与昇腾/源码课程/05-coll-algorithms' },
-                { text: '6｜AllReduce 调用链走读', link: '/通信与昇腾/源码课程/06-allreduce-call-chain' },
+                { text: '0｜双仓全景与调用链旅程', link: '/通信与昇腾/源码课程/00-双仓全景与调用链旅程' },
+                { text: '1｜软件架构与六族 API', link: '/通信与昇腾/源码课程/01-软件架构与六族API' },
+                { text: '2｜控制面：通信域的一生', link: '/通信与昇腾/源码课程/02-控制面-通信域的一生' },
+                { text: '3｜数据面：原语与资源', link: '/通信与昇腾/源码课程/03-数据面-原语与资源' },
+                { text: '4｜通信引擎与三引擎编排', link: '/通信与昇腾/源码课程/04-通信引擎与三引擎编排' },
+                { text: '5｜算法与 selector', link: '/通信与昇腾/源码课程/05-算法与selector' },
+                { text: '6｜AllReduce 调用链走读', link: '/通信与昇腾/源码课程/06-AllReduce调用链走读' },
                 { text: '7｜executor 与 template', link: '/通信与昇腾/源码课程/07-executor-template' },
-                { text: '8｜资源地基与 dlsym', link: '/通信与昇腾/源码课程/08-resources-dlsym' },
-                { text: '9｜自定义算子七步流程', link: '/通信与昇腾/源码课程/09-custom-op-dev' },
-                { text: '10｜MC2 框架与官方样例', link: '/通信与昇腾/源码课程/10-mc2-custom-ops' },
-                { text: '11｜实战与第一个算子', link: '/通信与昇腾/源码课程/11-examples-first-op' },
-                { text: '课程总结｜源码阅读地图', link: '/通信与昇腾/源码课程/summary' }
+                { text: '8｜资源地基与 dlsym', link: '/通信与昇腾/源码课程/08-资源地基与dlsym' },
+                { text: '9｜自定义算子七步流程', link: '/通信与昇腾/源码课程/09-自定义算子七步流程' },
+                { text: '10｜MC2 框架与官方样例', link: '/通信与昇腾/源码课程/10-MC2框架与官方样例' },
+                { text: '11｜实战与第一个算子', link: '/通信与昇腾/源码课程/11-实战与第一个算子' },
+                { text: '课程总结｜源码阅读地图', link: '/通信与昇腾/源码课程/总结-源码阅读地图' }
               ]
             },
             { text: 'HCCL 参考手册 →', link: '/通信与昇腾/参考手册/' }
@@ -197,10 +197,10 @@ export default withMermaid(defineConfig({
                 {
                   text: '总览', collapsed: true,
                   items: [
-                    { text: 'HCCL 概述', link: '/通信与昇腾/参考手册/总览/hccl-overview' },
-                    { text: '算子与算法总览', link: '/通信与昇腾/参考手册/总览/ops-algos-overview' },
-                    { text: 'L0/L1/L2 分级原理', link: '/通信与昇腾/参考手册/总览/l0l1l2-principle' },
-                    { text: '集群组网总览', link: '/通信与昇腾/参考手册/总览/cluster-topology' }
+                    { text: 'HCCL 概述', link: '/通信与昇腾/参考手册/总览/HCCL概述' },
+                    { text: '算子与算法总览', link: '/通信与昇腾/参考手册/总览/算子与算法总览' },
+                    { text: 'L0/L1/L2 分级原理', link: '/通信与昇腾/参考手册/总览/L0-L1-L2分级原理' },
+                    { text: '集群组网总览', link: '/通信与昇腾/参考手册/总览/集群组网总览' }
                   ]
                 },
                 {
@@ -227,7 +227,7 @@ export default withMermaid(defineConfig({
                     { text: '目录', link: '/通信与昇腾/参考手册/算法参考/' },
                     { text: 'Ring', link: '/通信与昇腾/参考手册/算法参考/ring' },
                     { text: 'Mesh/FullMesh', link: '/通信与昇腾/参考手册/算法参考/fullmesh' },
-                    { text: 'RHD（递归倍增）', link: '/通信与昇腾/参考手册/算法参考/hdr' },
+                    { text: 'RHD（递归倍增）', link: '/通信与昇腾/参考手册/算法参考/RHD递归倍增' },
                     { text: 'Star', link: '/通信与昇腾/参考手册/算法参考/star' },
                     { text: 'NHR', link: '/通信与昇腾/参考手册/算法参考/nhr' },
                     { text: 'NB', link: '/通信与昇腾/参考手册/算法参考/nb' },
@@ -235,20 +235,20 @@ export default withMermaid(defineConfig({
                     { text: 'Pipeline', link: '/通信与昇腾/参考手册/算法参考/pipeline' },
                     { text: 'Pairwise', link: '/通信与昇腾/参考手册/算法参考/pairwise' },
                     { text: '机制｜selector', link: '/通信与昇腾/参考手册/算法参考/algo_selector' },
-                    { text: '机制｜分层矩阵', link: '/通信与昇腾/参考手册/算法参考/algo_level_matrix' },
-                    { text: '机制｜组合', link: '/通信与昇腾/参考手册/算法参考/combination' }
+                    { text: '机制｜分层矩阵', link: '/通信与昇腾/参考手册/算法参考/分层矩阵' },
+                    { text: '机制｜组合', link: '/通信与昇腾/参考手册/算法参考/算法组合' }
                   ]
                 },
                 {
                   text: '组网形态', collapsed: true,
                   items: [
                     { text: '目录', link: '/通信与昇腾/参考手册/组网形态/' },
-                    { text: 'RoCE 集群', link: '/通信与昇腾/参考手册/组网形态/roce_cluster' },
-                    { text: 'UB 超节点', link: '/通信与昇腾/参考手册/组网形态/ub_superpod' },
-                    { text: '多平面网络', link: '/通信与昇腾/参考手册/组网形态/multi_plane' },
-                    { text: '层次化混合组网', link: '/通信与昇腾/参考手册/组网形态/hierarchical' },
-                    { text: '单机内部', link: '/通信与昇腾/参考手册/组网形态/server_internal' },
-                    { text: '整机形态', link: '/通信与昇腾/参考手册/组网形态/board_form_factor' }
+                    { text: 'RoCE 集群', link: '/通信与昇腾/参考手册/组网形态/RoCE集群' },
+                    { text: 'UB 超节点', link: '/通信与昇腾/参考手册/组网形态/UB超节点' },
+                    { text: '多平面网络', link: '/通信与昇腾/参考手册/组网形态/多平面网络' },
+                    { text: '层次化混合组网', link: '/通信与昇腾/参考手册/组网形态/层次化混合组网' },
+                    { text: '单机内部', link: '/通信与昇腾/参考手册/组网形态/单机内部' },
+                    { text: '整机形态', link: '/通信与昇腾/参考手册/组网形态/整机形态' }
                   ]
                 },
                 {
@@ -257,9 +257,9 @@ export default withMermaid(defineConfig({
                     { text: '目录', link: '/通信与昇腾/参考手册/协议与传输/' },
                     { text: 'HCCS/PCIe/SIO', link: '/通信与昇腾/参考手册/协议与传输/hccs_pcie' },
                     { text: 'RoCE/RDMA', link: '/通信与昇腾/参考手册/协议与传输/roce_rdma' },
-                    { text: '对称内存', link: '/通信与昇腾/参考手册/协议与传输/symmetric_mem' },
+                    { text: '对称内存', link: '/通信与昇腾/参考手册/协议与传输/对称内存' },
                     { text: 'UB_MEM', link: '/通信与昇腾/参考手册/协议与传输/ub_mem' },
-                    { text: 'UB 网络（CTP/RTP/UBoE）', link: '/通信与昇腾/参考手册/协议与传输/ub_network' },
+                    { text: 'UB 网络（CTP/RTP/UBoE）', link: '/通信与昇腾/参考手册/协议与传输/UB网络' },
                     { text: 'URMA', link: '/通信与昇腾/参考手册/协议与传输/urma' }
                   ]
                 },
@@ -267,8 +267,8 @@ export default withMermaid(defineConfig({
                   text: '通信域', collapsed: true,
                   items: [
                     { text: '目录', link: '/通信与昇腾/参考手册/通信域/' },
-                    { text: '创建方式', link: '/通信与昇腾/参考手册/通信域/creation' },
-                    { text: '配置', link: '/通信与昇腾/参考手册/通信域/config' }
+                    { text: '创建方式', link: '/通信与昇腾/参考手册/通信域/创建方式' },
+                    { text: '配置', link: '/通信与昇腾/参考手册/通信域/配置' }
                   ]
                 },
                 {
@@ -285,16 +285,16 @@ export default withMermaid(defineConfig({
                   text: '执行模式', collapsed: true,
                   items: [
                     { text: '目录', link: '/通信与昇腾/参考手册/执行模式/' },
-                    { text: 'ACL Graph 图捕获', link: '/通信与昇腾/参考手册/执行模式/aclgraph' },
-                    { text: '框架集成', link: '/通信与昇腾/参考手册/执行模式/framework_integration' }
+                    { text: 'ACL Graph 图捕获', link: '/通信与昇腾/参考手册/执行模式/ACL-Graph图捕获' },
+                    { text: '框架集成', link: '/通信与昇腾/参考手册/执行模式/框架集成' }
                   ]
                 },
                 {
                   text: '排障手册', collapsed: true,
                   items: [
                     { text: '总入口', link: '/通信与昇腾/参考手册/排障手册/' },
-                    { text: '定位流程', link: '/通信与昇腾/参考手册/排障手册/localization_flow' },
-                    { text: 'EI 错误码全表', link: '/通信与昇腾/参考手册/排障手册/error_codes' },
+                    { text: '定位流程', link: '/通信与昇腾/参考手册/排障手册/定位流程' },
+                    { text: 'EI 错误码全表', link: '/通信与昇腾/参考手册/排障手册/EI错误码全表' },
                     { text: '案例｜精度', link: '/通信与昇腾/参考手册/排障手册/案例/精度/' },
                     { text: '案例｜建链', link: '/通信与昇腾/参考手册/排障手册/案例/建链/' },
                     { text: '案例｜整网', link: '/通信与昇腾/参考手册/排障手册/案例/整网/' },
@@ -309,25 +309,25 @@ export default withMermaid(defineConfig({
                   text: '性能分析', collapsed: true,
                   items: [
                     { text: '目录', link: '/通信与昇腾/参考手册/性能分析/' },
-                    { text: '采集与分析', link: '/通信与昇腾/参考手册/性能分析/collect_analyze' },
-                    { text: '慢快与拥塞', link: '/通信与昇腾/参考手册/性能分析/slowfast_congestion' }
+                    { text: '采集与分析', link: '/通信与昇腾/参考手册/性能分析/采集与分析' },
+                    { text: '慢快与拥塞', link: '/通信与昇腾/参考手册/性能分析/慢快与拥塞' }
                   ]
                 },
                 {
                   text: '运行与约束', collapsed: true,
                   items: [
                     { text: '目录', link: '/通信与昇腾/参考手册/运行与约束/' },
-                    { text: '约束', link: '/通信与昇腾/参考手册/运行与约束/constraints' },
-                    { text: '环境变量', link: '/通信与昇腾/参考手册/运行与约束/env_vars' },
-                    { text: '可靠性与安全', link: '/通信与昇腾/参考手册/运行与约束/reliability_security' },
-                    { text: '支持与构建', link: '/通信与昇腾/参考手册/运行与约束/support_build' }
+                    { text: '约束', link: '/通信与昇腾/参考手册/运行与约束/约束' },
+                    { text: '环境变量', link: '/通信与昇腾/参考手册/运行与约束/环境变量' },
+                    { text: '可靠性与安全', link: '/通信与昇腾/参考手册/运行与约束/可靠性与安全' },
+                    { text: '支持与构建', link: '/通信与昇腾/参考手册/运行与约束/支持与构建' }
                   ]
                 },
                 {
                   text: '扩展机制', collapsed: true,
                   items: [
                     { text: '目录', link: '/通信与昇腾/参考手册/扩展机制/' },
-                    { text: '算法插件', link: '/通信与昇腾/参考手册/扩展机制/algo_plugin' },
+                    { text: '算法插件', link: '/通信与昇腾/参考手册/扩展机制/算法插件' },
                     { text: 'MC2 与 RFC', link: '/通信与昇腾/参考手册/扩展机制/mc2_and_rfc' }
                   ]
                 }
@@ -342,7 +342,7 @@ export default withMermaid(defineConfig({
             {
               text: '模板与方法论', collapsed: false,
               items: [
-                { text: '复盘写作模板｜复盘手记', link: '/实战复盘/00-模板与方法论/template' },
+                { text: '复盘写作模板｜复盘手记', link: '/实战复盘/00-模板与方法论/复盘写作模板' },
                 { text: 'SRS/SD 文档模板', link: '/实战复盘/00-模板与方法论/01-SRS_SD文档模板' },
                 { text: '需求实验方法论参考', link: '/实战复盘/00-模板与方法论/需求实验方法论参考' },
                 { text: '实验用例设计与脚本写法参考', link: '/实战复盘/00-模板与方法论/实验用例设计与脚本写法经验参考' }
@@ -378,7 +378,7 @@ export default withMermaid(defineConfig({
             {
               text: '问题修复', collapsed: false,
               items: [
-                { text: '01｜UBOE/UB_RTP 建链端口注入实战', link: '/实战复盘/02-问题修复/01-uboe-ubrtp-port-injection' },
+                { text: '01｜UBOE/UB_RTP 建链端口注入实战', link: '/实战复盘/02-问题修复/01-UBOE与UB_RTP建链端口注入实战' },
                 {
                   text: '02｜HCCL aclgraph 零拷贝方案', collapsed: true,
                   items: [
@@ -408,13 +408,13 @@ export default withMermaid(defineConfig({
           items: [
             { text: '目录', link: '/工具与效率/' },
             { text: 'VS Code + SSH + Jupyter', link: '/工具与效率/vscode-remote-ssh-jupyter' },
-            { text: 'Linux 服务器常用命令速查', link: '/工具与效率/linux-server-commands' },
-            { text: 'Git 实用速查', link: '/工具与效率/git-cheatsheet' },
-            { text: 'VS Code 快捷键速查', link: '/工具与效率/vscode-shortcuts' },
-            { text: 'opencode 使用教程', link: '/工具与效率/opencode-tutorial' },
-            { text: 'Ghostty 快捷键速查', link: '/工具与效率/ghostty-shortcuts' },
-            { text: 'macOS 快捷键速查', link: '/工具与效率/macos-shortcuts' },
-            { text: 'Vim 常用按键与技巧', link: '/工具与效率/vim-essentials' }
+            { text: 'Linux 服务器常用命令速查', link: '/工具与效率/Linux服务器常用命令速查' },
+            { text: 'Git 实用速查', link: '/工具与效率/Git实用速查' },
+            { text: 'VS Code 快捷键速查', link: '/工具与效率/VSCode快捷键速查' },
+            { text: 'opencode 使用教程', link: '/工具与效率/opencode使用教程' },
+            { text: 'Ghostty 快捷键速查', link: '/工具与效率/Ghostty快捷键速查' },
+            { text: 'macOS 快捷键速查', link: '/工具与效率/macOS快捷键速查' },
+            { text: 'Vim 常用按键与技巧', link: '/工具与效率/Vim常用按键与技巧' }
           ]
         }
       ],
@@ -437,9 +437,9 @@ export default withMermaid(defineConfig({
               text: 'AI 观察',
               collapsed: true,
               items: [
-                { text: '2026 热门 AI Agent 产品地图', link: '/个人杂谈/01-popular-agents' },
-                { text: 'AI Agent 工程化知识树', link: '/个人杂谈/agent-engineering-knowledge-tree' },
-                { text: 'AI Coding：从代码补全到智能体协作', link: '/个人杂谈/ai-coding-codearts' },
+                { text: '2026 热门 AI Agent 产品地图', link: '/个人杂谈/01-2026热门AIAgent产品地图' },
+                { text: 'AI Agent 工程化知识树', link: '/个人杂谈/AIAgent工程化知识树' },
+                { text: 'AI Coding：从代码补全到智能体协作', link: '/个人杂谈/AICoding-从代码补全到智能体协作' },
                 { text: '实用提示词收集', link: '/个人杂谈/实用提示词收集' }
               ]
             },

@@ -1,10 +1,10 @@
 # communicator：通信域管理
 
-> **深度参考** · 前置阅读：[源码课程单元 2｜控制面：通信域的一生](/通信与昇腾/源码课程/02-control-plane.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 2｜控制面：通信域的一生](/通信与昇腾/源码课程/02-控制面-通信域的一生.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > **通信域（Communicator）是集合通信算子执行的上下文**，管理参与通信的对象（每个 NPU/Die 为一个 rank）与通信所需资源。本目录聚焦 HCCL 的**控制面**：通信域的创建、配置、rank/Team 管理、挂起恢复与销毁。
 >
-> 通信域是 L2-comm 层（`hccl_comm.h`）的核心，向上供 AI 框架调用，向下依赖 [../04_昇腾集群组网总览.md](/通信与昇腾/参考手册/总览/cluster-topology.md) 的 RankGraph 建模与 [../comm/](/通信与昇腾/参考手册/协议与传输/) 的传输建链。
+> 通信域是 L2-comm 层（`hccl_comm.h`）的核心，向上供 AI 框架调用，向下依赖 [../04_昇腾集群组网总览.md](/通信与昇腾/参考手册/总览/集群组网总览.md) 的 RankGraph 建模与 [../comm/](/通信与昇腾/参考手册/协议与传输/) 的传输建链。
 >
 > 事实来源（可信度：代码 > 仓内文档 > 社区资料）：
 > `hccl/docs/zh/user_guide/api_comm_impl.md`（通信域管理权威）、`hcomm/docs/zh/api_ref/comm_mgr_c/`（40+ 通信域管理 API）、`hcomm/docs/zh/api_ref/comm_mgr_c/data_type_definition/HcclCommConfig.md`（配置结构体）、`hcomm/docs/zh/api_ref/comm_opdev/control_plane_api/comms_domain_resource_mgmt/`（Team/Thread/Channel）、`hcomm/include/hccl/hccl_comm.h`。
@@ -49,7 +49,7 @@ flowchart LR
 
 ## 3. 四种创建方式（对比）
 
-`api_comm_impl.md` 给出四种通信域创建方式，详见 [creation.md](/通信与昇腾/参考手册/通信域/creation.md)：
+`api_comm_impl.md` 给出四种通信域创建方式，详见 [creation.md](/通信与昇腾/参考手册/通信域/创建方式.md)：
 
 | 方式 | 接口 | 适用场景 | 是否需 socket 建链 |
 | --- | --- | --- | --- |
@@ -73,7 +73,7 @@ flowchart TB
     end
 ```
 
-> **Config 后缀**：带 `Config` 的接口（`HcclCommInitClusterInfoConfig`/`HcclCommInitRootInfoConfig`）可传入 `HcclCommConfig` 创建**具有特定配置**的通信域（缓冲区大小、展开模式、确定性、算法等，详见 [config.md](/通信与昇腾/参考手册/通信域/config.md)）。
+> **Config 后缀**：带 `Config` 的接口（`HcclCommInitClusterInfoConfig`/`HcclCommInitRootInfoConfig`）可传入 `HcclCommConfig` 创建**具有特定配置**的通信域（缓冲区大小、展开模式、确定性、算法等，详见 [config.md](/通信与昇腾/参考手册/通信域/配置.md)）。
 
 ---
 
@@ -94,7 +94,7 @@ flowchart TB
 
 ## 5. Team：通信域内的子分组
 
-Team 是通信域内一组 rank 的子分组，用于限定同步与通信范围（详见 [config.md §4](/通信与昇腾/参考手册/通信域/config.md)）：
+Team 是通信域内一组 rank 的子分组，用于限定同步与通信范围（详见 [config.md §4](/通信与昇腾/参考手册/通信域/配置.md)）：
 
 | 接口 | 作用 |
 | --- | --- |
@@ -103,7 +103,7 @@ Team 是通信域内一组 rank 的子分组，用于限定同步与通信范围
 | `HcclTeamMemberToRank` / `HcclTeamRankToMember` | team 成员号 ↔ 通信域 rank 号 互转 |
 | `HcclTeamDestroy(team)` | 销毁 team |
 
-> **LSA（Load/Store Accessible）**：一组可通过加载/存储语义直接互访内存的 rank。对称内存 UB Memory 场景要求"同一通信域内所有 **LSA WorldTeam** 成员同时注册"（见 [../comm/symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md)）。`HcclTeamCreate` 当前仅 950 支持、仅 URMA 协议。
+> **LSA（Load/Store Accessible）**：一组可通过加载/存储语义直接互访内存的 rank。对称内存 UB Memory 场景要求"同一通信域内所有 **LSA WorldTeam** 成员同时注册"（见 [../comm/对称内存.md](/通信与昇腾/参考手册/协议与传输/对称内存.md)）。`HcclTeamCreate` 当前仅 950 支持、仅 URMA 协议。
 
 ---
 
@@ -135,8 +135,8 @@ Team 是通信域内一组 rank 的子分组，用于限定同步与通信范围
 
 | 文档 | 内容 |
 | --- | --- |
-| [creation.md](/通信与昇腾/参考手册/通信域/creation.md) | 四种创建方式的**完整流程、参数、代码示例**（rank table / rootInfo / InitAll / 子域切分）+ 网卡选择 + 端口配置 |
-| [config.md](/通信与昇腾/参考手册/通信域/config.md) | **`HcclCommConfig` 全字段表**（缓冲区/确定性/展开模式/算法/重执行/对称内存/QoS 等）+ 配置优先级 + Team/LSA + 挂起恢复/销毁 |
+| [creation.md](/通信与昇腾/参考手册/通信域/创建方式.md) | 四种创建方式的**完整流程、参数、代码示例**（rank table / rootInfo / InitAll / 子域切分）+ 网卡选择 + 端口配置 |
+| [config.md](/通信与昇腾/参考手册/通信域/配置.md) | **`HcclCommConfig` 全字段表**（缓冲区/确定性/展开模式/算法/重执行/对称内存/QoS 等）+ 配置优先级 + Team/LSA + 挂起恢复/销毁 |
 
 ---
 
@@ -146,5 +146,5 @@ Team 是通信域内一组 rank 的子分组，用于限定同步与通信范围
 - `hcomm/docs/zh/api_ref/comm_mgr_c/`：`HcclCommInitClusterInfo(Config)`、`HcclCommInitRootInfo(Config)`、`HcclGetRootInfo`、`HcclCommInitAll`、`HcclCreateSubCommConfig`、`HcclCommDestroy`、`HcclCommSuspend/Resume`、`HcclCommGetStatus`、`HcclGetCommAsyncError`、`HcclGetRankId/Size` 等
 - `hcomm/docs/zh/api_ref/comm_mgr_c/data_type_definition/HcclCommConfig.md`：通信域配置结构体
 - `hcomm/docs/zh/api_ref/comm_opdev/control_plane_api/comms_domain_resource_mgmt/`：`HcclTeamCreate`、`HcclTeamGetLsaTeam`、`HcclThreadAcquire`、`HcclChannelAcquire` 等
-- 关联：[../01_HCCL集合通信概述.md](/通信与昇腾/参考手册/总览/hccl-overview.md)（API 分层）、[../04_昇腾集群组网总览.md](/通信与昇腾/参考手册/总览/cluster-topology.md)（RankGraph）、[../execution/](/通信与昇腾/参考手册/执行模式/)（执行模式）、[../comm/symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md)（对称内存与 Team）
+- 关联：[../01_HCCL集合通信概述.md](/通信与昇腾/参考手册/总览/HCCL概述.md)（API 分层）、[../04_昇腾集群组网总览.md](/通信与昇腾/参考手册/总览/集群组网总览.md)（RankGraph）、[../execution/](/通信与昇腾/参考手册/执行模式/)（执行模式）、[../comm/对称内存.md](/通信与昇腾/参考手册/协议与传输/对称内存.md)（对称内存与 Team）
 

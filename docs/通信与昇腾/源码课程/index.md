@@ -21,7 +21,7 @@
 ## 课程信息
 
 - **参考资料**：[HCCL 开源仓库](https://gitcode.com/cann/hccl) 与 [HCOMM 通信基础库仓库](https://gitcode.com/cann/hcomm) 及各自的 `docs/zh` 目录（架构简介、用户指南、通信算子开发指南、API 参考）；
-- **前置知识**：[第 0 章｜认识昇腾与 CANN](../00-ascend-cann.md)、[第 1 章｜Runtime 与任务执行](../01-runtime-task-execution.md)、[第 2 章｜从 PyTorch 走向 HCCL](../02-pytorch-to-hccl.md)；
+- **前置知识**：[第 0 章｜认识昇腾与 CANN](../00-认识昇腾与CANN.md)、[第 1 章｜Runtime 与任务执行](../01-Runtime与任务执行.md)、[第 2 章｜从 PyTorch 走向 HCCL](../02-从PyTorch走向HCCL.md)；
 - **学习节奏**：**12 个学习单元 + 1 篇总结**，分四幕推进，每单元约 20～30 分钟；强烈建议本地 `git clone --depth 1` 两个仓库对照目录与代码阅读；
 - **行号约定**：精读段的行号引用格式 `文件:行号`，均以课程整理时的仓快照为准。
 
@@ -31,8 +31,8 @@
 
 | 单元 | 主题 | 精读对象 |
 | ---: | --- | --- |
-| 0 | [双仓全景与一次 AllReduce 的旅程](00-repo-map.md) | 两仓目录地图、调用链总览 |
-| 1 | [软件架构：分层、五层 API 与两仓边界](01-architecture-layering.md) | `include/hccl.h`（262 行） |
+| 0 | [双仓全景与一次 AllReduce 的旅程](00-双仓全景与调用链旅程.md) | 两仓目录地图、调用链总览 |
+| 1 | [软件架构：分层、五层 API 与两仓边界](01-软件架构与六族API.md) | `include/hccl.h`（262 行） |
 
 ### 第二幕·底座：HCOMM 的名词与动词
 
@@ -40,27 +40,27 @@
 
 | 单元 | 主题 | 精读对象 |
 | ---: | --- | --- |
-| 2 | [控制面：通信域的一生](02-control-plane.md) | RankGraph 七概念 + 建域流水线（hcomm 仓） |
-| 3 | [数据面：原语与资源](03-data-plane.md) | 四原语概念 + `hcomm_primitives.h` 30 个动词 |
-| 4 | [通信引擎：模型、瀑布与三引擎编排](04-comm-engines.md) | 统一模型 + 编排时机 + CCU 深潜 |
+| 2 | [控制面：通信域的一生](02-控制面-通信域的一生.md) | RankGraph 七概念 + 建域流水线（hcomm 仓） |
+| 3 | [数据面：原语与资源](03-数据面-原语与资源.md) | 四原语概念 + `hcomm_primitives.h` 30 个动词 |
+| 4 | [通信引擎：模型、瀑布与三引擎编排](04-通信引擎与三引擎编排.md) | 统一模型 + 编排时机 + CCU 深潜 |
 
 ### 第三幕·算子层：一次 AllReduce 的下半生
 
 | 单元 | 主题 | 精读对象 |
 | ---: | --- | --- |
-| 5 | [集合通信算法与 selector 选择器](05-coll-algorithms.md) | `op_common/selector/` + `all_reduce/selector/`（728 行） |
-| 6 | [AllReduce 调用链走读](06-allreduce-call-chain.md) | `all_reduce_op.cc`（281 行） |
+| 5 | [集合通信算法与 selector 选择器](05-算法与selector.md) | `op_common/selector/` + `all_reduce/selector/`（728 行） |
+| 6 | [AllReduce 调用链走读](06-AllReduce调用链走读.md) | `all_reduce_op.cc`（281 行） |
 | 7 | [executor 与 template：执行机制](07-executor-template.md) | executor 注册表 + 13 个执行器 + Mesh RS 模板 |
-| 8 | [资源地基与 dlsym 解耦](08-resources-dlsym.md) | `op_common` 资源链 + `topo_host.cc` + `hcomm_dlsym/` |
+| 8 | [资源地基与 dlsym 解耦](08-资源地基与dlsym.md) | `op_common` 资源链 + `topo_host.cc` + `hcomm_dlsym/` |
 
 ### 第四幕·扩展：写出你自己的通信算子
 
 | 单元 | 主题 | 精读对象 |
 | ---: | --- | --- |
-| 9 | [自定义算子开发：AI CPU 七步流程](09-custom-op-dev.md) | 官方七步时序 + EngineCtx/TaskCache |
-| 10 | [MC2 自定义算子框架与官方样例](10-mc2-custom-ops.md) | `hccl_mc2.h` + `examples/04、05`（五步法 ↔ 七步对照） |
-| 11 | [实战：examples 与第一个自定义算子](11-examples-first-op.md) | 建域三式 + ACL Graph + 五步起步路线图 |
-| 总结 | [HCCL 与 HCOMM 源码阅读地图](summary.md) | 概念清单 + 岗位能力对照 + 六条深入路线 |
+| 9 | [自定义算子开发：AI CPU 七步流程](09-自定义算子七步流程.md) | 官方七步时序 + EngineCtx/TaskCache |
+| 10 | [MC2 自定义算子框架与官方样例](10-MC2框架与官方样例.md) | `hccl_mc2.h` + `examples/04、05`（五步法 ↔ 七步对照） |
+| 11 | [实战：examples 与第一个自定义算子](11-实战与第一个算子.md) | 建域三式 + ACL Graph + 五步起步路线图 |
+| 总结 | [HCCL 与 HCOMM 源码阅读地图](总结-源码阅读地图.md) | 概念清单 + 岗位能力对照 + 六条深入路线 |
 
 **阅读主线**：`双仓地图（0）→ 六族 API（1）→ 底座三单元（2/3/4）→ 算法选名（5）→ 算子入口（6）→ executor 组装（7）→ 资源与 dlsym（8）→ 自定义算子（9 → 10 → 11）`；赶时间可走最小闭环 `0 → 1 → 6 → 5 → 7`，再按需补底座与扩展。
 
@@ -90,4 +90,4 @@ HCCL 与 HCOMM 同处快速演进期：开源仓库的目录结构、模块命�
 
 ---
 
-[开始单元 0 →](00-repo-map.md)
+[开始单元 0 →](00-双仓全景与调用链旅程.md)

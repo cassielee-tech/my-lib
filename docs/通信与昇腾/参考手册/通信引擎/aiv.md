@@ -1,6 +1,6 @@
 # AIV 通信引擎
 
-> **深度参考** · 前置阅读：[源码课程单元 4｜通信引擎与三引擎编排](/通信与昇腾/源码课程/04-comm-engines.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[源码课程单元 4｜通信引擎与三引擎编排](/通信与昇腾/源码课程/04-通信引擎与三引擎编排.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > **低时延通信场景的主力引擎**（L0）。通信算子的执行逻辑与操作步骤由 **Vector Core（AIV，AI Core 中的向量核）** 直接执行——Host 提交 AIV Kernel，调度器发送至 Vector Core，Vector Core 利用不同协议完成数据搬运。**低时延**，但占用 Vector 计算核。
 >
@@ -142,7 +142,7 @@ AIV 模式支持**控核**——业务根据计算算子与通信算子的并发
 | **大数据量回退** | A3/950 的 Broadcast/AllReduce/ReduceScatter/AllGather/AlltoAll（单机）数据量超阈值自动切换 AI_CPU；AlltoAllV/VC、AlltoAll（多机）配 AIV **不自动切换**——任意两 rank 间最大数据量 ≤ 1MB 时建议 AIV，否则用 AI_CPU |
 | **确定性计算优先级** | 设 `HCCL_DETERMINISTIC=true/strict` 时确定性计算优先级更高，某些场景 AIV 展开可能不生效 |
 | **A2 Box16 异构子框** | Atlas 200T A2 Box16 异构子框不支持跨框通信 |
-| **对称内存** | AIV + URMA、AIV + UB Memory 两场景支持对称内存注册（见 [../comm/symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md)） |
+| **对称内存** | AIV + URMA、AIV + UB Memory 两场景支持对称内存注册（见 [../comm/对称内存.md](/通信与昇腾/参考手册/协议与传输/对称内存.md)） |
 
 ---
 
@@ -165,7 +165,7 @@ AIV 模式支持**控核**——业务根据计算算子与通信算子的并发
 | **AIV 数据通路（950）** | `hcomm/src/legacy/ascend950/unified_platform/aiv/`：`ub_memory_transport.{h,cc}`、`urma_direct_transport.{h,cc}` |
 | **引擎选择** | `hccl/src/ops/*/selector/*_auto_selector.cc`、`selector_engine.cc`（`Aiv*` 前缀） |
 | **加速模式枚举** | `hccl/src/ops/op_common/inc/alg_param.h:133-153`（`AIV=3`、`AIV_ONLY=4`） |
-| **AIV kernel 模板** | `hccl/src/ops/*/algorithm/template/aiv/`（各算子 AIV 模板，如 ReduceScatter 的 hifloat8 kernel） |
+| **AIV kernel 模板** | `hccl/src/ops/*/algorithm/复盘写作模板.md/aiv/`（各算子 AIV 模板，如 ReduceScatter 的 hifloat8 kernel） |
 
 ---
 
@@ -176,5 +176,5 @@ AIV 模式支持**控核**——业务根据计算算子与通信算子的并发
 - `hcomm/docs/zh/comm_op_dev_guide/aiv_comm_op_dev/`：`overall_flow.md`、`task_sched.md`、`algo_select.md`、`op_dispatch.md`、`create_res.md`、`query_topo.md`、`define_op_if.md`
 - `hccl/docs/zh/user_guide/hccl_env/HCCL_OP_EXPANSION_MODE.md`：AIV 约束、控核、数据类型
 - `hccl/docs/zh/user_guide/concepts.md`：AIV 术语
-- 关联：[README.md](/通信与昇腾/参考手册/通信引擎/)（引擎总览）、[../comm/ub_mem.md](/通信与昇腾/参考手册/协议与传输/ub_mem.md)、[../comm/urma.md](/通信与昇腾/参考手册/协议与传输/urma.md)、[../comm/symmetric_mem.md](/通信与昇腾/参考手册/协议与传输/symmetric_mem.md)
+- 关联：[README.md](/通信与昇腾/参考手册/通信引擎/)（引擎总览）、[../comm/ub_mem.md](/通信与昇腾/参考手册/协议与传输/ub_mem.md)、[../comm/urma.md](/通信与昇腾/参考手册/协议与传输/urma.md)、[../comm/对称内存.md](/通信与昇腾/参考手册/协议与传输/对称内存.md)
 

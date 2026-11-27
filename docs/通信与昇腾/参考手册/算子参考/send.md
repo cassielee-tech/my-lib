@@ -1,6 +1,6 @@
 # HcclSend 算子解析
 
-> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-collective-semantics-cost.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+> **深度参考** · 前置阅读：[《集合通信》第 1 章（语义）与第 4 章（AG/RS/AlltoAll）](/通信与昇腾/01-Collective语义与代价模型.md)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
 
 > 代码基线：`hccl/src/ops/send/`（950/A5 路径）+ `hcomm/src/legacy/ascend910/algorithm/base/alg_template/temp_send_recv/send_receive.cc`（910/A2/A3 路径）。
 > 参数与约束以 `hccl/docs/zh/api_ref/comm_op_interface/HcclSend.md` 为准。
@@ -154,5 +154,5 @@ send/
 - `hcomm/include/hcomm_res_defs.h`：`EndpointLocType`（DEVICE=0 / HOST=1）
 - `hcomm/include/hccl/hccl_rank_graph.h`：`HcclRankGraphGetLinks` 与 `EndpointDesc`
 - [recv.md](/通信与昇腾/参考手册/算子参考/recv.md)：配对的接收算子；[batch_send_recv.md](/通信与昇腾/参考手册/算子参考/batch_send_recv.md)：异步批量版本
-- 层级原理：[../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/l0l1l2-principle.md)
+- 层级原理：[../03_L0L1L2分级通信实现原理.md](/通信与昇腾/参考手册/总览/L0-L1-L2分级原理.md)
 
