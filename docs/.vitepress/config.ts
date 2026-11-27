@@ -393,9 +393,7 @@ export default withMermaid(defineConfig({
                 {
                   text: 'AllGather Selector 算法选择策略研究', collapsed: true,
                   items: [
-                    { text: '代价模型研讨（13 图）', link: '/实战复盘/03-研讨笔记/allgather-selector-算法选择策略研究/' },
-                    { text: '决策树与 Corner Case', link: '/实战复盘/03-研讨笔记/allgather-selector-算法选择策略研究/allgather-selector-decision-tree' },
-                    { text: '10 分钟分享', link: '/实战复盘/03-研讨笔记/allgather-selector-算法选择策略研究/分享_10分钟' }
+                    { text: '研究合集（决策树 · 代价模型 · Corner Case）', link: '/实战复盘/03-研讨笔记/allgather-selector-算法选择策略研究/' }
                   ]
                 }
               ]

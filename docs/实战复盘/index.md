@@ -48,9 +48,7 @@ Issue 驱动的修复实战——从问题暴露、根因定位到合入的完�
 
 | 材料 | 说明 |
 | --- | --- |
-| [代价模型研讨（13 图）](03-研讨笔记/allgather-selector-算法选择策略研究/index.md) | 选路代价模型可视化：13 图 + corner case 扫描（CSV）+ 图表生成脚本 |
-| [决策树与 Corner Case](03-研讨笔记/allgather-selector-算法选择策略研究/allgather-selector-decision-tree.md) | 完整决策树、老路径分支表、阈值表、代码行号索引 |
-| [10 分钟分享](03-研讨笔记/allgather-selector-算法选择策略研究/分享_10分钟.md) | AllGather 选算法：从阈值树到代价模型（9 页 deck，另有 PDF 与 `slides/`） |
+| [AllGather 选算法：从阈值树到代价模型](03-研讨笔记/allgather-selector-算法选择策略研究/index.md) | 合集版：决策树、代价模型、util 阶梯、7 组 corner case、10 分钟分享稿、16 张图与交互式计算器 |
 
 ## 阅读提示
 
