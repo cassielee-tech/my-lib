@@ -1,0 +1,99 @@
+# cases：问题定位案例（按类型）
+
+> **深度参考** · 前置阅读：[实战复盘（真实需求案例）](/实战复盘/)。本篇为参考手册体例，检索导向；事实基线见文首引用块。
+
+> 按**问题类型**归类的 HCCL 故障定位案例。每个案例含：问题现象、定位流程、常见根因、关联错误码/日志关键字、处置与规避。
+>
+> 与 [../localization_flow.md](/通信与昇腾/参考手册/排障手册/localization_flow.md)（按**阶段**定位）互补：阶段定位回答"在哪个阶段报错"，案例定位回答"是哪一类问题、怎么查"。错误码全表见 [../error_codes.md](/通信与昇腾/参考手册/排障手册/error_codes.md)。
+
+---
+
+## 1. 案例分类总览
+
+```mermaid
+flowchart TB
+    subgraph 计算侧["计算侧问题"]
+        AIC["AIC 问题<br/>Cube 核（通算融合）"]
+        AIV["AIV 问题<br/>Vector 核执行失败"]
+        PREC["精度问题<br/>确定性/保序/归约精度"]
+        CORE["coredump 问题<br/>进程崩溃"]
+    end
+    subgraph 配置侧["配置/控制面问题"]
+        DATA["资料问题<br/>rank table/配置/集群信息"]
+        INT["拦截问题<br/>参数/一致性/资源拦截"]
+    end
+    subgraph 网络侧["网络/集群问题"]
+        LINK["建链问题<br/>参数面建链/根节点定位"]
+        NET["整网问题<br/>心跳/行为一致性/快慢卡"]
+    end
+```
+
+| 案例 | 问题类型 | 主要阶段 | 关联错误码 | 文档 |
+| --- | --- | --- | --- | --- |
+| **精度问题** | 归约结果不确定/精度偏差 | 执行 | —（功能问题） | [precision](/通信与昇腾/参考手册/排障手册/案例/精度/) |
+| **coredump 问题** | 进程崩溃/远端 core dump | 执行 | EI0012（SDMA） | [coredump](/通信与昇腾/参考手册/排障手册/案例/coredump/) |
+| **AIC 问题** | Cube 核执行失败（通算融合） | 执行 | EI0002/EI9999 | [aic](/通信与昇腾/参考手册/排障手册/案例/aic/) |
+| **AIV 问题** | Vector 核通信算子执行失败 | 执行 | EI0002 | [aiv](/通信与昇腾/参考手册/排障手册/案例/aiv/) |
+| **资料问题** | rank table/环境变量/集群信息配置 | 初始化 | EI0001/EI0004/EI0014/EI0015/EI0016 | [config_data](/通信与昇腾/参考手册/排障手册/案例/资料配置/) |
+| **拦截问题** | HCCL 主动拦截报错 | 初始化/建链/执行 | EI0003/EI0005/EI0007 | [interception](/通信与昇腾/参考手册/排障手册/案例/拦截/) |
+| **整网问题** | 集群级协同异常 | 执行 | EI0002 + 心跳 | [whole_network](/通信与昇腾/参考手册/排障手册/案例/整网/) |
+| **建链问题** | 参数面建链失败/超时 | 建链 | EI0005/EI0006/EI0011/EI0019 | [link](/通信与昇腾/参考手册/排障手册/案例/建链/) |
+
+---
+
+## 2. 目录组织与案例结构
+
+**每一类问题一个目录**，目录内含一个 `README.md`（该类问题的**定位总览**）与若干**具体案例**文件（按需补充，当前各类暂无独立案例文件）：
+
+```text
+cases/
+├── README.md              ← 本文件（案例分类索引）
+├── precision/README.md    ← 精度问题总览（+ 后续具体案例）
+├── coredump/README.md     ← coredump 问题总览
+├── aic/README.md          ← AIC 问题总览
+├── aiv/README.md          ← AIV 问题总览
+├── config_data/README.md  ← 资料问题总览
+├── interception/README.md ← 拦截问题总览
+├── whole_network/README.md← 整网问题总览
+└── link/README.md         ← 建链问题总览
+```
+
+每类 README（及后续具体案例）统一按以下结构组织：
+
+| 部分 | 内容 |
+| --- | --- |
+| **问题现象** | 典型报错日志、打屏信息、业务表现 |
+| **定位流程** | mermaid 流程图 + 检索关键字 |
+| **常见根因** | 根因分类表 |
+| **关联错误码/关键字** | 对应 EI 错误码、plog 检索关键字 |
+| **处置与规避** | 解决方法与预防配置 |
+| **参考文档** | fault_diagnosis 源文档 |
+
+> 新增具体案例时，在对应类别目录下新建 `.md` 文件，并在该目录 README 中登记链接。
+
+---
+
+## 3. 定位入口选择
+
+```mermaid
+flowchart TB
+    S["HCCL 异常"] --> Q1{"有 EI**** 故障码？"}
+    Q1 -->|有| EC["查 error_codes.md<br/>定位错误码所属阶段"]
+    Q1 -->|"无/EI9999"| Q2{"业务表现？"}
+    EC --> CASE["按问题类型进入对应案例"]
+    Q2 -->|"结果不对/精度"| PREC["precision/"]
+    Q2 -->|"进程崩溃"| CORE["coredump/"]
+    Q2 -->|"kernel 执行失败"| CORE2["aic/ · aiv/"]
+    Q2 -->|"创建通信域失败"| DATA["config_data/"]
+    Q2 -->|"报错不支持/被拦截"| INT["interception/"]
+    Q2 -->|"卡住/超时"| NET["whole_network/ · link/"]
+```
+
+---
+
+## 4. 参考资料
+
+- `hccl/docs/zh/user_guide/fault_diagnosis/`：42 篇诊断文档（各案例的源文档）
+- `hcomm/docs/zh/error_codes/`：EI0001~EI0020 错误码定义
+- 关联：[../README.md](/通信与昇腾/参考手册/排障手册/)（排障总览）、[../localization_flow.md](/通信与昇腾/参考手册/排障手册/localization_flow.md)（按阶段定位流程）、[../error_codes.md](/通信与昇腾/参考手册/排障手册/error_codes.md)（错误码全表）
+

@@ -10,20 +10,32 @@ const BASE = '/my-lib/'
  * 加载本主题脚本，在此做客户端重定向。
  */
 const REDIRECTS: Array<[string, string]> = [
+  // 2026-11 目录中文化：英文路径 → 中文路径（前缀规则，具体在前）
+  ['/comm-ascend/reference/debug/cases', '/通信与昇腾/参考手册/排障手册/案例'],
+  ['/comm-ascend/reference/debug', '/通信与昇腾/参考手册/排障手册'],
+  ['/comm-ascend/reference', '/通信与昇腾/参考手册'],
+  ['/comm-ascend/hccl-hcomm', '/通信与昇腾/源码课程/'],
+  ['/comm-ascend', '/通信与昇腾'],
+  ['/model-systems', '/模型与系统'],
+  ['/execution-parallel', '/执行与并行'],
+  ['/practice', '/实战复盘'],
+  ['/backend', '/后端知识'],
+  ['/tools-productivity', '/工具与效率'],
+  ['/essays', '/个人杂谈'],
   // 成对专栏的速通拆为上篇/下篇（须在前缀规则之前）
-  ['/model/00-速通', '/model-systems/00-速通-上篇'],
-  ['/systems/00-速通', '/model-systems/00-速通-下篇'],
-  ['/device/00-速通', '/execution-parallel/00-速通-上篇'],
-  ['/parallel/00-速通', '/execution-parallel/00-速通-下篇'],
-  // practice 独立成 /practice/（须在 /ascend 之前）
-  ['/ascend/practice', '/practice'],
+  ['/model/00-速通', '/模型与系统/00-速通-上篇'],
+  ['/systems/00-速通', '/模型与系统/00-速通-下篇'],
+  ['/device/00-速通', '/执行与并行/00-速通-上篇'],
+  ['/parallel/00-速通', '/执行与并行/00-速通-下篇'],
+  // practice 独立成 /实战复盘/（须在 /ascend 之前）
+  ['/ascend/practice', '/实战复盘'],
   // 六专栏 → 三专栏
-  ['/model', '/model-systems'],
-  ['/systems', '/model-systems'],
-  ['/device', '/execution-parallel'],
-  ['/parallel', '/execution-parallel'],
-  ['/collective', '/comm-ascend'],
-  ['/ascend', '/comm-ascend']
+  ['/model', '/模型与系统'],
+  ['/systems', '/模型与系统'],
+  ['/device', '/执行与并行'],
+  ['/parallel', '/执行与并行'],
+  ['/collective', '/通信与昇腾'],
+  ['/ascend', '/通信与昇腾']
 ]
 
 function redirectFor(pathname: string): string | null {
